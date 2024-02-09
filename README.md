@@ -8,4 +8,4 @@ This tool is fork of https://regexrenamer.sourceforge.net/ and modified for [Kav
 - Added features related to file operation
 - Refactored the code
 - Few other improvments
-  
+- Ported to .NET Core  
