@@ -9,7 +9,8 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Platforms>AnyCPU;x64</Platforms>
-    <SignAssembly>False</SignAssembly>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>RegexRenamer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <CodeAnalysisLogFile>bin\Debug\RegexRenamer.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
@@ -34,6 +35,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Native\Shell32.ContextMenu.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Controls\FolderTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -46,21 +50,21 @@
     <Content Include="appicon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <COMReference Include="Shell32">
-      <Guid>{50A7E9B0-70EF-11D1-B75A-00A0C90564FE}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </COMReference>
+    <None Include="Native\Interop\Shell32.ContextMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Interop.Shell32">
+      <HintPath>Common\Interop.Shell32.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="COPY &quot;$(ProjectDir)\Documents\Regex Quick Reference.chm&quot; &quot;$(OutDir)\.&quot;&#xD;&#xA;COPY &quot;$(ProjectDir)\Documents\RegexRenamer.chm&quot; &quot;$(OutDir)\.&quot;" />
+  </Target>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="if NOT EXIST &quot;$(ProjectDir)\RegexRenamer.snk&quot; (&#xD;&#xA;&quot;$(TargetFrameworkSDKToolsDirectory)sn.exe&quot; -k &quot;$(ProjectDir)\RegexRenamer.snk&quot;&#xD;&#xA;)&#xD;&#xA;&quot;$(TargetFrameworkSDKToolsDirectory)tlbimp.exe&quot; &quot;$(SystemRoot)\System32\shell32.dll&quot; /out:&quot;$(ProjectDir)\Common\Interop.Shell32.dll&quot; /keyfile:&quot;$(ProjectDir)\RegexRenamer.snk&quot; /asmversion:1.0.0.0 /nologo /machine:&quot;Agnostic&quot; /strictref" />
   </Target>
 </Project>

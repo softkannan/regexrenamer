@@ -49,6 +49,17 @@ namespace RegexRenamer
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             tvwFolders = new Controls.FolderTreeView();
+            cmFolderView = new System.Windows.Forms.ContextMenuStrip(components);
+            deleteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            pasteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            cutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            copyToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            copyPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            openInExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            explorerContextMenuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            newFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            setAsKavitaLibraryRootToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             btnRename = new Controls.SplitButton();
             cmsRename = new System.Windows.Forms.ContextMenuStrip(components);
             itmRenameFiles = new System.Windows.Forms.ToolStripMenuItem();
@@ -103,6 +114,12 @@ namespace RegexRenamer
             itmOutputMoveTo = new System.Windows.Forms.ToolStripMenuItem();
             itmOutputCopyTo = new System.Windows.Forms.ToolStripMenuItem();
             itmOutputBackupTo = new System.Windows.Forms.ToolStripMenuItem();
+            mnuKavitaCheck = new System.Windows.Forms.ToolStripDropDownButton();
+            noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            previewComicsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            previewMangaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            previewBooksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ttPreviewError = new System.Windows.Forms.ToolTip(components);
             fbdNetwork = new System.Windows.Forms.FolderBrowserDialog();
             fbdMoveCopy = new System.Windows.Forms.FolderBrowserDialog();
@@ -186,9 +203,15 @@ namespace RegexRenamer
             colIcon = new System.Windows.Forms.DataGridViewImageColumn();
             colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colPreview = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colKavita = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSeries = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colVolume = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colChapter = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colTitle = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
             cmFileView = new System.Windows.Forms.ContextMenuStrip(components);
             editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            explorerContextMenuToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -215,20 +238,11 @@ namespace RegexRenamer
             btnCancel = new System.Windows.Forms.Button();
             bgwRename = new System.ComponentModel.BackgroundWorker();
             groupBoxTop = new System.Windows.Forms.GroupBox();
-            tsKavita = new System.Windows.Forms.ToolStrip();
-            mnuKavitaCheck = new System.Windows.Forms.ToolStripDropDownButton();
-            noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            checkComicsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            checkMangaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            checkBooksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
-            renameComicsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            renameBooksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            pnlInfo = new System.Windows.Forms.Panel();
+            lblInfoFileSize = new System.Windows.Forms.Label();
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
-            cmFolderView = new System.Windows.Forms.ContextMenuStrip(components);
-            setAsKavitaLibraryRootToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            cmFolderView.SuspendLayout();
             cmsRename.SuspendLayout();
             gbFilter.SuspendLayout();
             pnlStats.SuspendLayout();
@@ -240,10 +254,9 @@ namespace RegexRenamer
             cmFileView.SuspendLayout();
             tsOptions.SuspendLayout();
             groupBoxTop.SuspendLayout();
-            tsKavita.SuspendLayout();
+            pnlInfo.SuspendLayout();
             groupBoxFolderTree.SuspendLayout();
             groupBoxFileView.SuspendLayout();
-            cmFolderView.SuspendLayout();
             SuspendLayout();
             // 
             // tvwFolders
@@ -253,10 +266,89 @@ namespace RegexRenamer
             tvwFolders.Location = new System.Drawing.Point(11, 22);
             tvwFolders.Margin = new System.Windows.Forms.Padding(4);
             tvwFolders.Name = "tvwFolders";
-            tvwFolders.Size = new System.Drawing.Size(486, 854);
+            tvwFolders.Size = new System.Drawing.Size(486, 903);
             tvwFolders.TabIndex = 1;
+            tvwFolders.AfterLabelEdit += tvwFolders_AfterLabelEdit;
             tvwFolders.AfterSelect += tvwFolders_AfterSelect;
+            tvwFolders.NodeMouseClick += tvwFolders_NodeMouseClick;
             tvwFolders.KeyUp += tvwFolders_KeyUp;
+            // 
+            // cmFolderView
+            // 
+            cmFolderView.ImageScalingSize = new System.Drawing.Size(20, 20);
+            cmFolderView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { deleteToolStripMenuItem1, pasteToolStripMenuItem1, cutToolStripMenuItem1, copyToolStripMenuItem1, copyPathToolStripMenuItem, renameToolStripMenuItem, openInExplorerToolStripMenuItem, explorerContextMenuToolStripMenuItem, newFolderToolStripMenuItem, setAsKavitaLibraryRootToolStripMenuItem });
+            cmFolderView.Name = "cmFileView";
+            cmFolderView.Size = new System.Drawing.Size(250, 244);
+            // 
+            // deleteToolStripMenuItem1
+            // 
+            deleteToolStripMenuItem1.Name = "deleteToolStripMenuItem1";
+            deleteToolStripMenuItem1.Size = new System.Drawing.Size(249, 24);
+            deleteToolStripMenuItem1.Text = "Delete";
+            deleteToolStripMenuItem1.Click += deleteToolStripMenuItem1_Click;
+            // 
+            // pasteToolStripMenuItem1
+            // 
+            pasteToolStripMenuItem1.Name = "pasteToolStripMenuItem1";
+            pasteToolStripMenuItem1.Size = new System.Drawing.Size(249, 24);
+            pasteToolStripMenuItem1.Text = "Paste";
+            pasteToolStripMenuItem1.Click += pasteToolStripMenuItem1_Click;
+            // 
+            // cutToolStripMenuItem1
+            // 
+            cutToolStripMenuItem1.Name = "cutToolStripMenuItem1";
+            cutToolStripMenuItem1.Size = new System.Drawing.Size(249, 24);
+            cutToolStripMenuItem1.Text = "Cut";
+            cutToolStripMenuItem1.Click += cutToolStripMenuItem1_Click;
+            // 
+            // copyToolStripMenuItem1
+            // 
+            copyToolStripMenuItem1.Name = "copyToolStripMenuItem1";
+            copyToolStripMenuItem1.Size = new System.Drawing.Size(249, 24);
+            copyToolStripMenuItem1.Text = "Copy";
+            copyToolStripMenuItem1.Click += copyToolStripMenuItem1_Click;
+            // 
+            // copyPathToolStripMenuItem
+            // 
+            copyPathToolStripMenuItem.Name = "copyPathToolStripMenuItem";
+            copyPathToolStripMenuItem.Size = new System.Drawing.Size(249, 24);
+            copyPathToolStripMenuItem.Text = "Copy Path";
+            copyPathToolStripMenuItem.Click += copyPathToolStripMenuItem_Click;
+            // 
+            // renameToolStripMenuItem
+            // 
+            renameToolStripMenuItem.Name = "renameToolStripMenuItem";
+            renameToolStripMenuItem.Size = new System.Drawing.Size(249, 24);
+            renameToolStripMenuItem.Text = "Rename";
+            renameToolStripMenuItem.Click += renameToolStripMenuItem_Click;
+            // 
+            // openInExplorerToolStripMenuItem
+            // 
+            openInExplorerToolStripMenuItem.Name = "openInExplorerToolStripMenuItem";
+            openInExplorerToolStripMenuItem.Size = new System.Drawing.Size(249, 24);
+            openInExplorerToolStripMenuItem.Text = "Open In Explorer";
+            openInExplorerToolStripMenuItem.Click += openInExplorerToolStripMenuItem_Click;
+            // 
+            // explorerContextMenuToolStripMenuItem
+            // 
+            explorerContextMenuToolStripMenuItem.Name = "explorerContextMenuToolStripMenuItem";
+            explorerContextMenuToolStripMenuItem.Size = new System.Drawing.Size(249, 24);
+            explorerContextMenuToolStripMenuItem.Text = "Explorer Context Menu";
+            explorerContextMenuToolStripMenuItem.Click += explorerContextMenuToolStripMenuItem_Click;
+            // 
+            // newFolderToolStripMenuItem
+            // 
+            newFolderToolStripMenuItem.Name = "newFolderToolStripMenuItem";
+            newFolderToolStripMenuItem.Size = new System.Drawing.Size(249, 24);
+            newFolderToolStripMenuItem.Text = "New Folder";
+            newFolderToolStripMenuItem.Click += newFolderToolStripMenuItem_Click;
+            // 
+            // setAsKavitaLibraryRootToolStripMenuItem
+            // 
+            setAsKavitaLibraryRootToolStripMenuItem.Name = "setAsKavitaLibraryRootToolStripMenuItem";
+            setAsKavitaLibraryRootToolStripMenuItem.Size = new System.Drawing.Size(249, 24);
+            setAsKavitaLibraryRootToolStripMenuItem.Text = "Set As Kavita Library Root";
+            setAsKavitaLibraryRootToolStripMenuItem.Click += setAsKavitaLibraryRootToolStripMenuItem_Click;
             // 
             // btnRename
             // 
@@ -413,7 +505,7 @@ namespace RegexRenamer
             gbFilter.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             gbFilter.Name = "gbFilter";
             gbFilter.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            gbFilter.Size = new System.Drawing.Size(201, 80);
+            gbFilter.Size = new System.Drawing.Size(201, 100);
             gbFilter.TabIndex = 2;
             gbFilter.TabStop = false;
             gbFilter.Text = "Filter";
@@ -425,7 +517,7 @@ namespace RegexRenamer
             cbFilterExclude.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             cbFilterExclude.Image = Properties.Resources.x;
             cbFilterExclude.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            cbFilterExclude.Location = new System.Drawing.Point(95, 29);
+            cbFilterExclude.Location = new System.Drawing.Point(92, 39);
             cbFilterExclude.Margin = new System.Windows.Forms.Padding(0);
             cbFilterExclude.Name = "cbFilterExclude";
             cbFilterExclude.Size = new System.Drawing.Size(16, 31);
@@ -438,7 +530,7 @@ namespace RegexRenamer
             // 
             txtFilter.Anchor = System.Windows.Forms.AnchorStyles.Right;
             txtFilter.Font = new System.Drawing.Font("Courier New", 8.25F);
-            txtFilter.Location = new System.Drawing.Point(9, 34);
+            txtFilter.Location = new System.Drawing.Point(9, 44);
             txtFilter.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             txtFilter.Name = "txtFilter";
             txtFilter.Size = new System.Drawing.Size(79, 23);
@@ -487,17 +579,16 @@ namespace RegexRenamer
             pnlStats.Controls.Add(lblStatsShown);
             pnlStats.Controls.Add(lblStatsFiltered);
             pnlStats.Controls.Add(lblStatsTotal);
-            pnlStats.Location = new System.Drawing.Point(1067, 28);
+            pnlStats.Location = new System.Drawing.Point(1045, 20);
             pnlStats.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             pnlStats.Name = "pnlStats";
-            pnlStats.Size = new System.Drawing.Size(149, 55);
+            pnlStats.Size = new System.Drawing.Size(123, 98);
             pnlStats.TabIndex = 6;
-            pnlStats.Visible = false;
             // 
             // lblStatsHidden
             // 
             lblStatsHidden.AutoEllipsis = true;
-            lblStatsHidden.Location = new System.Drawing.Point(81, 30);
+            lblStatsHidden.Location = new System.Drawing.Point(5, 50);
             lblStatsHidden.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblStatsHidden.Name = "lblStatsHidden";
             lblStatsHidden.Size = new System.Drawing.Size(113, 19);
@@ -507,7 +598,7 @@ namespace RegexRenamer
             // lblStatsShown
             // 
             lblStatsShown.AutoEllipsis = true;
-            lblStatsShown.Location = new System.Drawing.Point(-3, 30);
+            lblStatsShown.Location = new System.Drawing.Point(5, 27);
             lblStatsShown.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblStatsShown.Name = "lblStatsShown";
             lblStatsShown.Size = new System.Drawing.Size(113, 19);
@@ -517,7 +608,7 @@ namespace RegexRenamer
             // lblStatsFiltered
             // 
             lblStatsFiltered.AutoEllipsis = true;
-            lblStatsFiltered.Location = new System.Drawing.Point(81, 5);
+            lblStatsFiltered.Location = new System.Drawing.Point(5, 73);
             lblStatsFiltered.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblStatsFiltered.Name = "lblStatsFiltered";
             lblStatsFiltered.Size = new System.Drawing.Size(113, 19);
@@ -527,7 +618,7 @@ namespace RegexRenamer
             // lblStatsTotal
             // 
             lblStatsTotal.AutoEllipsis = true;
-            lblStatsTotal.Location = new System.Drawing.Point(-3, 5);
+            lblStatsTotal.Location = new System.Drawing.Point(6, 5);
             lblStatsTotal.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblStatsTotal.Name = "lblStatsTotal";
             lblStatsTotal.Size = new System.Drawing.Size(113, 19);
@@ -616,7 +707,7 @@ namespace RegexRenamer
             // 
             btnNetwork.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             btnNetwork.Image = (System.Drawing.Image)resources.GetObject("btnNetwork.Image");
-            btnNetwork.Location = new System.Drawing.Point(441, 885);
+            btnNetwork.Location = new System.Drawing.Point(441, 934);
             btnNetwork.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             btnNetwork.Name = "btnNetwork";
             btnNetwork.Size = new System.Drawing.Size(48, 38);
@@ -628,7 +719,7 @@ namespace RegexRenamer
             // txtPath
             // 
             txtPath.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            txtPath.Location = new System.Drawing.Point(50, 892);
+            txtPath.Location = new System.Drawing.Point(50, 941);
             txtPath.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             txtPath.Name = "txtPath";
             txtPath.Size = new System.Drawing.Size(383, 27);
@@ -676,12 +767,11 @@ namespace RegexRenamer
             tsMenu.Font = new System.Drawing.Font("Tahoma", 8.25F);
             tsMenu.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             tsMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
-            tsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { mnuChangeCase, mnuNumbering, mnuMoveCopy });
+            tsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { mnuChangeCase, mnuNumbering, mnuMoveCopy, mnuKavitaCheck });
             tsMenu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            tsMenu.Location = new System.Drawing.Point(1369, 20);
+            tsMenu.Location = new System.Drawing.Point(1375, 20);
             tsMenu.Name = "tsMenu";
-            tsMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            tsMenu.Size = new System.Drawing.Size(118, 82);
+            tsMenu.Size = new System.Drawing.Size(112, 103);
             tsMenu.TabIndex = 1;
             tsMenu.TabStop = true;
             // 
@@ -850,6 +940,59 @@ namespace RegexRenamer
             itmOutputBackupTo.Text = "Backup to...";
             itmOutputBackupTo.ToolTipText = "Files that match are copied and the originals are renamed";
             itmOutputBackupTo.Click += itmOutputBackupTo_Click;
+            // 
+            // mnuKavitaCheck
+            // 
+            mnuKavitaCheck.AutoToolTip = false;
+            mnuKavitaCheck.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            mnuKavitaCheck.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { noneToolStripMenuItem, toolStripSeparator1, previewComicsToolStripMenuItem, previewMangaToolStripMenuItem, previewBooksToolStripMenuItem });
+            mnuKavitaCheck.ImageTransparentColor = System.Drawing.Color.Magenta;
+            mnuKavitaCheck.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
+            mnuKavitaCheck.Name = "mnuKavitaCheck";
+            mnuKavitaCheck.Padding = new System.Windows.Forms.Padding(0, 0, 43, 0);
+            mnuKavitaCheck.Size = new System.Drawing.Size(102, 21);
+            mnuKavitaCheck.Text = "Kavita";
+            mnuKavitaCheck.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            mnuKavitaCheck.ToolTipText = "Preview Kavitha Parsed Values";
+            // 
+            // noneToolStripMenuItem
+            // 
+            noneToolStripMenuItem.Checked = true;
+            noneToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            noneToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            noneToolStripMenuItem.Name = "noneToolStripMenuItem";
+            noneToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            noneToolStripMenuItem.Text = "None";
+            noneToolStripMenuItem.Click += this.noneToolStripMenuItem_Click;
+            // 
+            // toolStripSeparator1
+            // 
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
+            // 
+            // previewComicsToolStripMenuItem
+            // 
+            previewComicsToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            previewComicsToolStripMenuItem.Name = "previewComicsToolStripMenuItem";
+            previewComicsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            previewComicsToolStripMenuItem.Text = "Preview Comics";
+            previewComicsToolStripMenuItem.Click += this.previewComicsToolStripMenuItem_Click;
+            // 
+            // previewMangaToolStripMenuItem
+            // 
+            previewMangaToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            previewMangaToolStripMenuItem.Name = "previewMangaToolStripMenuItem";
+            previewMangaToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            previewMangaToolStripMenuItem.Text = "Preview Manga";
+            previewMangaToolStripMenuItem.Click += this.previewMangaToolStripMenuItem_Click;
+            // 
+            // previewBooksToolStripMenuItem
+            // 
+            previewBooksToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            previewBooksToolStripMenuItem.Name = "previewBooksToolStripMenuItem";
+            previewBooksToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            previewBooksToolStripMenuItem.Text = "Preview Books";
+            previewBooksToolStripMenuItem.Click += this.previewBooksToolStripMenuItem_Click;
             // 
             // ttPreviewError
             // 
@@ -1387,7 +1530,7 @@ namespace RegexRenamer
             // 
             lblPath.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             lblPath.AutoSize = true;
-            lblPath.Location = new System.Drawing.Point(5, 896);
+            lblPath.Location = new System.Drawing.Point(5, 945);
             lblPath.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblPath.Name = "lblPath";
             lblPath.Size = new System.Drawing.Size(40, 20);
@@ -1401,12 +1544,12 @@ namespace RegexRenamer
             dgvFiles.AllowUserToResizeRows = false;
             dgvFiles.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvFiles.BackgroundColor = System.Drawing.SystemColors.Window;
-            dgvFiles.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            dgvFiles.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
             dgvFiles.ColumnHeadersHeight = 29;
             dgvFiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIcon, colFilename, colPreview, colKavita });
+            dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIcon, colFilename, colPreview, colSeries, colVolume, colChapter, colTitle, colEdition, colSpecial });
             dgvFiles.ContextMenuStrip = cmFileView;
-            dgvFiles.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
+            dgvFiles.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             dgvFiles.GridColor = System.Drawing.SystemColors.Control;
             dgvFiles.Location = new System.Drawing.Point(7, 20);
             dgvFiles.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -1455,53 +1598,112 @@ namespace RegexRenamer
             colPreview.Name = "colPreview";
             colPreview.ReadOnly = true;
             // 
-            // colKavita
+            // colSeries
             // 
-            colKavita.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            colKavita.HeaderText = "Kavita Preview";
-            colKavita.MinimumWidth = 6;
-            colKavita.Name = "colKavita";
-            colKavita.Visible = false;
+            colSeries.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            colSeries.HeaderText = "Series";
+            colSeries.MinimumWidth = 6;
+            colSeries.Name = "colSeries";
+            colSeries.ReadOnly = true;
+            colSeries.Visible = false;
+            colSeries.Width = 125;
+            // 
+            // colVolume
+            // 
+            colVolume.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colVolume.HeaderText = "Volume";
+            colVolume.MinimumWidth = 6;
+            colVolume.Name = "colVolume";
+            colVolume.ReadOnly = true;
+            colVolume.Visible = false;
+            colVolume.Width = 125;
+            // 
+            // colChapter
+            // 
+            colChapter.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colChapter.HeaderText = "Chapter";
+            colChapter.MinimumWidth = 6;
+            colChapter.Name = "colChapter";
+            colChapter.ReadOnly = true;
+            colChapter.Visible = false;
+            colChapter.Width = 125;
+            // 
+            // colTitle
+            // 
+            colTitle.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            colTitle.HeaderText = "Title";
+            colTitle.MinimumWidth = 6;
+            colTitle.Name = "colTitle";
+            colTitle.ReadOnly = true;
+            colTitle.Visible = false;
+            colTitle.Width = 125;
+            // 
+            // colEdition
+            // 
+            colEdition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colEdition.HeaderText = "Edition";
+            colEdition.MinimumWidth = 6;
+            colEdition.Name = "colEdition";
+            colEdition.ReadOnly = true;
+            colEdition.Visible = false;
+            colEdition.Width = 125;
+            // 
+            // colSpecial
+            // 
+            colSpecial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colSpecial.HeaderText = "Special";
+            colSpecial.MinimumWidth = 6;
+            colSpecial.Name = "colSpecial";
+            colSpecial.ReadOnly = true;
+            colSpecial.Visible = false;
+            colSpecial.Width = 125;
             // 
             // cmFileView
             // 
             cmFileView.ImageScalingSize = new System.Drawing.Size(20, 20);
-            cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { editToolStripMenuItem, copyToolStripMenuItem, cutToolStripMenuItem, pasteToolStripMenuItem, deleteToolStripMenuItem });
+            cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { editToolStripMenuItem, explorerContextMenuToolStripMenuItem1, copyToolStripMenuItem, cutToolStripMenuItem, pasteToolStripMenuItem, deleteToolStripMenuItem });
             cmFileView.Name = "contextMenuStripFileView";
-            cmFileView.Size = new System.Drawing.Size(123, 124);
+            cmFileView.Size = new System.Drawing.Size(230, 148);
             // 
             // editToolStripMenuItem
             // 
             editToolStripMenuItem.Name = "editToolStripMenuItem";
-            editToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
+            editToolStripMenuItem.Size = new System.Drawing.Size(229, 24);
             editToolStripMenuItem.Text = "Edit";
             editToolStripMenuItem.Click += editToolStripMenuItem_Click;
+            // 
+            // explorerContextMenuToolStripMenuItem1
+            // 
+            explorerContextMenuToolStripMenuItem1.Name = "explorerContextMenuToolStripMenuItem1";
+            explorerContextMenuToolStripMenuItem1.Size = new System.Drawing.Size(229, 24);
+            explorerContextMenuToolStripMenuItem1.Text = "Explorer Context Menu";
+            explorerContextMenuToolStripMenuItem1.Click += explorerContextMenuToolStripMenuItem1_Click;
             // 
             // copyToolStripMenuItem
             // 
             copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            copyToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
+            copyToolStripMenuItem.Size = new System.Drawing.Size(229, 24);
             copyToolStripMenuItem.Text = "Copy";
             copyToolStripMenuItem.Click += copyToolStripMenuItem_Click;
             // 
             // cutToolStripMenuItem
             // 
             cutToolStripMenuItem.Name = "cutToolStripMenuItem";
-            cutToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
+            cutToolStripMenuItem.Size = new System.Drawing.Size(229, 24);
             cutToolStripMenuItem.Text = "Cut";
             cutToolStripMenuItem.Click += cutToolStripMenuItem_Click;
             // 
             // pasteToolStripMenuItem
             // 
             pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
-            pasteToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
+            pasteToolStripMenuItem.Size = new System.Drawing.Size(229, 24);
             pasteToolStripMenuItem.Text = "Paste";
             pasteToolStripMenuItem.Click += pasteToolStripMenuItem_Click;
             // 
             // deleteToolStripMenuItem
             // 
             deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            deleteToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
+            deleteToolStripMenuItem.Size = new System.Drawing.Size(229, 24);
             deleteToolStripMenuItem.Text = "Delete";
             deleteToolStripMenuItem.Click += deleteToolStripMenuItem_Click;
             // 
@@ -1690,7 +1892,7 @@ namespace RegexRenamer
             // groupBoxTop
             // 
             groupBoxTop.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            groupBoxTop.Controls.Add(tsKavita);
+            groupBoxTop.Controls.Add(pnlInfo);
             groupBoxTop.Controls.Add(lblMatch);
             groupBoxTop.Controls.Add(cmbReplace);
             groupBoxTop.Controls.Add(cmbMatch);
@@ -1706,97 +1908,27 @@ namespace RegexRenamer
             groupBoxTop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBoxTop.Name = "groupBoxTop";
             groupBoxTop.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxTop.Size = new System.Drawing.Size(1699, 121);
+            groupBoxTop.Size = new System.Drawing.Size(1699, 127);
             groupBoxTop.TabIndex = 7;
             groupBoxTop.TabStop = false;
             // 
-            // tsKavita
+            // pnlInfo
             // 
-            tsKavita.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            tsKavita.AutoSize = false;
-            tsKavita.BackColor = System.Drawing.SystemColors.ButtonFace;
-            tsKavita.CanOverflow = false;
-            tsKavita.Dock = System.Windows.Forms.DockStyle.None;
-            tsKavita.ImageScalingSize = new System.Drawing.Size(20, 20);
-            tsKavita.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { mnuKavitaCheck, toolStripDropDownButton2 });
-            tsKavita.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Table;
-            tsKavita.Location = new System.Drawing.Point(1220, 24);
-            tsKavita.Name = "tsKavita";
-            tsKavita.Size = new System.Drawing.Size(140, 82);
-            tsKavita.TabIndex = 7;
-            tsKavita.Text = "toolStrip1";
+            pnlInfo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            pnlInfo.Controls.Add(lblInfoFileSize);
+            pnlInfo.Location = new System.Drawing.Point(1175, 19);
+            pnlInfo.Name = "pnlInfo";
+            pnlInfo.Size = new System.Drawing.Size(199, 99);
+            pnlInfo.TabIndex = 7;
             // 
-            // mnuKavitaCheck
+            // lblInfoFileSize
             // 
-            mnuKavitaCheck.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            mnuKavitaCheck.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { noneToolStripMenuItem, toolStripSeparator1, checkComicsToolStripMenuItem, checkMangaToolStripMenuItem, checkBooksToolStripMenuItem });
-            mnuKavitaCheck.ImageTransparentColor = System.Drawing.Color.Magenta;
-            mnuKavitaCheck.Name = "mnuKavitaCheck";
-            mnuKavitaCheck.Size = new System.Drawing.Size(64, 24);
-            mnuKavitaCheck.Text = "Kavita";
-            // 
-            // noneToolStripMenuItem
-            // 
-            noneToolStripMenuItem.Checked = true;
-            noneToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            noneToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            noneToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
-            noneToolStripMenuItem.Text = "None";
-            noneToolStripMenuItem.Click += noneToolStripMenuItem_Click;
-            // 
-            // toolStripSeparator1
-            // 
-            toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(180, 6);
-            // 
-            // checkComicsToolStripMenuItem
-            // 
-            checkComicsToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            checkComicsToolStripMenuItem.Name = "checkComicsToolStripMenuItem";
-            checkComicsToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
-            checkComicsToolStripMenuItem.Text = "Check Comics";
-            checkComicsToolStripMenuItem.Click += checkComicsToolStripMenuItem_Click;
-            // 
-            // checkMangaToolStripMenuItem
-            // 
-            checkMangaToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            checkMangaToolStripMenuItem.Name = "checkMangaToolStripMenuItem";
-            checkMangaToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
-            checkMangaToolStripMenuItem.Text = "Check Manga";
-            checkMangaToolStripMenuItem.Click += checkMangaToolStripMenuItem_Click;
-            // 
-            // checkBooksToolStripMenuItem
-            // 
-            checkBooksToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
-            checkBooksToolStripMenuItem.Name = "checkBooksToolStripMenuItem";
-            checkBooksToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
-            checkBooksToolStripMenuItem.Text = "Check Books";
-            checkBooksToolStripMenuItem.Click += checkBooksToolStripMenuItem_Click;
-            // 
-            // toolStripDropDownButton2
-            // 
-            toolStripDropDownButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            toolStripDropDownButton2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { renameComicsToolStripMenuItem, renameBooksToolStripMenuItem });
-            toolStripDropDownButton2.Image = (System.Drawing.Image)resources.GetObject("toolStripDropDownButton2.Image");
-            toolStripDropDownButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            toolStripDropDownButton2.Name = "toolStripDropDownButton2";
-            toolStripDropDownButton2.Size = new System.Drawing.Size(126, 24);
-            toolStripDropDownButton2.Text = "Change Kavitha";
-            // 
-            // renameComicsToolStripMenuItem
-            // 
-            renameComicsToolStripMenuItem.Name = "renameComicsToolStripMenuItem";
-            renameComicsToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
-            renameComicsToolStripMenuItem.Text = "Rename Comics";
-            renameComicsToolStripMenuItem.Click += renameComicsToolStripMenuItem_Click;
-            // 
-            // renameBooksToolStripMenuItem
-            // 
-            renameBooksToolStripMenuItem.Name = "renameBooksToolStripMenuItem";
-            renameBooksToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
-            renameBooksToolStripMenuItem.Text = "Rename Books";
-            renameBooksToolStripMenuItem.Click += renameBooksToolStripMenuItem_Click;
+            lblInfoFileSize.AutoSize = true;
+            lblInfoFileSize.Location = new System.Drawing.Point(13, 5);
+            lblInfoFileSize.Name = "lblInfoFileSize";
+            lblInfoFileSize.Size = new System.Drawing.Size(39, 20);
+            lblInfoFileSize.TabIndex = 0;
+            lblInfoFileSize.Text = "0 Kb";
             // 
             // groupBoxFolderTree
             // 
@@ -1809,7 +1941,7 @@ namespace RegexRenamer
             groupBoxFolderTree.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBoxFolderTree.Name = "groupBoxFolderTree";
             groupBoxFolderTree.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxFolderTree.Size = new System.Drawing.Size(504, 938);
+            groupBoxFolderTree.Size = new System.Drawing.Size(504, 987);
             groupBoxFolderTree.TabIndex = 8;
             groupBoxFolderTree.TabStop = false;
             // 
@@ -1831,20 +1963,6 @@ namespace RegexRenamer
             groupBoxFileView.TabIndex = 9;
             groupBoxFileView.TabStop = false;
             // 
-            // cmFolderView
-            // 
-            cmFolderView.ImageScalingSize = new System.Drawing.Size(20, 20);
-            cmFolderView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { setAsKavitaLibraryRootToolStripMenuItem });
-            cmFolderView.Name = "cmFileView";
-            cmFolderView.Size = new System.Drawing.Size(250, 28);
-            // 
-            // setAsKavitaLibraryRootToolStripMenuItem
-            // 
-            setAsKavitaLibraryRootToolStripMenuItem.Name = "setAsKavitaLibraryRootToolStripMenuItem";
-            setAsKavitaLibraryRootToolStripMenuItem.Size = new System.Drawing.Size(249, 24);
-            setAsKavitaLibraryRootToolStripMenuItem.Text = "Set As Kavita Library Root";
-            setAsKavitaLibraryRootToolStripMenuItem.Click += setAsKavitaLibraryRootToolStripMenuItem_Click;
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1863,6 +1981,7 @@ namespace RegexRenamer
             FormClosing += MainForm_FormClosing;
             Load += MainForm_Load;
             KeyDown += MainForm_KeyDown;
+            cmFolderView.ResumeLayout(false);
             cmsRename.ResumeLayout(false);
             gbFilter.ResumeLayout(false);
             gbFilter.PerformLayout();
@@ -1878,13 +1997,12 @@ namespace RegexRenamer
             tsOptions.PerformLayout();
             groupBoxTop.ResumeLayout(false);
             groupBoxTop.PerformLayout();
-            tsKavita.ResumeLayout(false);
-            tsKavita.PerformLayout();
+            pnlInfo.ResumeLayout(false);
+            pnlInfo.PerformLayout();
             groupBoxFolderTree.ResumeLayout(false);
             groupBoxFolderTree.PerformLayout();
             groupBoxFileView.ResumeLayout(false);
             groupBoxFileView.PerformLayout();
-            cmFolderView.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -2055,22 +2173,35 @@ namespace RegexRenamer
         private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cutToolStripMenuItem;
-        private System.Windows.Forms.ToolStrip tsKavita;
-        private System.Windows.Forms.ToolStripDropDownButton mnuKavitaCheck;
-        private System.Windows.Forms.ToolStripMenuItem checkComicsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem checkMangaToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem checkBooksToolStripMenuItem;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton2;
-        private System.Windows.Forms.ToolStripMenuItem renameComicsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem renameBooksToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem noneToolStripMenuItem;
         private System.Windows.Forms.ContextMenuStrip cmFolderView;
         private System.Windows.Forms.ToolStripMenuItem setAsKavitaLibraryRootToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem openInExplorerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyPathToolStripMenuItem;
         private System.Windows.Forms.DataGridViewImageColumn colIcon;
         private System.Windows.Forms.DataGridViewTextBoxColumn colFilename;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPreview;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colKavita;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colSeries;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colVolume;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colChapter;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTitle;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colEdition;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colSpecial;
+        private System.Windows.Forms.ToolStripMenuItem pasteToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem cutToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem newFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem explorerContextMenuToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem explorerContextMenuToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripDropDownButton mnuKavitaCheck;
+        private System.Windows.Forms.ToolStripMenuItem noneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem previewComicsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem previewMangaToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem previewBooksToolStripMenuItem;
+        private System.Windows.Forms.Panel pnlInfo;
+        private System.Windows.Forms.Label lblInfoFileSize;
     }
 }
 

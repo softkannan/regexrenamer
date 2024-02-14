@@ -40,7 +40,7 @@ using System.IO;
 
 using System.Diagnostics;
 using System.Security;
-using RegexRenamer.Utility;
+using RegexRenamer.Native;
 
 namespace RegexRenamer.Controls
 {
@@ -81,7 +81,7 @@ namespace RegexRenamer.Controls
             // add the Desktop icon to the image list
             try
             {
-                folderTreeViewImageList.Images.Add(ExtractIcons.GetDesktopIcon());
+                folderTreeViewImageList.Images.Add(TreeviewExtractIcons.GetDesktopIcon());
             }
             catch
             {
@@ -102,7 +102,7 @@ namespace RegexRenamer.Controls
         private void TreeViewBeforeExpand(object sender, System.Windows.Forms.TreeViewCancelEventArgs e)
         {
             this.BeginUpdate();
-            e.Node.ExpandBranch(this.ImageList);
+            e.Node.ExpandTreeNode(this.ImageList);
             this.EndUpdate();
         }
 
@@ -112,13 +112,13 @@ namespace RegexRenamer.Controls
 
         public string GetSelectedNodePath()
         {
-            return SelectedNode.GetFilePath();
+            return SelectedNode.GetOnlyDirectory();
         }
 
         // [xiperware]
         public string ForceGetSelectedNodePath()
         {
-            return SelectedNode.ForceGetFilePath();
+            return SelectedNode.TreeNodeToPath();
         }
 
         public bool DrillToFolder(string folderPath)
@@ -146,7 +146,7 @@ namespace RegexRenamer.Controls
                 if (!folderFound)
                 {
                     this.SelectedNode = tn;
-                    string tnPath = tn.GetFilePath().ToUpper(cultureInfo);
+                    string tnPath = tn.GetOnlyDirectory().ToUpper(cultureInfo);
                     if (path == tnPath && !folderFound)
                     {
                         this.SelectedNode = tn;
@@ -178,8 +178,7 @@ namespace RegexRenamer.Controls
                 {
                     if (node.Tag.ToString() == "DUMMYNODE")
                         return;
-
-                    string nodePath = ((Shell32.FolderItem)node.Tag).Path.ToLower();
+                    string nodePath = node.TreeNodeToPath().ToLower();
                     if (path == nodePath)
                     {
                         currentNode = node;
@@ -226,7 +225,7 @@ namespace RegexRenamer.Controls
                 tn.Collapse();
 
             if (this.SelectedNode != selectedNode)
-                DrillToFolder(((Shell32.FolderItem)selectedNode.Tag).Path);
+                DrillToFolder(selectedNode.TreeNodeToPath());
 
             this.EndUpdate();
         }

@@ -1,4 +1,5 @@
 ﻿using RegexRenamer.Kavita;
+using RegexRenamer.Native;
 using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
@@ -20,24 +21,21 @@ namespace RegexRenamer
         {
             // get selected path (regardless whether it exists)
 
-            if (tvwFolders.SelectedNode != null)
+            if (tvwFolders.SelectedNode != null && !Directory.Exists(activePath))
                 activePath = tvwFolders.ForceGetSelectedNodePath();
 
 
             // save prev path to preserve node expansion
-
             string prevPathExpand = null;
             if (tvwFolders.SelectedNode != null && tvwFolders.SelectedNode.IsExpanded)
                 prevPathExpand = activePath.ToLower();
 
 
             // init tvwFolders with directory tree
-
             tvwFolders.InitFolderTreeView();
 
 
             // get active path
-
             while (!Directory.Exists(activePath))  // if doesn't exist, walk tree backwards
             {
                 DirectoryInfo di = null;
@@ -52,7 +50,6 @@ namespace RegexRenamer
 
 
             // drill to folder and expand
-
             EnableUpdates = false;
             if (activePath.StartsWith("\\\\"))
             {
@@ -74,7 +71,6 @@ namespace RegexRenamer
 
 
             // re-expand
-
             if (tvwFolders.SelectedNode != null && prevPathExpand == activePath.ToLower())
                 tvwFolders.SelectedNode.Expand();
 
@@ -263,7 +259,7 @@ namespace RegexRenamer
                 if (RenameFolders)
                 {
                     if (icons.Count == 0)
-                        icons.Add("folder", ExtractIcons.GetFolderIcon());
+                        icons.Add("folder", TreeviewExtractIcons.GetFolderIcon());
                     dgvFiles.Rows[i].Cells[0].Value = icons["folder"];
                 }
                 else
@@ -272,13 +268,13 @@ namespace RegexRenamer
                     if (ext == ".lnk")  // shortcut, don't key by extension as each may have different icon
                     {
                         ext = ".lnk." + icons.Count;
-                        icons.Add(ext, ExtractIcons.GetIcon(activeFiles[i].Fullpath, false));
+                        icons.Add(ext, TreeviewExtractIcons.GetIcon(activeFiles[i].Fullpath, false));
                         dgvFiles.Rows[i].Cells[0].Value = icons[ext];
                     }
                     else  // non-shortcut
                     {
                         if (!icons.ContainsKey(ext))
-                            icons.Add(ext, ExtractIcons.GetIcon(activeFiles[i].Fullpath, false));
+                            icons.Add(ext, TreeviewExtractIcons.GetIcon(activeFiles[i].Fullpath, false));
 
                         dgvFiles.Rows[i].Cells[0].Value = icons[ext];
                     }
@@ -443,10 +439,15 @@ namespace RegexRenamer
             {
                 int afi = (int)dgvFiles.Rows[dfi].Tag;
                 dgvFiles.Rows[dfi].Cells[2].Value = activeFiles[afi].Preview;
-                dgvFiles.Rows[dfi].Cells[3].Value = "";
+                //showSizeToolStripMenuItem
                 if (activeFiles[afi].Info != null)
                 {
-                    dgvFiles.Rows[dfi].Cells[3].Value = activeFiles[afi].Info.ToText();
+                    dgvFiles.Rows[dfi].Cells[3].Value = activeFiles[afi].Info.Series;
+                    dgvFiles.Rows[dfi].Cells[4].Value = activeFiles[afi].Info.Volumes;
+                    dgvFiles.Rows[dfi].Cells[5].Value = activeFiles[afi].Info.Chapters;
+                    dgvFiles.Rows[dfi].Cells[6].Value = activeFiles[afi].Info.Title;
+                    dgvFiles.Rows[dfi].Cells[7].Value = activeFiles[afi].Info.Edition;
+                    dgvFiles.Rows[dfi].Cells[8].Value = activeFiles[afi].Info.IsSpecial ? "true" : "false";
                 }
             }
 
@@ -489,13 +490,20 @@ namespace RegexRenamer
             if (dgvFiles.Rows.Count != this.activeFiles.Count)
                 return;
 
+            RRItem firstSelection = null;
             foreach (DataGridViewRow row in dgvFiles.Rows)
             {
                 if (row.Tag == null) continue;
 
                 int afi = (int)row.Tag;
                 this.activeFiles[afi].Selected = row.Selected;
+                if(firstSelection == null && this.activeFiles[afi].Selected)
+                {
+                    firstSelection = this.activeFiles[afi];
+                }
             }
+
+            UpdateFileInfo(firstSelection);
         }
 
         // background worker

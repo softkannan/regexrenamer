@@ -1,91 +1,113 @@
-﻿using System;
+﻿using RegexRenamer.Kavita;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static PInvoke.NativeShell32;
 
-namespace RegexRenamer.Utility
+namespace RegexRenamer.Native
 {
-    public class ExtractIcons
+    public class TreeviewExtractIcons
     {
-        #region Structs & Enum
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct SHFILEINFO
+        private readonly static string SHELL_DLL_PATH;
+        static TreeviewExtractIcons()
         {
-            public SHFILEINFO(bool b)
-            {
-                hIcon = IntPtr.Zero; iIcon = 0; dwAttributes = 0; szDisplayName = ""; szTypeName = "";
-            }
-            public IntPtr hIcon;
-            public int iIcon;
-            public uint dwAttributes;
-            [MarshalAs(UnmanagedType.LPStr, SizeConst = 260)]
-            public string szDisplayName;
-            [MarshalAs(UnmanagedType.LPStr, SizeConst = 80)]
-            public string szTypeName;
-        };
-
-        private enum SHGFI
-        {
-            SHGFI_ICON = 0x000000100,     // get icon
-            SHGFI_DISPLAYNAME = 0x000000200,     // get display name
-            SHGFI_TYPENAME = 0x000000400,     // get type name
-            SHGFI_ATTRIBUTES = 0x000000800,     // get attributes
-            SHGFI_ICONLOCATION = 0x000001000,     // get icon location
-            SHGFI_EXETYPE = 0x000002000,     // return exe type
-            SHGFI_SYSICONINDEX = 0x000004000,     // get system icon index
-            SHGFI_LINKOVERLAY = 0x000008000,     // put a link overlay on icon
-            SHGFI_SELECTED = 0x000010000,     // show icon in selected state
-            SHGFI_ATTR_SPECIFIED = 0x000020000,     // get only specified attributes
-            SHGFI_LARGEICON = 0x000000000,     // get large icon
-            SHGFI_SMALLICON = 0x000000001,     // get small icon
-            SHGFI_OPENICON = 0x000000002,     // get open icon
-            SHGFI_SHELLICONSIZE = 0x000000004,     // get shell size icon
-            SHGFI_PIDL = 0x000000008,     // pszPath is a pidl
-            SHGFI_USEFILEATTRIBUTES = 0x000000010     // use passed dwFileAttribute
+            SHELL_DLL_PATH = Environment.SystemDirectory + "\\shell32.dll";
         }
-
-        #endregion
 
         #region Get Folder Icons
 
-        [DllImport("Shell32.dll")]
+        #region With Caching
+        //private static ConcurrentDictionary<string, Icon> shellIcons = new ConcurrentDictionary<string, Icon>();
+        //public static Icon GetIcon(string strPath, bool selected)
+        //{
+        //    Icon retVal = null;
+        //    string iconKey = "";
+        //    if (string.IsNullOrEmpty(strPath)) return GetNormalFolderIcon();
 
-        private static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes,
-          out SHFILEINFO psfi, uint cbfileInfo, SHGFI uFlags);
+        //    var fileAttr = File.GetAttributes(strPath);
+
+        //    if ((fileAttr & FileAttributes.Directory) != FileAttributes.Directory)
+        //    {
+        //        iconKey = Path.GetExtension(strPath);
+
+        //        if (string.Compare(iconKey, ".lnk", StringComparison.OrdinalIgnoreCase) == 0)
+        //        {
+        //            iconKey = "";
+        //        }
+        //    }
 
 
-        public static Icon GetIcon(string strPath, bool selected)  // [xiperware]  , ImageList imageList)
+
+        //    if (iconKey.Length > 0 && shellIcons.TryGetValue(iconKey, out Icon icon))
+        //    {
+        //        retVal = icon;
+        //    }
+        //    else
+        //    {
+        //        lock (syncObj)
+        //        {
+        //            SHFILEINFO info = new SHFILEINFO(true);
+        //            int cbFileInfo = Marshal.SizeOf(info);
+        //            SHGFI flags;
+        //            if (!selected)
+        //                flags = SHGFI.SHGFI_ICON | SHGFI.SHGFI_SMALLICON;
+        //            else
+        //                flags = SHGFI.SHGFI_ICON | SHGFI.SHGFI_SMALLICON | SHGFI.SHGFI_OPENICON;
+
+        //            SHGetFileInfo(strPath, (int)SHFileInfoFlags.SHGFI_ICON, out info, (uint)cbFileInfo, flags);
+
+        //            if (info.hIcon == nint.Zero)
+        //            {
+        //                retVal = GetNormalFolderIcon();
+        //            }
+        //            else
+        //            {
+        //                retVal = Icon.FromHandle(info.hIcon);
+        //            }
+        //            shellIcons[iconKey] = retVal;
+        //        }
+        //    }
+        //    return retVal;
+        //} 
+        #endregion
+
+        public static Icon GetIcon(string strPath, bool selected)
         {
-            SHFILEINFO info = new SHFILEINFO(true);
-            int cbFileInfo = Marshal.SizeOf(info);
-            SHGFI flags;
-            if (!selected)
-                flags = SHGFI.SHGFI_ICON | SHGFI.SHGFI_SMALLICON;
-            else
-                flags = SHGFI.SHGFI_ICON | SHGFI.SHGFI_SMALLICON | SHGFI.SHGFI_OPENICON;
-
-            SHGetFileInfo(strPath, 256, out info, (uint)cbFileInfo, flags);
             Icon retVal = null;
-            if (info.hIcon == IntPtr.Zero)
+            lock (syncObj)
             {
-                retVal = GetNormalFolderIcon();
-            }
-            else
-            {
-                retVal = Icon.FromHandle(info.hIcon);
-            }
+                SHFILEINFO info = new SHFILEINFO(true);
+                int cbFileInfo = Marshal.SizeOf(info);
+                SHGFI flags;
+                if (!selected)
+                    flags = SHGFI.SHGFI_ICON | SHGFI.SHGFI_SMALLICON;
+                else
+                    flags = SHGFI.SHGFI_ICON | SHGFI.SHGFI_SMALLICON | SHGFI.SHGFI_OPENICON;
 
+                SHGetFileInfo(strPath, (int)SHFileInfoFlags.SHGFI_ICON, out info, (uint)cbFileInfo, flags);
+
+                if (info.hIcon == nint.Zero)
+                {
+                    retVal = GetNormalFolderIcon();
+                }
+                else
+                {
+                    retVal = Icon.FromHandle(info.hIcon);
+                }
+            }
             return retVal;
         }
 
         private static Icon normalFolderIcon = null;
         private static object syncObj = new object();
 
-        public static Icon GetNormalFolderIcon()  // [xiperware]
+        public static Icon GetNormalFolderIcon()
         {
             if (normalFolderIcon == null)
             {
@@ -95,7 +117,7 @@ namespace RegexRenamer.Utility
                     {
                         SHFILEINFO info = new SHFILEINFO();
                         SHGetFileInfo(null,
-                                       0x00000003,  // Shell32.FILE_ATTRIBUTE_DIRECTORY,
+                                       0x00000005,  // Shell32.FILE_ATTRIBUTE_DIRECTORY,
                                        out info,
                                        (uint)Marshal.SizeOf(info),
                                        SHGFI.SHGFI_ICON | SHGFI.SHGFI_USEFILEATTRIBUTES | SHGFI.SHGFI_SMALLICON);
@@ -107,7 +129,7 @@ namespace RegexRenamer.Utility
         }
 
         private static Icon folderIcon = null;
-        public static Icon GetFolderIcon()  // [xiperware]
+        public static Icon GetFolderIcon()
         {
             if (folderIcon == null)
             {
@@ -148,10 +170,54 @@ namespace RegexRenamer.Utility
         // Updated this method in v1.11 so that the icon returned is a small icon, not a large icon as
         // returned by the old method above
 
-        [DllImport("Shell32.dll", CharSet = CharSet.Auto)]
+       
 
-        public static extern uint ExtractIconEx(
-          string lpszFile, int nIconIndex, IntPtr[] phiconLarge, IntPtr[] phiconSmall, uint nIcons);
+        private static ConcurrentDictionary<int, Icon> windowsIcons = new ConcurrentDictionary<int, Icon>();
+
+        public static Icon GetWindowsIcon(int iconNum)
+        {
+            if (!windowsIcons.TryGetValue(iconNum, out Icon icon))
+            {
+                lock (syncObj)
+                {
+                    nint[] handlesIconLarge = new nint[1];
+                    nint[] handlesIconSmall = new nint[1];
+                    uint i = ExtractIconEx(SHELL_DLL_PATH, iconNum,
+                      handlesIconLarge, handlesIconSmall, 1);
+
+                    var retIcon = Icon.FromHandle(handlesIconSmall[0]);
+
+                    windowsIcons[iconNum] = retIcon;
+
+                    return retIcon;
+                }
+            }
+
+            return icon;
+        }
+
+        private static Icon desktopFolderIcon = null;
+
+        public static Icon GetDesktopIcon()
+        {
+            if (desktopFolderIcon == null)
+            {
+                lock (syncObj)
+                {
+                    if (desktopFolderIcon == null)
+                    {
+                        nint[] handlesIconLarge = new nint[1];
+                        nint[] handlesIconSmall = new nint[1];
+                        uint i = ExtractIconEx(SHELL_DLL_PATH, 34,
+                          handlesIconLarge, handlesIconSmall, 1);
+
+                        desktopFolderIcon = Icon.FromHandle(handlesIconSmall[0]);
+                    }
+
+                }
+            }
+            return desktopFolderIcon;
+        }
 
         //3     normal folder icon
         //8     fixed drive folder icon
@@ -403,25 +469,7 @@ namespace RegexRenamer.Utility
         //16718 // old delete
         //16721 // old delete
 
-        public static Icon GetWindowsIcon(int iconNum)
-        {
-            IntPtr[] handlesIconLarge = new IntPtr[1];
-            IntPtr[] handlesIconSmall = new IntPtr[1];
-            uint i = ExtractIconEx(Environment.SystemDirectory + "\\shell32.dll", iconNum,
-              handlesIconLarge, handlesIconSmall, 1);
 
-            return Icon.FromHandle(handlesIconSmall[0]);
-        }
-
-        public static Icon GetDesktopIcon()
-        {
-            IntPtr[] handlesIconLarge = new IntPtr[1];
-            IntPtr[] handlesIconSmall = new IntPtr[1];
-            uint i = ExtractIconEx(Environment.SystemDirectory + "\\shell32.dll", 34,
-              handlesIconLarge, handlesIconSmall, 1);
-
-            return Icon.FromHandle(handlesIconSmall[0]);
-        }
 
         #endregion
 

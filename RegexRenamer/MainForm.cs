@@ -315,7 +315,6 @@ namespace RegexRenamer
 
         #endregion
 
-
         #region Event Handlers
 
         // MAINFORM

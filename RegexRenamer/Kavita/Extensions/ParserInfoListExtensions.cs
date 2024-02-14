@@ -12,8 +12,8 @@ namespace RegexRenamer.Kavita
 
             if (pThis != null)
             {
-                ret = $"Series:{pThis.Series}, Chapter:{pThis.Chapters}, Volumes:{pThis.Volumes}, Edition:{pThis.Edition}," +
-                    $" Special:{pThis.IsSpecial}, Title:{pThis.Title}";
+                ret = $"Series: {pThis.Series} | Chapter: {pThis.Chapters} | Volumes: {pThis.Volumes} | Edition: {pThis.Edition} | " +
+                    $"Special: {pThis.IsSpecial} | Title: {pThis.Title}";
             }
             return ret;
         }

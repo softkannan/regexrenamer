@@ -29,6 +29,9 @@ namespace RegexRenamer
         {
             try
             {
+
+                //PInvoke.NativeShell32.ResolveShortcut(@"D:\App_Launchers\Shortcuts\QuickTools\MobaXterm.lnk");
+
 #if !DEBUG
         
         Application.ThreadException += Application_ThreadException;

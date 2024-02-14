@@ -67,25 +67,25 @@ namespace RegexRenamer
             {
                 mnuKavitaCheck.Font = new Font("Tahoma", 8.25F);
                 mnuKavitaCheck.Padding = new Padding(0, 0, 8, 0);
-                colKavita.Visible = false;
+                SetKavithaColVisibility(false);
             }
             else
             {
-                colKavita.Visible = true;
+                SetKavithaColVisibility(true);
                 mnuKavitaCheck.Font = new Font("Tahoma", 8.25F, FontStyle.Bold);
                 mnuKavitaCheck.Padding = new Padding(0, 0, 0, 0);
 
                 curLibType = LibraryType.Comic;
 
-                if (checkComicsToolStripMenuItem.Checked)
+                if (previewComicsToolStripMenuItem.Checked)
                 {
                     curLibType = LibraryType.Comic;
                 }
-                else if (checkMangaToolStripMenuItem.Checked)
+                else if (previewMangaToolStripMenuItem.Checked)
                 {
                     curLibType = LibraryType.Manga;
                 }
-                else if (checkBooksToolStripMenuItem.Checked)
+                else if (previewBooksToolStripMenuItem.Checked)
                 {
                     curLibType = LibraryType.Book;
                 }
@@ -98,34 +98,35 @@ namespace RegexRenamer
             UpdatePreview();
         }
 
+        private void SetKavithaColVisibility(bool isKavithaColVisibile)
+        {
+            colSeries.Visible = isKavithaColVisibile;
+            colVolume.Visible = isKavithaColVisibile;
+            colChapter.Visible = isKavithaColVisibile;
+            colTitle.Visible = isKavithaColVisibile;
+            colSpecial.Visible = isKavithaColVisibile;
+            colEdition.Visible = isKavithaColVisibile;
+        }
+
         private void noneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             KavitaMenuItem(sender);
         }
 
-        private void checkComicsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void previewComicsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             KavitaMenuItem(sender);
         }
 
-        private void checkMangaToolStripMenuItem_Click(object sender, EventArgs e)
+        private void previewMangaToolStripMenuItem_Click(object sender, EventArgs e)
         {
             KavitaMenuItem(sender);
         }
 
-        private void checkBooksToolStripMenuItem_Click(object sender, EventArgs e)
+        private void previewBooksToolStripMenuItem_Click(object sender, EventArgs e)
         {
             KavitaMenuItem(sender);
         }
 
-        private void renameComicsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void renameBooksToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
