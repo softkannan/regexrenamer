@@ -1,4 +1,5 @@
-﻿using RegexRenamer.Native;
+﻿using PInvoke;
+using RegexRenamer.Native;
 using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
@@ -125,11 +126,8 @@ namespace RegexRenamer
             {
                 try  // add image (keyed by extension)
                 {
-                    string ext = fi.Extension.ToLower();
-                    if (!icons.ContainsKey(ext))
-                        icons.Add(ext, TreeviewExtractIcons.GetIcon(newFullpath, false));
-
-                    dgvFiles.Rows[e.RowIndex].Cells[0].Value = icons[ext];
+                    var icon = FileIconAPI.GetIcon(newFullpath, false);
+                    dgvFiles.Rows[e.RowIndex].Cells[0].Value = icon;
                 }
                 catch  // default = no image
                 {
@@ -230,7 +228,7 @@ namespace RegexRenamer
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var selectedFiles = dgvFiles.GetSelectedFileItems(activeFiles).Select( item => item.Fullpath).ToList();
-            PInvoke.NativeShell32.SendToRecycleBin(selectedFiles);
+            PInvoke.FileOperationAPI.SendToRecycleBin(selectedFiles);
             UpdateFileList();
         }
 

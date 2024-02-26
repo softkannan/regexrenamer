@@ -11,6 +11,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>RegexRenamer.snk</AssemblyOriginatorKeyFile>
+    <UseWPF>True</UseWPF>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <CodeAnalysisLogFile>bin\Debug\RegexRenamer.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>

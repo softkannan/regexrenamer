@@ -1,4 +1,5 @@
-﻿using RegexRenamer.Kavita;
+﻿using PInvoke;
+using RegexRenamer.Kavita;
 using RegexRenamer.Native;
 using RegexRenamer.Utility;
 using System;
@@ -17,66 +18,7 @@ namespace RegexRenamer
     public partial class MainForm
     {
         // update directory tree/filenames/previews/validation (each cascades into the one below)
-        private void UpdateFolderTree()
-        {
-            // get selected path (regardless whether it exists)
-
-            if (tvwFolders.SelectedNode != null && !Directory.Exists(activePath))
-                activePath = tvwFolders.ForceGetSelectedNodePath();
-
-
-            // save prev path to preserve node expansion
-            string prevPathExpand = null;
-            if (tvwFolders.SelectedNode != null && tvwFolders.SelectedNode.IsExpanded)
-                prevPathExpand = activePath.ToLower();
-
-
-            // init tvwFolders with directory tree
-            tvwFolders.InitFolderTreeView();
-
-
-            // get active path
-            while (!Directory.Exists(activePath))  // if doesn't exist, walk tree backwards
-            {
-                DirectoryInfo di = null;
-                try { di = Directory.GetParent(activePath); } catch { }
-                if (di == null) break;
-
-                activePath = di.FullName;
-            }
-
-            if (!Directory.Exists(activePath))  // still not found, default to system drive
-                activePath = Environment.GetEnvironmentVariable("SystemDrive") + "\\";
-
-
-            // drill to folder and expand
-            EnableUpdates = false;
-            if (activePath.StartsWith("\\\\"))
-            {
-                // select My Network Places
-                tvwFolders.SelectedNode = (TreeNode)tvwFolders.Tag;
-            }
-            else if (Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory).Equals(activePath, StringComparison.CurrentCultureIgnoreCase))
-            {
-                // select root node
-                tvwFolders.SelectedNode = tvwFolders.Nodes[0];
-            }
-            else
-            {
-                // find folder in tree
-                if (!tvwFolders.DrillToFolder(activePath))
-                    activePath = tvwFolders.GetSelectedNodePath();
-            }
-            EnableUpdates = true;
-
-
-            // re-expand
-            if (tvwFolders.SelectedNode != null && prevPathExpand == activePath.ToLower())
-                tvwFolders.SelectedNode.Expand();
-
-
-            UpdateFileList();
-        }
+        
         private void UpdateFileList()
         {
             if (!EnableUpdates) return;
@@ -97,7 +39,6 @@ namespace RegexRenamer
             {
                 activeFiles.Clear();
                 inactiveFiles.Clear();
-                icons.Clear();
                 dgvFiles.Rows.Clear();
                 lblNumMatched.Text = "0";
                 lblNumConflict.Text = "0";
@@ -130,7 +71,6 @@ namespace RegexRenamer
 
             activeFiles.Clear();
             inactiveFiles.Clear();
-            icons.Clear();
 
             DirectoryInfo activeDir = new DirectoryInfo(activePath);
 
@@ -258,25 +198,20 @@ namespace RegexRenamer
 #endif
                 if (RenameFolders)
                 {
-                    if (icons.Count == 0)
-                        icons.Add("folder", TreeviewExtractIcons.GetFolderIcon());
-                    dgvFiles.Rows[i].Cells[0].Value = icons["folder"];
+                    dgvFiles.Rows[i].Cells[0].Value = FileIconAPI.GetDefaultFolderIcon(false);
                 }
                 else
                 {
                     string ext = activeFiles[i].Extension.ToLower();
                     if (ext == ".lnk")  // shortcut, don't key by extension as each may have different icon
                     {
-                        ext = ".lnk." + icons.Count;
-                        icons.Add(ext, TreeviewExtractIcons.GetIcon(activeFiles[i].Fullpath, false));
-                        dgvFiles.Rows[i].Cells[0].Value = icons[ext];
+                        var icon = FileIconAPI.GetIcon(activeFiles[i].Fullpath, false);
+                        dgvFiles.Rows[i].Cells[0].Value = icon;
                     }
                     else  // non-shortcut
                     {
-                        if (!icons.ContainsKey(ext))
-                            icons.Add(ext, TreeviewExtractIcons.GetIcon(activeFiles[i].Fullpath, false));
-
-                        dgvFiles.Rows[i].Cells[0].Value = icons[ext];
+                        var icon = FileIconAPI.GetIcon(activeFiles[i].Fullpath, false);
+                        dgvFiles.Rows[i].Cells[0].Value = icon;
                     }
                 }
 #if !DEBUG
@@ -465,8 +400,9 @@ namespace RegexRenamer
 
 
             // show warning if any ignored files
-
-            if ((int)dgvFiles.Tag > 0)
+            int fileNum = 0;
+            if(dgvFiles.Tag != null) { fileNum = (int)dgvFiles.Tag; }
+            if (fileNum > 0)
             {
                 MessageBox.Show("For performance reasons, RegexRenamer will only display " + MAX_FILES
                                + " " + strFile + "s at once (" + (int)dgvFiles.Tag + " " + strFile + "s ignored).\r\n"

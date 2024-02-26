@@ -98,7 +98,7 @@ namespace RegexRenamer
 
             (TreeNode clickNode, Point location) = ((TreeNode, Point))cmFolderView.Tag;
             var destPath = clickNode.TreeNodeToPath();
-            PInvoke.NativeShell32.SendToRecycleBin(destPath);
+            PInvoke.FileOperationAPI.SendToRecycleBin(destPath);
             UpdateFolderTree();
             cmFolderView.Tag = null;
         }
@@ -234,7 +234,7 @@ namespace RegexRenamer
                     else
                     {
                         // find folder in tree
-                        if (!tvwFolders.DrillToFolder(txtPath.Text))
+                        if (!tvwFolders.BringToView(txtPath.Text))
                             tvwFolders.SelectedNode = null;
                     }
                     EnableUpdates = true;
@@ -271,7 +271,7 @@ namespace RegexRenamer
                     else  // find folder in tree
                     {
                         EnableUpdates = false;
-                        if (!tvwFolders.DrillToFolder(txtPath.Text))
+                        if (!tvwFolders.BringToView(txtPath.Text))
                             tvwFolders.SelectedNode = null;
                         EnableUpdates = true;
                     }

@@ -28,7 +28,8 @@ using Microsoft.Win32;          // Registry
 using System.Reflection;
 using System.Security;
 using RegexRenamer.Kavita;
-using RegexRenamer.Utility;        // FieldInfo
+using RegexRenamer.Utility;
+using System.Threading;        // FieldInfo
 
 
 namespace RegexRenamer
@@ -52,8 +53,6 @@ namespace RegexRenamer
 
         private List<RRItem> activeFiles = new List<RRItem>();  // files in activePath displayed in filelist
         private Dictionary<string, InactiveReason> inactiveFiles = new Dictionary<string, InactiveReason>();  // files in activePath but not displayed
-
-        private Dictionary<string, Icon> icons = new Dictionary<string, Icon>();  // key = file extension
 
         private bool validFilter = true;      // file filter is valid
         private bool validMatch = true;      // regex match expression is valid
@@ -315,6 +314,14 @@ namespace RegexRenamer
 
         #endregion
 
+        public void UpdateFolderTree()
+        {
+            EnableUpdates = false;
+            tvwFolders.UpdateFolderTree(activePath);
+            UpdateFileList();
+            EnableUpdates = true;
+        }
+
         #region Event Handlers
 
         // MAINFORM
@@ -330,7 +337,6 @@ namespace RegexRenamer
 
 
             // popluate folder tree and file list
-
             UpdateFolderTree();
             dgvFiles.ClearSelection();
 

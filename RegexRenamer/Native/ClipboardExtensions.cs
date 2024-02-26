@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static PInvoke.NativeShell32;
+using PInvoke;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace RegexRenamer.Native
@@ -26,7 +26,7 @@ namespace RegexRenamer.Native
 
             var data = new DataObject();
             data.SetFileDropList(droplist);
-            data.SetData(ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, new MemoryStream(BitConverter.GetBytes((int)dropEffect)));
+            data.SetData( ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, new MemoryStream(BitConverter.GetBytes((int)dropEffect)));
             data.SetText(fileText, TextDataFormat.UnicodeText);
             Clipboard.SetDataObject(data);
         }
@@ -41,14 +41,14 @@ namespace RegexRenamer.Native
 
             var data = new DataObject();
             data.SetFileDropList(droplist);
-            data.SetData(ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, new MemoryStream(BitConverter.GetBytes((int)dropEffect)));
+            data.SetData(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, new MemoryStream(BitConverter.GetBytes((int)dropEffect)));
             data.SetText(fileText, TextDataFormat.UnicodeText);
             Clipboard.SetDataObject(data);
         }
         public static void ClipboardPasteFiles(this string pastePath)
         {
             DataObject data = Clipboard.GetDataObject() as DataObject;
-            var obj = data.GetData(ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT);
+            var obj = data.GetData(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT);
             bool isMove = false;
             if (obj != null)
             {
@@ -70,7 +70,7 @@ namespace RegexRenamer.Native
                 files.Add(item.ToString());
             }
 
-            PInvoke.NativeShell32.MoveFiles(files, pastePath,isMove);
+            PInvoke.FileOperationAPI.MoveFiles(files, pastePath,isMove);
         }
 
         public static void PutFilesOnClipboard(this IEnumerable<FileSystemInfo> filesAndFolders, bool moveFilesOnPaste = false)
@@ -82,7 +82,7 @@ namespace RegexRenamer.Native
 
             var data = new DataObject();
             data.SetFileDropList(droplist);
-            data.SetData(ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, new MemoryStream(BitConverter.GetBytes((int)dropEffect)));
+            data.SetData(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, new MemoryStream(BitConverter.GetBytes((int)dropEffect)));
             Clipboard.SetDataObject(data);
         }
 
@@ -91,9 +91,9 @@ namespace RegexRenamer.Native
             DataObject data = new DataObject();
             data.SetFileDropList(items);
             if (isCut)
-                data.SetData(ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, DragDropEffects.Move);
+                data.SetData(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, DragDropEffects.Move);
             else
-                data.SetData(ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, DragDropEffects.Copy);
+                data.SetData(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, DragDropEffects.Copy);
             Clipboard.Clear();
             Clipboard.SetDataObject(data);
         }

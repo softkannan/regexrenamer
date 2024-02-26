@@ -41,6 +41,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Security;
 using RegexRenamer.Native;
+using PInvoke;
 
 namespace RegexRenamer.Controls
 {
@@ -48,21 +49,22 @@ namespace RegexRenamer.Controls
 
     public class FolderTreeView : System.Windows.Forms.TreeView
     {
-        private System.Windows.Forms.ImageList folderTreeViewImageList;
+        private System.Windows.Forms.ImageList iconImageList;
         private System.Globalization.CultureInfo cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
         #region Constructors
-
         
         public FolderTreeView()
         {
             this.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.TreeViewBeforeExpand);
         }
-
         
         public void InitFolderTreeView()
         {
             InitImageList();
+            // Set default image list index to folder icon
+            this.ImageIndex = 1;    
+            this.SelectedImageIndex = 2;
             this.PopulateTree(base.ImageList);
             if (this.Nodes.Count > 0)
             {
@@ -73,25 +75,27 @@ namespace RegexRenamer.Controls
         private void InitImageList()
         {
             // setup the image list to hold the folder icons
-            folderTreeViewImageList = new System.Windows.Forms.ImageList();
-            folderTreeViewImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            folderTreeViewImageList.ImageSize = new System.Drawing.Size(16, 16);
-            folderTreeViewImageList.TransparentColor = System.Drawing.Color.Transparent;
+            iconImageList = new ImageList();
+            iconImageList.ColorDepth = ColorDepth.Depth32Bit;
+            iconImageList.ImageSize = new Size(16, 16);
+            iconImageList.TransparentColor = Color.Transparent;
 
             // add the Desktop icon to the image list
             try
             {
-                folderTreeViewImageList.Images.Add(TreeviewExtractIcons.GetDesktopIcon());
+                iconImageList.Images.Add(ExtractIconsAPI.GetDesktopIcon());
+                iconImageList.Images.Add(FileIconAPI.GetDefaultFolderIcon(false));
+                iconImageList.Images.Add(FileIconAPI.GetDefaultFolderIcon(true));
             }
             catch
             {
                 // Create a blank icon if the desktop icon fails for some reason
                 Bitmap bmp = new Bitmap(16, 16);
                 Image img = (Image)bmp;
-                folderTreeViewImageList.Images.Add((Image)img.Clone());
+                iconImageList.Images.Add((Image)img.Clone());
                 bmp.Dispose();
             }
-            this.ImageList = folderTreeViewImageList;
+            this.ImageList = iconImageList;
         }
 
         #endregion
@@ -121,7 +125,7 @@ namespace RegexRenamer.Controls
             return SelectedNode.TreeNodeToPath();
         }
 
-        public bool DrillToFolder(string folderPath)
+        public bool BringToView(string folderPath)
         {
             bool folderFound = false;
             if (Directory.Exists(folderPath)) // don't bother drilling unless the directory exists
@@ -156,6 +160,7 @@ namespace RegexRenamer.Controls
                     }
                     else if (path.IndexOf(tnPath) > -1 && !folderFound)
                     {
+                        //TODO: fix this
                         tn.Expand();
                         DrillTree(tn.Nodes, path, ref folderFound);
                     }
@@ -225,12 +230,76 @@ namespace RegexRenamer.Controls
                 tn.Collapse();
 
             if (this.SelectedNode != selectedNode)
-                DrillToFolder(selectedNode.TreeNodeToPath());
+                this.BringToView(selectedNode.TreeNodeToPath());
 
             this.EndUpdate();
         }
 
         #endregion
+
+        public void UpdateFolderTree(string activePath)
+        {
+            this.BeginUpdate();
+
+            // get selected path (regardless whether it exists)
+            if (SelectedNode != null && !Directory.Exists(activePath))
+            {
+                activePath = this.ForceGetSelectedNodePath();
+            }
+
+            // save prev path to preserve node expansion
+            string prevPathExpand = null;
+            if (this.SelectedNode != null && this.SelectedNode.IsExpanded)
+            {
+                prevPathExpand = activePath.ToLower();
+            }
+
+            // init tvwFolders with directory tree
+            this.InitFolderTreeView();
+
+            // get active path
+            while (!Directory.Exists(activePath))  // if doesn't exist, walk tree backwards
+            {
+                DirectoryInfo di = null;
+                try { di = Directory.GetParent(activePath); } catch { }
+                if (di == null) break;
+
+                activePath = di.FullName;
+            }
+
+            if (!Directory.Exists(activePath))  // still not found, default to system drive
+            {
+                activePath = Environment.GetEnvironmentVariable("SystemDrive") + "\\";
+            }
+
+            // drill to folder and expand
+            if (activePath.StartsWith("\\\\"))
+            {
+                // select My Network Places
+                this.SelectedNode = (TreeNode)this.Tag;
+            }
+            else if (Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory).Equals(activePath, StringComparison.CurrentCultureIgnoreCase))
+            {
+                // select root node
+                this.SelectedNode = this.Nodes[0];
+            }
+            else
+            {
+                // find folder in tree
+                //if (!this.BringToView(activePath))
+                //{
+                //    activePath = this.GetSelectedNodePath();
+                //}
+            }
+
+            // re-expand
+            if (this.SelectedNode != null && prevPathExpand == activePath.ToLower())
+            {
+                this.SelectedNode.Expand();
+            }
+
+            this.EndUpdate(); 
+        }
     }
 
     #endregion

@@ -1,4 +1,5 @@
 ﻿using Interop.Shell32;
+using PInvoke;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +9,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using static PInvoke.NativeShell32;
 
 namespace RegexRenamer.Native
 {
@@ -26,7 +26,7 @@ namespace RegexRenamer.Native
             {
                 var parentDir = Directory.GetParent(folderItem.Path);
                 var newPath = $"{parentDir}\\{newLabel}";
-                PInvoke.NativeShell32.RenameFolder(folderItem.Path, newPath);
+                PInvoke.FileOperationAPI.RenameFolder(folderItem.Path, newPath);
                 ret = newPath;
             }
             return ret;
@@ -72,7 +72,7 @@ namespace RegexRenamer.Native
         {
             int imageCount = imageList.Images.Count - 1;
             tree.Nodes.Clear();
-            AddRootNode(tree, ref imageCount, imageList, SHShellFolder.Desktop, true);
+            AddRootNode(tree, ref imageCount, imageList, KnownFolderAPI.SHShellFolder.DESKTOP, true);
             if (tree.Nodes.Count > 1)
             {
                 tree.SelectedNode = tree.Nodes[1];
@@ -104,7 +104,7 @@ namespace RegexRenamer.Native
         #endregion
 
         #region Private Methods
-        private static Folder GetFolder(SHShellFolder topFolder)
+        private static Folder GetFolder(KnownFolderAPI.SHShellFolder topFolder)
         {
             return (Folder) shell32.NameSpace(topFolder);
         }
@@ -112,7 +112,7 @@ namespace RegexRenamer.Native
         {
             return (Folder) shell32.NameSpace(path);
         }
-        private static void AddRootNode(TreeView tree, ref int imageCount, ImageList imageList, SHShellFolder rootFolder, bool getIcons)
+        private static void AddRootNode(TreeView tree, ref int imageCount, ImageList imageList, KnownFolderAPI.SHShellFolder rootFolder, bool getIcons)
         {
             Folder shell32RootFolder = GetFolder(rootFolder);
             FolderItems rootItems = shell32RootFolder.Items();
@@ -125,7 +125,7 @@ namespace RegexRenamer.Native
             // There's possibly a better way to create a Shell32.FolderItem instance for this purpose, 
             // but I surely don't know it
 
-            Folder dfolder = GetFolder(SHShellFolder.DesktopDirectory);
+            Folder dfolder = GetFolder(KnownFolderAPI.SHShellFolder.DESKTOPDIRECTORY);
             foreach (FolderItem fi in dfolder.ParentFolder.Items())
             {
                 if (fi.Name == dfolder.Title)
@@ -139,7 +139,7 @@ namespace RegexRenamer.Native
             tree.Nodes.Add(rootNode);
 
             // Get FolderItem that represents Recycle Bin
-            Folder recFolder = GetFolder(SHShellFolder.RecycleBin);
+            Folder recFolder = GetFolder(KnownFolderAPI.SHShellFolder.BITBUCKET);
             FolderItem recycle = null;
             foreach (FolderItem fi in recFolder.ParentFolder.Items())
             {
@@ -151,7 +151,7 @@ namespace RegexRenamer.Native
             }
 
             // Get FolderItem that represents My Network Places
-            Folder netFolder = GetFolder(SHShellFolder.NetworkNeighborhood);
+            Folder netFolder = GetFolder(KnownFolderAPI.SHShellFolder.NETWORK);
             FolderItem mynetwork = null;
             foreach (FolderItem fi in netFolder.ParentFolder.Items())
             {
@@ -241,12 +241,14 @@ namespace RegexRenamer.Native
             {
                 try
                 {
+                    var normalIcon = FileIconAPI.GetIcon(item.Path, false);
+                    var selectedIcon = FileIconAPI.GetIcon(item.Path, true);
+                    imageList.Images.Add(normalIcon); // normal icon
+                    imageList.Images.Add(selectedIcon); // selected icon
                     imageCount++;
                     tn.ImageIndex = imageCount;
                     imageCount++;
                     tn.SelectedImageIndex = imageCount;
-                    imageList.Images.Add(TreeviewExtractIcons.GetIcon(item.Path, false)); // normal icon
-                    imageList.Images.Add(TreeviewExtractIcons.GetIcon(item.Path, true)); // selected icon
                 }
                 catch // use default 
                 {
