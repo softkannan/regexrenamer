@@ -2,6 +2,9 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
+using HWND = System.IntPtr;
+using HANDLE = System.IntPtr;
+
 namespace PInvoke;
 
 internal static class StringAPI

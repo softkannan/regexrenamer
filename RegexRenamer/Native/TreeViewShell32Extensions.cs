@@ -35,30 +35,16 @@ namespace RegexRenamer.Native
         public static string TreeNodeToPath(this TreeNode node)
         {
             var folderItem = node.Tag as FolderItem;
-            var ret = "";
-            if (folderItem != null)
-            {
-                ret = folderItem.Path;
-                ret ??= "";
-            }
+            var ret = folderItem?.Path;
+            ret ??= "";
             return ret;
         }
 
-        public static string GetOnlyDirectory(this TreeNode tn)
+        public static string FolderTreeNodeToDirectory(this TreeNode tn)
         {
-            try
-            {
-                FolderItem folderItem = (FolderItem)tn.Tag;
-                string folderPath = folderItem.Path;
-                if (Directory.Exists(folderPath))
-                    return folderPath;
-                else
-                    return "";
-            }
-            catch
-            {
-                return "";
-            }
+            FolderItem folderItem = tn.Tag as FolderItem;
+            var folderPath = folderItem?.Path;
+            return Directory.Exists(folderPath) ? folderPath : "";
         }
 
         public static FolderItem GetShellFolderItem(this string path, string fileName)
@@ -70,9 +56,8 @@ namespace RegexRenamer.Native
 
         public static void PopulateTree(this TreeView tree, ImageList imageList)
         {
-            int imageCount = imageList.Images.Count - 1;
             tree.Nodes.Clear();
-            AddRootNode(tree, ref imageCount, imageList, KnownFolderAPI.SHShellFolder.DESKTOP, true);
+            AddRootNode(tree, imageList, KnownFolderAPI.SHShellFolder.DESKTOP, true);
             if (tree.Nodes.Count > 1)
             {
                 tree.SelectedNode = tree.Nodes[1];
@@ -88,15 +73,14 @@ namespace RegexRenamer.Native
                 tn.Nodes.Clear();
                 FolderItem folderItem = (FolderItem)tn.Tag;
                 Folder folder = (Folder)folderItem.GetFolder;
-                int imageCount = imageList.Images.Count - 1;
                 foreach (FolderItem item in folder.Items())
                 {
                     //if (item.IsFileSystem && item.IsFolder && !item.IsBrowsable)
                     if (item.IsFolder && !item.IsBrowsable)
                     {
-                        TreeNode ntn = AddTreeNode(item, ref imageCount, imageList, true);
+                        TreeNode ntn = AddTreeNode(item, imageList);
                         tn.Nodes.Add(ntn);
-                        AddSubFolderNodes(ntn, imageList);
+                        AddSubFolderDummyNodes(ntn);
                     }
                 }
             }
@@ -112,7 +96,7 @@ namespace RegexRenamer.Native
         {
             return (Folder) shell32.NameSpace(path);
         }
-        private static void AddRootNode(TreeView tree, ref int imageCount, ImageList imageList, KnownFolderAPI.SHShellFolder rootFolder, bool getIcons)
+        private static void AddRootNode(TreeView tree, ImageList imageList, KnownFolderAPI.SHShellFolder rootFolder, bool getIcons)
         {
             Folder shell32RootFolder = GetFolder(rootFolder);
             FolderItems rootItems = shell32RootFolder.Items();
@@ -169,7 +153,7 @@ namespace RegexRenamer.Native
                 if (item.IsBrowsable) continue;  // exclude zip files
                 if (recycle != null && item.Path == recycle.Path) continue;  //  skip recycle bin
 
-                TreeNode tn = AddTreeNode(item, ref imageCount, imageList, getIcons);
+                TreeNode tn = AddTreeNode(item, imageList, getIcons);
                 rootNode.Nodes.Add(tn);
 
                 Debug.WriteLine(item.Path);
@@ -180,11 +164,11 @@ namespace RegexRenamer.Native
                     continue;
                 }
 
-                AddSubFolderNodes(tn, imageList);
+                AddSubFolderDummyNodes(tn);
             }
         }
 
-        private static void FillSubDirectories(TreeNode tn, ref int imageCount, ImageList imageList, bool getIcons)
+        private static void FillSubDirectories(TreeNode tn, ImageList imageList, bool getIcons)
         {
             FolderItem folderItem = (FolderItem)tn.Tag;
             Folder folder = (Folder)folderItem.GetFolder;
@@ -194,76 +178,62 @@ namespace RegexRenamer.Native
                 //if (item.IsFileSystem && item.IsFolder && !item.IsBrowsable)
                 if (item.IsFolder && !item.IsBrowsable)
                 {
-                    TreeNode ntn = AddTreeNode(item, ref imageCount, imageList, getIcons);
+                    TreeNode ntn = AddTreeNode(item, imageList, getIcons);
                     tn.Nodes.Add(ntn);
-                    AddSubFolderNodes(ntn, imageList);
+                    AddSubFolderDummyNodes(ntn);
                 }
             }
         }
 
-        private static void AddSubFolderNodes(TreeNode tn, ImageList imageList)
+        private static void AddSubFolderDummyNodes(TreeNode tn)
         {
             if (tn.Nodes.Count == 0)
             {
-                try
+                // create dummy nodes for any subfolders that have further subfolders
+                FolderItem folderItem = tn.Tag as FolderItem;
+                Folder folder = folderItem?.GetFolder as Folder;
+                if(folder == null) { return; }
+                bool hasFolders = false;
+                foreach (FolderItem item in folder.Items())
                 {
-                    // create dummy nodes for any subfolders that have further subfolders
-                    FolderItem folderItem = (FolderItem)tn.Tag;
-                    Folder folder = (Folder)folderItem.GetFolder;
-
-                    bool hasFolders = false;
-                    foreach (FolderItem item in folder.Items())
+                    if (item.IsFolder && !item.IsBrowsable)
                     {
-                        if (item.IsFolder && !item.IsBrowsable)
-                        {
-                            hasFolders = true;
-                            break;
-                        }
-                    }
-                    if (hasFolders)
-                    {
-                        TreeNode ntn = new TreeNode();
-                        ntn.Tag = DUMMYNODE;
-                        tn.Nodes.Add(ntn);
+                        hasFolders = true;
+                        break;
                     }
                 }
-                catch { }
+                if (hasFolders)
+                {
+                    TreeNode ntn = new TreeNode();
+                    ntn.Tag = DUMMYNODE;
+                    tn.Nodes.Add(ntn);
+                }
             }
         }
 
-        private static TreeNode AddTreeNode(FolderItem item, ref int imageCount, ImageList imageList, bool getIcons)
+        private static TreeNode AddTreeNode(FolderItem item, ImageList imageList, bool getIcons = true)
         {
             TreeNode tn = new TreeNode();
             tn.Text = item.Name;
             tn.Tag = item;
-
+            var imageIndex = 1;
+            var selectedImageIndex = 2;
             if (getIcons)
             {
-                try
+                var normalIcon = FileIconAPI.GetIcon(item.Path, false);
+                var selectedIcon = FileIconAPI.GetIcon(item.Path, true);
+                if (normalIcon != null && selectedIcon != null)
                 {
-                    var normalIcon = FileIconAPI.GetIcon(item.Path, false);
-                    var selectedIcon = FileIconAPI.GetIcon(item.Path, true);
                     imageList.Images.Add(normalIcon); // normal icon
+                    imageIndex = imageList.Images.Count - 1;
                     imageList.Images.Add(selectedIcon); // selected icon
-                    imageCount++;
-                    tn.ImageIndex = imageCount;
-                    imageCount++;
-                    tn.SelectedImageIndex = imageCount;
-                }
-                catch // use default 
-                {
-                    tn.ImageIndex = 1;
-                    tn.SelectedImageIndex = 2;
+                    selectedImageIndex = imageList.Images.Count - 1;
                 }
             }
-            else // use default
-            {
-                tn.ImageIndex = 1;
-                tn.SelectedImageIndex = 2;
-            }
+            tn.ImageIndex = imageIndex;
+            tn.SelectedImageIndex = selectedImageIndex;
             return tn;
         }
-
         #endregion
 
     }

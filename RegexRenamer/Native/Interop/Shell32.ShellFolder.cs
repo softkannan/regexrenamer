@@ -5,6 +5,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using HWND = System.IntPtr;
+using HANDLE = System.IntPtr;
+
 namespace PInvoke;
 
 internal class KnownFolderAPI

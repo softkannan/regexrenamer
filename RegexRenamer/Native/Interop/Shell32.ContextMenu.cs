@@ -9,6 +9,8 @@ using System.Drawing;
 using System.IO;
 using System.Threading;
 
+using HWND = System.IntPtr;
+using HANDLE = System.IntPtr;
 
 namespace PInvoke;
 

@@ -86,7 +86,7 @@ namespace RegexRenamer.Native
             Clipboard.SetDataObject(data);
         }
 
-        private static void ItemsToClipboard(StringCollection items, bool isCut)
+        public static void ItemsToClipboard(StringCollection items, bool isCut)
         {
             DataObject data = new DataObject();
             data.SetFileDropList(items);

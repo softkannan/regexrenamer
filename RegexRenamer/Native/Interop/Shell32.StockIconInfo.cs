@@ -6,10 +6,20 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using HWND = System.IntPtr;
+using HANDLE = System.IntPtr;
+
 namespace PInvoke;
 
 internal class StockIconAPI
 {
+    
+     [DllImport("shell32.dll")]
+    internal static extern int SHGetStockIconInfo(uint siid, SHGSI uFlags, ref SHSTOCKICONINFO psii);
+
+    [DllImport("user32.dll")]
+    internal static extern bool DestroyIcon(IntPtr handle);
+
     internal enum SHSTOCKICONID : uint
     {
         SIID_DOCNOASSOC        = 0,
@@ -118,12 +128,6 @@ internal class StockIconAPI
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
         public string szPath;
     }
-
-    [DllImport("shell32.dll")]
-    internal static extern int SHGetStockIconInfo(uint siid, SHGSI uFlags, ref SHSTOCKICONINFO psii);
-
-    [DllImport("user32.dll")]
-    internal static extern bool DestroyIcon(IntPtr handle);
 
     [Flags]
     internal enum SHGSI : uint

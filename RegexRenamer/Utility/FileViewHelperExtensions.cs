@@ -10,6 +10,12 @@ namespace RegexRenamer.Utility
 {
     public static class FileViewHelperExtensions
     {
+        public static IEnumerable<T> OrEmptyIfNull<T>(this IEnumerable<T> source)
+        {
+            return source ?? Enumerable.Empty<T>();
+        }
+
+
         public static List<RRItem> GetSelectedFileItems(this DataGridView pThis, List<RRItem> activeFiles)
         {
             List<RRItem> selectedFiles = new List<RRItem>();

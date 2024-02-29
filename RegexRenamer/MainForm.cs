@@ -29,7 +29,8 @@ using System.Reflection;
 using System.Security;
 using RegexRenamer.Kavita;
 using RegexRenamer.Utility;
-using System.Threading;        // FieldInfo
+using System.Threading;
+using RegexRenamer.Native;        // FieldInfo
 
 
 namespace RegexRenamer
@@ -203,12 +204,19 @@ namespace RegexRenamer
 
         #region Constructor
 
+        private DarkModeCS DM =null;
         public MainForm(string initPath)
         {
+
             this.activePath = initPath;
 
             // draw form
             InitializeComponent();
+
+            //DM = new DarkModeCS(this);
+            this.ApplyTheme();
+
+            // Render draws label and prevent borders on toolstrip
             tsMenu.Renderer = new Controls.MyToolStripSystemRenderer();
             tsOptions.Renderer = new Controls.MyToolStripSystemRenderer();
 
@@ -217,21 +225,6 @@ namespace RegexRenamer
 
             //FieldInfo fieldInfo = fbdNetwork.GetType().GetField("rootFolder", BindingFlags.NonPublic | BindingFlags.Instance);
             //fieldInfo.SetValue(fbdNetwork, (Environment.SpecialFolder)0x0012);  // My Network Places
-
-
-            // disable help menuitems if files are missing
-
-            if (!File.Exists(Path.Combine(Application.StartupPath, "RegexRenamer.chm")))
-            {
-                itmHelpContents.Enabled = false;
-                itmHelpContents.ToolTipText = "Not installed";
-            }
-            if (!File.Exists(Path.Combine(Application.StartupPath, "Regex Quick Reference.chm")))
-            {
-                itmHelpRegexReference.Enabled = false;
-                itmHelpRegexReference.ToolTipText = "Not installed";
-            }
-
 
             // add insert args to regex context menu items
 
@@ -318,8 +311,8 @@ namespace RegexRenamer
         {
             EnableUpdates = false;
             tvwFolders.UpdateFolderTree(activePath);
-            UpdateFileList();
             EnableUpdates = true;
+            UpdateFileList();
         }
 
         #region Event Handlers
@@ -330,19 +323,34 @@ namespace RegexRenamer
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            // disable help menuitems if files are missing
+            if (!File.Exists(Path.Combine(Application.StartupPath, "RegexRenamer.chm")))
+            {
+                itmHelpContents.Enabled = false;
+                itmHelpContents.ToolTipText = "Not installed";
+            }
+            if (!File.Exists(Path.Combine(Application.StartupPath, "Regex Quick Reference.chm")))
+            {
+                itmHelpRegexReference.Enabled = false;
+                itmHelpRegexReference.ToolTipText = "Not installed";
+            }
+
             // load settings & regex history from registry
+
+            cmbMatch.SetCueBanner("Shift+RightClick for a menu of regex elements");
+            cmbReplace.SetCueBanner("Use $1, $2, ... to insert captured text, $# auto number, $` text before match, $' text after match, $_ original filename");
 
             LoadSettings();
             LoadRegexHistory();
+        }
 
-
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
             // popluate folder tree and file list
             UpdateFolderTree();
             dgvFiles.ClearSelection();
 
-
             // focus folder list
-
             tvwFolders.Focus();
         }
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Forms;
 
 namespace RegexRenamer
@@ -199,6 +200,20 @@ namespace RegexRenamer
                     dgvFiles.Rows[dfi].Cells[2].Style.ForeColor = SystemColors.WindowText;
             }
 
+            if (DM != null)
+            {
+                dgvFiles.BackgroundColor = DM.OScolors.Control;
+                dgvFiles.GridColor = DM.OScolors.Accent;
+                dgvFiles.RowsDefaultCellStyle.BackColor = DM.OScolors.Surface;
+                dgvFiles.AlternatingRowsDefaultCellStyle.BackColor = DM.OScolors.Control;
+            }
+            else
+            {
+                dgvFiles.BackgroundColor = System.Drawing.SystemColors.Window;
+                dgvFiles.GridColor = System.Drawing.SystemColors.Control;
+                dgvFiles.RowsDefaultCellStyle.BackColor = System.Drawing.SystemColors.Window;
+                dgvFiles.AlternatingRowsDefaultCellStyle.BackColor = System.Drawing.SystemColors.ControlLight;
+            }
 
             // update matched/conflicts counters
 
@@ -381,7 +396,14 @@ namespace RegexRenamer
 
             if (errorMessage == null)
             {
-                cmbMatch.BackColor = SystemColors.Window;
+                if (DM != null)
+                {
+                    cmbMatch.BackColor = DM.OScolors.Control;
+                }
+                else
+                {
+                    cmbMatch.BackColor = SystemColors.Window;
+                }
                 toolTip.Hide(cmbMatch);
                 validMatch = true;
             }

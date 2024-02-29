@@ -7,6 +7,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Media.Imaging;
 
+using HWND = System.IntPtr;
+using HANDLE = System.IntPtr;
+
 namespace PInvoke;
 internal class FileIconAPI
 {
@@ -45,10 +48,45 @@ internal class FileIconAPI
         SHGFI_ADDOVERLAYS       = 0x000000020,     // apply the appropriate overlays
         SHGFI_OVERLAYINDEX      = 0x000000040,     // Get the index of the overlay in the upper 8 bits of the iIcon
     }
+
+    internal struct BROWSEINFO 
+	{
+		public HWND hwndOwner;
+		public int pIDLRoot;
+		public int pszDisplayName;
+		public int lpszTitle;
+		public int ulFlags;
+		public int lpfnCallback;
+		public int lParam;
+		public int iImage;
+
+        public BROWSEINFO()
+        {
+            hwndOwner = 0;
+            pIDLRoot = 0;
+            pszDisplayName = 0;
+            lpszTitle = 0;
+            ulFlags = 0;
+            lpfnCallback = 0;
+            lParam = 0;
+            iImage = 0;
+        }
+	}
     
+    [DllImport("shell32")] 
+    internal static extern int SHGetNewLinkInfo(string pszLinkto, string pszDir, string pszName, ref int pfMustCopy, int uFlags);
+
+    [DllImport("shell32")]
+    internal static extern int SHBrowseForFolder(BROWSEINFO lpbi);
+
+	[DllImport("shell32")] 
+    internal static extern int SHGetPathFromIDList(int pidList, string lpBuffer);
 
     [DllImport("Shell32.dll", EntryPoint = "#727")]
     internal extern static int SHGetImageList(int iImageList, ref Guid riid, out IImageList ppv);
+
+    [DllImport("user32.dll")]
+    internal static extern IntPtr CopyIcon(IntPtr hIcon);
 
     // The signature of SHGetFileInfo (located in Shell32.dll)
     [DllImport("Shell32.dll", CharSet = CharSet.Auto)]
@@ -65,10 +103,7 @@ internal class FileIconAPI
 
     [DllImport("Shell32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     internal static extern nint SHILCreateFromPath([MarshalAs(UnmanagedType.LPWStr)] string pszPath, out IntPtr ppIdl, ref uint rgflnOut);
-
-    [DllImport("Shell32.dll", CharSet = CharSet.Auto)]
-    internal static extern uint ExtractIconEx(string lpszFile, int nIconIndex, IntPtr[] phiconLarge, IntPtr[] phiconSmall, uint nIcons);
-
+    
     [DllImport("User32.dll")]
     internal static extern int DestroyIcon(IntPtr hIcon);
 
@@ -296,7 +331,7 @@ internal class FileIconAPI
         bool isOk = false;
         try
         {
-            var secInfo = info.GetAccessControl();
+            var secInfo = info?.GetAccessControl();
             isOk = true;
         }
         catch
@@ -359,6 +394,10 @@ internal class FileIconAPI
         if (info.hIcon == IntPtr.Zero)
         {
             retVal = GetFileIcon(localCpPath);
+            if(retVal == null)
+            {
+                return GetDefaultFolderIcon(selected);
+            }
         }
         else
         {
@@ -387,11 +426,15 @@ internal class FileIconAPI
         return normalFolderIcon;
     }
 
-    internal static Icon GetDefaultFolderIcon()
+    internal static Icon GetStockFolderIcon(bool selected)
     {
         SHFILEINFO info = new ();
-        SHGFI flags = SHGFI.SHGFI_ICON | SHGFI.SHGFI_SMALLICON| SHGFI.SHGFI_USEFILEATTRIBUTES;
-        SHGetFileInfo(null,
+        SHGFI flags = SHGFI.SHGFI_ICON | SHGFI.SHGFI_SMALLICON | SHGFI.SHGFI_USEFILEATTRIBUTES;
+        if (selected)
+        {
+            flags |= SHGFI.SHGFI_SELECTED | SHGFI.SHGFI_OPENICON;
+        }
+        SHGetFileInfo(IntPtr.Zero,
                         FILE_ATTRIBUTE_DIRECTORY,
                         ref info,
                         (uint)Marshal.SizeOf(info), flags);
@@ -414,6 +457,9 @@ internal class FileIconAPI
         if (hIcon != IntPtr.Zero)
         {
             icon = Icon.FromHandle(hIcon).Clone() as Icon;
+        }
+        if(shinfo.hIcon != IntPtr.Zero)
+        {
             DestroyIcon(shinfo.hIcon);
         }
         return icon;
@@ -447,7 +493,6 @@ internal class FileIconAPI
             {
                 gr.DrawImage(bitmap, 0, 0, icon.Width, icon.Height);
             }
-
             DestroyIcon(shinfo.hIcon);
         }
         return bitmap;

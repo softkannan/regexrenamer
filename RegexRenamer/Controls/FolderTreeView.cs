@@ -42,6 +42,8 @@ using System.Diagnostics;
 using System.Security;
 using RegexRenamer.Native;
 using PInvoke;
+using System.Configuration;
+using static RegexRenamer.Native.ControlExtensions;
 
 namespace RegexRenamer.Controls
 {
@@ -52,11 +54,36 @@ namespace RegexRenamer.Controls
         private System.Windows.Forms.ImageList iconImageList;
         private System.Globalization.CultureInfo cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
 
+
+
         #region Constructors
-        
+
         public FolderTreeView()
         {
             this.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.TreeViewBeforeExpand);
+        }
+
+
+        public void SetExplorerTheme(bool on = true)
+        {
+            if (Environment.OSVersion.Version.Major >= 6)
+            {
+		        const int TV_FIRST = 0x1100;
+
+                const int TVS_NOHSCROLL = 0x8000;
+                // Make sure the TVS_NOHSCROLL style is set
+                this.SetStyle((int)TVS_NOHSCROLL);
+
+                // Set explorer theme, set critical properties, and set extended styles
+                this.SetWindowTheme(on ? "explorer" : null);
+                if (!on) return;
+                this.HotTracking = true;
+                this.ShowLines = false;
+                const int TVM_SETEXTENDEDSTYLE = TV_FIRST + 44;
+                const int TVS_EX_FADEINOUTEXPANDOS = 0x0040;
+                const int TVS_EX_AUTOHSCROLL = 0x0020;
+                this.SendMessage((uint)TVM_SETEXTENDEDSTYLE, (IntPtr)(TVS_EX_FADEINOUTEXPANDOS | TVS_EX_AUTOHSCROLL), (IntPtr)(TVS_EX_FADEINOUTEXPANDOS | TVS_EX_AUTOHSCROLL));
+            }
         }
         
         public void InitFolderTreeView()
@@ -93,9 +120,13 @@ namespace RegexRenamer.Controls
                 Bitmap bmp = new Bitmap(16, 16);
                 Image img = (Image)bmp;
                 iconImageList.Images.Add((Image)img.Clone());
+                iconImageList.Images.Add((Image)img.Clone());
+                iconImageList.Images.Add((Image)img.Clone());
                 bmp.Dispose();
             }
+            this.BeginUpdate();
             this.ImageList = iconImageList;
+            this.EndUpdate();
         }
 
         #endregion
@@ -116,7 +147,7 @@ namespace RegexRenamer.Controls
 
         public string GetSelectedNodePath()
         {
-            return SelectedNode.GetOnlyDirectory();
+            return SelectedNode.FolderTreeNodeToDirectory();
         }
 
         // [xiperware]
@@ -139,7 +170,9 @@ namespace RegexRenamer.Controls
                 this.EndUpdate();
             }
             if (!folderFound)
+            {
                 this.SelectedNode = this.Nodes[0];
+            }
             return folderFound;
         }
 
@@ -150,7 +183,7 @@ namespace RegexRenamer.Controls
                 if (!folderFound)
                 {
                     this.SelectedNode = tn;
-                    string tnPath = tn.GetOnlyDirectory().ToUpper(cultureInfo);
+                    string tnPath = tn.FolderTreeNodeToDirectory().ToUpper(cultureInfo);
                     if (path == tnPath && !folderFound)
                     {
                         this.SelectedNode = tn;
@@ -160,7 +193,6 @@ namespace RegexRenamer.Controls
                     }
                     else if (path.IndexOf(tnPath) > -1 && !folderFound)
                     {
-                        //TODO: fix this
                         tn.Expand();
                         DrillTree(tn.Nodes, path, ref folderFound);
                     }
@@ -269,7 +301,7 @@ namespace RegexRenamer.Controls
 
             if (!Directory.Exists(activePath))  // still not found, default to system drive
             {
-                activePath = Environment.GetEnvironmentVariable("SystemDrive") + "\\";
+                activePath = Environment.SystemDirectory;
             }
 
             // drill to folder and expand
@@ -286,10 +318,10 @@ namespace RegexRenamer.Controls
             else
             {
                 // find folder in tree
-                //if (!this.BringToView(activePath))
-                //{
-                //    activePath = this.GetSelectedNodePath();
-                //}
+                if (!this.BringToView(activePath))
+                {
+                    activePath = this.GetSelectedNodePath();
+                }
             }
 
             // re-expand

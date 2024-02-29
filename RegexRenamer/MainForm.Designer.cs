@@ -76,6 +76,7 @@ namespace RegexRenamer
             miRegexMatchMatchNonAlpha = new System.Windows.Forms.ToolStripMenuItem();
             miRegexMatchMatchNonSpace = new System.Windows.Forms.ToolStripMenuItem();
             gbFilter = new System.Windows.Forms.GroupBox();
+            lblInfoFileSize = new System.Windows.Forms.Label();
             cbFilterExclude = new System.Windows.Forms.CheckBox();
             txtFilter = new System.Windows.Forms.TextBox();
             rbFilterGlob = new System.Windows.Forms.RadioButton();
@@ -238,8 +239,6 @@ namespace RegexRenamer
             btnCancel = new System.Windows.Forms.Button();
             bgwRename = new System.ComponentModel.BackgroundWorker();
             groupBoxTop = new System.Windows.Forms.GroupBox();
-            pnlInfo = new System.Windows.Forms.Panel();
-            lblInfoFileSize = new System.Windows.Forms.Label();
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
             cmFolderView.SuspendLayout();
@@ -254,7 +253,6 @@ namespace RegexRenamer
             cmFileView.SuspendLayout();
             tsOptions.SuspendLayout();
             groupBoxTop.SuspendLayout();
-            pnlInfo.SuspendLayout();
             groupBoxFolderTree.SuspendLayout();
             groupBoxFileView.SuspendLayout();
             SuspendLayout();
@@ -266,7 +264,7 @@ namespace RegexRenamer
             tvwFolders.Location = new System.Drawing.Point(11, 22);
             tvwFolders.Margin = new System.Windows.Forms.Padding(4);
             tvwFolders.Name = "tvwFolders";
-            tvwFolders.Size = new System.Drawing.Size(486, 903);
+            tvwFolders.Size = new System.Drawing.Size(486, 893);
             tvwFolders.TabIndex = 1;
             tvwFolders.AfterLabelEdit += tvwFolders_AfterLabelEdit;
             tvwFolders.AfterSelect += tvwFolders_AfterSelect;
@@ -355,14 +353,13 @@ namespace RegexRenamer
             btnRename.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             btnRename.AutoSize = true;
             btnRename.ContextMenuStrip = cmsRename;
-            btnRename.Location = new System.Drawing.Point(1076, 940);
+            btnRename.Location = new System.Drawing.Point(1076, 930);
             btnRename.Margin = new System.Windows.Forms.Padding(4);
             btnRename.Name = "btnRename";
             btnRename.Size = new System.Drawing.Size(113, 32);
             btnRename.State = System.Windows.Forms.VisualStyles.PushButtonState.Normal;
             btnRename.TabIndex = 3;
             btnRename.Text = "&Rename";
-            btnRename.UseVisualStyleBackColor = true;
             btnRename.Click += btnRename_Click;
             // 
             // cmsRename
@@ -398,11 +395,10 @@ namespace RegexRenamer
             cmbReplace.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             cmbReplace.AutoCompleteCustomSource.AddRange(new string[] { "$1" });
             cmbReplace.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            cmbReplace.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             cmbReplace.Location = new System.Drawing.Point(82, 74);
             cmbReplace.Margin = new System.Windows.Forms.Padding(4);
             cmbReplace.Name = "cmbReplace";
-            cmbReplace.Size = new System.Drawing.Size(904, 25);
+            cmbReplace.Size = new System.Drawing.Size(904, 28);
             cmbReplace.TabIndex = 2;
             toolTip.SetToolTip(cmbReplace, "Use $1, $2, ... to insert captured text");
             cmbReplace.TextChanged += cmbReplace_TextChanged;
@@ -416,11 +412,10 @@ namespace RegexRenamer
             cmbMatch.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             cmbMatch.AutoCompleteCustomSource.AddRange(new string[] { "(.+)", "(.+)(/d+)" });
             cmbMatch.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            cmbMatch.Font = new System.Drawing.Font("Courier New", 8.25F);
             cmbMatch.Location = new System.Drawing.Point(82, 34);
             cmbMatch.Margin = new System.Windows.Forms.Padding(4);
             cmbMatch.Name = "cmbMatch";
-            cmbMatch.Size = new System.Drawing.Size(904, 25);
+            cmbMatch.Size = new System.Drawing.Size(904, 28);
             cmbMatch.TabIndex = 1;
             toolTip.SetToolTip(cmbMatch, "Shift+rightclick for a menu of regex elements");
             cmbMatch.SelectedIndexChanged += cmbMatch_SelectedIndexChanged;
@@ -497,43 +492,51 @@ namespace RegexRenamer
             // gbFilter
             // 
             gbFilter.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            gbFilter.Controls.Add(lblInfoFileSize);
             gbFilter.Controls.Add(cbFilterExclude);
             gbFilter.Controls.Add(txtFilter);
             gbFilter.Controls.Add(rbFilterGlob);
             gbFilter.Controls.Add(rbFilterRegex);
-            gbFilter.Location = new System.Drawing.Point(1491, 20);
+            gbFilter.Location = new System.Drawing.Point(1491, 11);
             gbFilter.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             gbFilter.Name = "gbFilter";
             gbFilter.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            gbFilter.Size = new System.Drawing.Size(201, 100);
+            gbFilter.Size = new System.Drawing.Size(201, 111);
             gbFilter.TabIndex = 2;
             gbFilter.TabStop = false;
             gbFilter.Text = "Filter";
+            // 
+            // lblInfoFileSize
+            // 
+            lblInfoFileSize.AutoSize = true;
+            lblInfoFileSize.Location = new System.Drawing.Point(9, 86);
+            lblInfoFileSize.Name = "lblInfoFileSize";
+            lblInfoFileSize.Size = new System.Drawing.Size(100, 20);
+            lblInfoFileSize.TabIndex = 0;
+            lblInfoFileSize.Text = "FileSize : 0 Kb";
             // 
             // cbFilterExclude
             // 
             cbFilterExclude.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             cbFilterExclude.Appearance = System.Windows.Forms.Appearance.Button;
-            cbFilterExclude.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            cbFilterExclude.Image = Properties.Resources.x;
-            cbFilterExclude.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
-            cbFilterExclude.Location = new System.Drawing.Point(92, 39);
+            cbFilterExclude.ForeColor = System.Drawing.Color.Red;
+            cbFilterExclude.Location = new System.Drawing.Point(176, 23);
             cbFilterExclude.Margin = new System.Windows.Forms.Padding(0);
             cbFilterExclude.Name = "cbFilterExclude";
             cbFilterExclude.Size = new System.Drawing.Size(16, 31);
             cbFilterExclude.TabIndex = 2;
+            cbFilterExclude.Text = "!";
+            cbFilterExclude.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             toolTip.SetToolTip(cbFilterExclude, "Exclude (invert filter)");
-            cbFilterExclude.UseVisualStyleBackColor = true;
             cbFilterExclude.CheckedChanged += cbFilterExclude_CheckedChanged;
             // 
             // txtFilter
             // 
             txtFilter.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            txtFilter.Font = new System.Drawing.Font("Courier New", 8.25F);
-            txtFilter.Location = new System.Drawing.Point(9, 44);
+            txtFilter.Location = new System.Drawing.Point(9, 25);
             txtFilter.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             txtFilter.Name = "txtFilter";
-            txtFilter.Size = new System.Drawing.Size(79, 23);
+            txtFilter.Size = new System.Drawing.Size(163, 27);
             txtFilter.TabIndex = 1;
             txtFilter.Text = "*.*";
             toolTip.SetToolTip(txtFilter, "Press ENTER to apply filter");
@@ -548,27 +551,25 @@ namespace RegexRenamer
             rbFilterGlob.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             rbFilterGlob.AutoSize = true;
             rbFilterGlob.Checked = true;
-            rbFilterGlob.Location = new System.Drawing.Point(124, 18);
+            rbFilterGlob.Location = new System.Drawing.Point(9, 57);
             rbFilterGlob.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             rbFilterGlob.Name = "rbFilterGlob";
             rbFilterGlob.Size = new System.Drawing.Size(62, 24);
             rbFilterGlob.TabIndex = 3;
             rbFilterGlob.TabStop = true;
             rbFilterGlob.Text = "Glob";
-            rbFilterGlob.UseVisualStyleBackColor = true;
             rbFilterGlob.Click += rbFilterGlob_Click;
             // 
             // rbFilterRegex
             // 
             rbFilterRegex.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             rbFilterRegex.AutoSize = true;
-            rbFilterRegex.Location = new System.Drawing.Point(124, 46);
+            rbFilterRegex.Location = new System.Drawing.Point(101, 57);
             rbFilterRegex.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             rbFilterRegex.Name = "rbFilterRegex";
             rbFilterRegex.Size = new System.Drawing.Size(71, 24);
             rbFilterRegex.TabIndex = 3;
             rbFilterRegex.Text = "Regex";
-            rbFilterRegex.UseVisualStyleBackColor = true;
             rbFilterRegex.CheckedChanged += rbFilterRegex_CheckedChanged;
             rbFilterRegex.Click += rbFilterRegex_Click;
             // 
@@ -579,10 +580,10 @@ namespace RegexRenamer
             pnlStats.Controls.Add(lblStatsShown);
             pnlStats.Controls.Add(lblStatsFiltered);
             pnlStats.Controls.Add(lblStatsTotal);
-            pnlStats.Location = new System.Drawing.Point(1045, 20);
+            pnlStats.Location = new System.Drawing.Point(1360, 20);
             pnlStats.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             pnlStats.Name = "pnlStats";
-            pnlStats.Size = new System.Drawing.Size(123, 98);
+            pnlStats.Size = new System.Drawing.Size(123, 102);
             pnlStats.TabIndex = 6;
             // 
             // lblStatsHidden
@@ -628,7 +629,6 @@ namespace RegexRenamer
             // lblStats
             // 
             lblStats.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lblStats.ForeColor = System.Drawing.SystemColors.ControlDark;
             lblStats.Location = new System.Drawing.Point(1626, 22);
             lblStats.Margin = new System.Windows.Forms.Padding(0);
             lblStats.Name = "lblStats";
@@ -641,7 +641,7 @@ namespace RegexRenamer
             // lblMatch
             // 
             lblMatch.AutoSize = true;
-            lblMatch.Location = new System.Drawing.Point(25, 34);
+            lblMatch.Location = new System.Drawing.Point(25, 37);
             lblMatch.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblMatch.Name = "lblMatch";
             lblMatch.Size = new System.Drawing.Size(53, 20);
@@ -651,7 +651,7 @@ namespace RegexRenamer
             // lblReplace
             // 
             lblReplace.AutoSize = true;
-            lblReplace.Location = new System.Drawing.Point(9, 75);
+            lblReplace.Location = new System.Drawing.Point(12, 78);
             lblReplace.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblReplace.Name = "lblReplace";
             lblReplace.Size = new System.Drawing.Size(65, 20);
@@ -670,7 +670,6 @@ namespace RegexRenamer
             cbModifierI.Tag = false;
             cbModifierI.Text = "/i";
             toolTip.SetToolTip(cbModifierI, "Ignore case");
-            cbModifierI.UseVisualStyleBackColor = true;
             cbModifierI.CheckedChanged += cbModifierI_CheckedChanged;
             // 
             // cbModifierG
@@ -685,7 +684,6 @@ namespace RegexRenamer
             cbModifierG.Tag = false;
             cbModifierG.Text = "/g";
             toolTip.SetToolTip(cbModifierG, "Global (match as many times as possible)");
-            cbModifierG.UseVisualStyleBackColor = true;
             cbModifierG.CheckedChanged += cbModifierG_CheckedChanged;
             // 
             // cbModifierX
@@ -700,26 +698,24 @@ namespace RegexRenamer
             cbModifierX.Tag = false;
             cbModifierX.Text = "/x";
             toolTip.SetToolTip(cbModifierX, "Extended regex (ignore unescaped spaces)");
-            cbModifierX.UseVisualStyleBackColor = true;
             cbModifierX.CheckedChanged += cbModifierX_CheckedChanged;
             // 
             // btnNetwork
             // 
             btnNetwork.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             btnNetwork.Image = (System.Drawing.Image)resources.GetObject("btnNetwork.Image");
-            btnNetwork.Location = new System.Drawing.Point(441, 934);
+            btnNetwork.Location = new System.Drawing.Point(441, 924);
             btnNetwork.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             btnNetwork.Name = "btnNetwork";
             btnNetwork.Size = new System.Drawing.Size(48, 38);
             btnNetwork.TabIndex = 3;
             toolTip.SetToolTip(btnNetwork, "Browse network");
-            btnNetwork.UseVisualStyleBackColor = true;
             btnNetwork.Click += btnNetwork_Click;
             // 
             // txtPath
             // 
             txtPath.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            txtPath.Location = new System.Drawing.Point(50, 941);
+            txtPath.Location = new System.Drawing.Point(50, 931);
             txtPath.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             txtPath.Name = "txtPath";
             txtPath.Size = new System.Drawing.Size(383, 27);
@@ -734,7 +730,7 @@ namespace RegexRenamer
             lblNumMatched.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             lblNumMatched.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             lblNumMatched.ForeColor = System.Drawing.Color.Blue;
-            lblNumMatched.Location = new System.Drawing.Point(967, 943);
+            lblNumMatched.Location = new System.Drawing.Point(967, 933);
             lblNumMatched.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblNumMatched.Name = "lblNumMatched";
             lblNumMatched.Size = new System.Drawing.Size(47, 25);
@@ -748,7 +744,7 @@ namespace RegexRenamer
             lblNumConflict.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             lblNumConflict.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             lblNumConflict.ForeColor = System.Drawing.Color.Red;
-            lblNumConflict.Location = new System.Drawing.Point(1022, 943);
+            lblNumConflict.Location = new System.Drawing.Point(1022, 933);
             lblNumConflict.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblNumConflict.Name = "lblNumConflict";
             lblNumConflict.Size = new System.Drawing.Size(47, 25);
@@ -760,18 +756,15 @@ namespace RegexRenamer
             // tsMenu
             // 
             tsMenu.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            tsMenu.AutoSize = false;
-            tsMenu.BackColor = System.Drawing.SystemColors.ButtonFace;
             tsMenu.CanOverflow = false;
             tsMenu.Dock = System.Windows.Forms.DockStyle.None;
-            tsMenu.Font = new System.Drawing.Font("Tahoma", 8.25F);
             tsMenu.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             tsMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
             tsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { mnuChangeCase, mnuNumbering, mnuMoveCopy, mnuKavitaCheck });
-            tsMenu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            tsMenu.Location = new System.Drawing.Point(1375, 20);
+            tsMenu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
+            tsMenu.Location = new System.Drawing.Point(1219, 19);
             tsMenu.Name = "tsMenu";
-            tsMenu.Size = new System.Drawing.Size(112, 103);
+            tsMenu.Size = new System.Drawing.Size(137, 102);
             tsMenu.TabIndex = 1;
             tsMenu.TabStop = true;
             // 
@@ -779,11 +772,10 @@ namespace RegexRenamer
             // 
             mnuChangeCase.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             mnuChangeCase.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmChangeCaseNoChange, itmChangeCaseSep, itmChangeCaseUppercase, itmChangeCaseLowercase, itmChangeCaseTitlecase });
-            mnuChangeCase.Font = new System.Drawing.Font("Tahoma", 8.25F);
             mnuChangeCase.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
             mnuChangeCase.Name = "mnuChangeCase";
             mnuChangeCase.Padding = new System.Windows.Forms.Padding(0, 0, 8, 0);
-            mnuChangeCase.Size = new System.Drawing.Size(110, 21);
+            mnuChangeCase.Size = new System.Drawing.Size(135, 24);
             mnuChangeCase.Text = "Change Case";
             mnuChangeCase.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             mnuChangeCase.ToolTipText = "Only the matched portion of the filename will have its case changed";
@@ -793,38 +785,34 @@ namespace RegexRenamer
             // 
             itmChangeCaseNoChange.Checked = true;
             itmChangeCaseNoChange.CheckState = System.Windows.Forms.CheckState.Checked;
-            itmChangeCaseNoChange.Font = new System.Drawing.Font("Tahoma", 8.25F);
             itmChangeCaseNoChange.Name = "itmChangeCaseNoChange";
-            itmChangeCaseNoChange.Size = new System.Drawing.Size(156, 26);
+            itmChangeCaseNoChange.Size = new System.Drawing.Size(164, 26);
             itmChangeCaseNoChange.Text = "No change";
             itmChangeCaseNoChange.Click += itmChangeCaseNoChange_Click;
             // 
             // itmChangeCaseSep
             // 
             itmChangeCaseSep.Name = "itmChangeCaseSep";
-            itmChangeCaseSep.Size = new System.Drawing.Size(153, 6);
+            itmChangeCaseSep.Size = new System.Drawing.Size(161, 6);
             // 
             // itmChangeCaseUppercase
             // 
-            itmChangeCaseUppercase.Font = new System.Drawing.Font("Tahoma", 8.25F);
             itmChangeCaseUppercase.Name = "itmChangeCaseUppercase";
-            itmChangeCaseUppercase.Size = new System.Drawing.Size(156, 26);
+            itmChangeCaseUppercase.Size = new System.Drawing.Size(164, 26);
             itmChangeCaseUppercase.Text = "Uppercase";
             itmChangeCaseUppercase.Click += itmChangeCaseUppercase_Click;
             // 
             // itmChangeCaseLowercase
             // 
-            itmChangeCaseLowercase.Font = new System.Drawing.Font("Tahoma", 8.25F);
             itmChangeCaseLowercase.Name = "itmChangeCaseLowercase";
-            itmChangeCaseLowercase.Size = new System.Drawing.Size(156, 26);
+            itmChangeCaseLowercase.Size = new System.Drawing.Size(164, 26);
             itmChangeCaseLowercase.Text = "Lowercase";
             itmChangeCaseLowercase.Click += itmChangeCaseLowercase_Click;
             // 
             // itmChangeCaseTitlecase
             // 
-            itmChangeCaseTitlecase.Font = new System.Drawing.Font("Tahoma", 8.25F);
             itmChangeCaseTitlecase.Name = "itmChangeCaseTitlecase";
-            itmChangeCaseTitlecase.Size = new System.Drawing.Size(156, 26);
+            itmChangeCaseTitlecase.Size = new System.Drawing.Size(164, 26);
             itmChangeCaseTitlecase.Text = "Title case";
             itmChangeCaseTitlecase.Click += itmChangeCaseTitlecase_Click;
             // 
@@ -834,10 +822,10 @@ namespace RegexRenamer
             mnuNumbering.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { txtNumberingStart, txtNumberingPad, txtNumberingInc, txtNumberingReset });
             mnuNumbering.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
             mnuNumbering.Name = "mnuNumbering";
-            mnuNumbering.Padding = new System.Windows.Forms.Padding(0, 0, 21, 0);
-            mnuNumbering.Size = new System.Drawing.Size(110, 21);
+            mnuNumbering.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            mnuNumbering.Size = new System.Drawing.Size(135, 24);
             mnuNumbering.Tag = "mnuNumbering";
-            mnuNumbering.Text = "Numbering";
+            mnuNumbering.Text = "Auto Numbering";
             mnuNumbering.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             mnuNumbering.ToolTipText = "Enter \"$#\" in the replace field to insert a number sequence";
             mnuNumbering.MouseDown += mnuNumbering_MouseDown;
@@ -893,8 +881,8 @@ namespace RegexRenamer
             mnuMoveCopy.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmOutputRenameInPlace, itmOutputSep, itmOutputMoveTo, itmOutputCopyTo, itmOutputBackupTo });
             mnuMoveCopy.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
             mnuMoveCopy.Name = "mnuMoveCopy";
-            mnuMoveCopy.Padding = new System.Windows.Forms.Padding(0, 0, 17, 0);
-            mnuMoveCopy.Size = new System.Drawing.Size(110, 21);
+            mnuMoveCopy.Padding = new System.Windows.Forms.Padding(0, 0, 15, 0);
+            mnuMoveCopy.Size = new System.Drawing.Size(135, 24);
             mnuMoveCopy.Text = "Move/Copy";
             mnuMoveCopy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             mnuMoveCopy.MouseDown += mnuMoveCopy_MouseDown;
@@ -903,40 +891,36 @@ namespace RegexRenamer
             // 
             itmOutputRenameInPlace.Checked = true;
             itmOutputRenameInPlace.CheckState = System.Windows.Forms.CheckState.Checked;
-            itmOutputRenameInPlace.Font = new System.Drawing.Font("Tahoma", 8.25F);
             itmOutputRenameInPlace.Name = "itmOutputRenameInPlace";
-            itmOutputRenameInPlace.Size = new System.Drawing.Size(189, 26);
+            itmOutputRenameInPlace.Size = new System.Drawing.Size(202, 26);
             itmOutputRenameInPlace.Text = "Rename in place";
             itmOutputRenameInPlace.Click += itmOutputRenameInPlace_Click;
             // 
             // itmOutputSep
             // 
             itmOutputSep.Name = "itmOutputSep";
-            itmOutputSep.Size = new System.Drawing.Size(186, 6);
+            itmOutputSep.Size = new System.Drawing.Size(199, 6);
             // 
             // itmOutputMoveTo
             // 
-            itmOutputMoveTo.Font = new System.Drawing.Font("Tahoma", 8.25F);
             itmOutputMoveTo.Name = "itmOutputMoveTo";
-            itmOutputMoveTo.Size = new System.Drawing.Size(189, 26);
+            itmOutputMoveTo.Size = new System.Drawing.Size(202, 26);
             itmOutputMoveTo.Text = "Move to...";
             itmOutputMoveTo.ToolTipText = "Files that match are moved and renamed";
             itmOutputMoveTo.Click += itmOutputMoveTo_Click;
             // 
             // itmOutputCopyTo
             // 
-            itmOutputCopyTo.Font = new System.Drawing.Font("Tahoma", 8.25F);
             itmOutputCopyTo.Name = "itmOutputCopyTo";
-            itmOutputCopyTo.Size = new System.Drawing.Size(189, 26);
+            itmOutputCopyTo.Size = new System.Drawing.Size(202, 26);
             itmOutputCopyTo.Text = "Copy to...";
             itmOutputCopyTo.ToolTipText = "Files that match are copied and the copies are renamed";
             itmOutputCopyTo.Click += itmOutputCopyTo_Click;
             // 
             // itmOutputBackupTo
             // 
-            itmOutputBackupTo.Font = new System.Drawing.Font("Tahoma", 8.25F);
             itmOutputBackupTo.Name = "itmOutputBackupTo";
-            itmOutputBackupTo.Size = new System.Drawing.Size(189, 26);
+            itmOutputBackupTo.Size = new System.Drawing.Size(202, 26);
             itmOutputBackupTo.Text = "Backup to...";
             itmOutputBackupTo.ToolTipText = "Files that match are copied and the originals are renamed";
             itmOutputBackupTo.Click += itmOutputBackupTo_Click;
@@ -946,11 +930,10 @@ namespace RegexRenamer
             mnuKavitaCheck.AutoToolTip = false;
             mnuKavitaCheck.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             mnuKavitaCheck.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { noneToolStripMenuItem, toolStripSeparator1, previewComicsToolStripMenuItem, previewMangaToolStripMenuItem, previewBooksToolStripMenuItem });
-            mnuKavitaCheck.ImageTransparentColor = System.Drawing.Color.Magenta;
             mnuKavitaCheck.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
             mnuKavitaCheck.Name = "mnuKavitaCheck";
-            mnuKavitaCheck.Padding = new System.Windows.Forms.Padding(0, 0, 43, 0);
-            mnuKavitaCheck.Size = new System.Drawing.Size(102, 21);
+            mnuKavitaCheck.Padding = new System.Windows.Forms.Padding(0, 0, 50, 0);
+            mnuKavitaCheck.Size = new System.Drawing.Size(135, 24);
             mnuKavitaCheck.Text = "Kavita";
             mnuKavitaCheck.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             mnuKavitaCheck.ToolTipText = "Preview Kavitha Parsed Values";
@@ -959,40 +942,36 @@ namespace RegexRenamer
             // 
             noneToolStripMenuItem.Checked = true;
             noneToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            noneToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            noneToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            noneToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
             noneToolStripMenuItem.Text = "None";
-            noneToolStripMenuItem.Click += this.noneToolStripMenuItem_Click;
+            noneToolStripMenuItem.Click += noneToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
+            toolStripSeparator1.Size = new System.Drawing.Size(192, 6);
             // 
             // previewComicsToolStripMenuItem
             // 
-            previewComicsToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             previewComicsToolStripMenuItem.Name = "previewComicsToolStripMenuItem";
-            previewComicsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            previewComicsToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
             previewComicsToolStripMenuItem.Text = "Preview Comics";
-            previewComicsToolStripMenuItem.Click += this.previewComicsToolStripMenuItem_Click;
+            previewComicsToolStripMenuItem.Click += previewComicsToolStripMenuItem_Click;
             // 
             // previewMangaToolStripMenuItem
             // 
-            previewMangaToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             previewMangaToolStripMenuItem.Name = "previewMangaToolStripMenuItem";
-            previewMangaToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            previewMangaToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
             previewMangaToolStripMenuItem.Text = "Preview Manga";
-            previewMangaToolStripMenuItem.Click += this.previewMangaToolStripMenuItem_Click;
+            previewMangaToolStripMenuItem.Click += previewMangaToolStripMenuItem_Click;
             // 
             // previewBooksToolStripMenuItem
             // 
-            previewBooksToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             previewBooksToolStripMenuItem.Name = "previewBooksToolStripMenuItem";
-            previewBooksToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            previewBooksToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
             previewBooksToolStripMenuItem.Text = "Preview Books";
-            previewBooksToolStripMenuItem.Click += this.previewBooksToolStripMenuItem_Click;
+            previewBooksToolStripMenuItem.Click += previewBooksToolStripMenuItem_Click;
             // 
             // ttPreviewError
             // 
@@ -1530,7 +1509,7 @@ namespace RegexRenamer
             // 
             lblPath.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
             lblPath.AutoSize = true;
-            lblPath.Location = new System.Drawing.Point(5, 945);
+            lblPath.Location = new System.Drawing.Point(5, 935);
             lblPath.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             lblPath.Name = "lblPath";
             lblPath.Size = new System.Drawing.Size(40, 20);
@@ -1545,7 +1524,7 @@ namespace RegexRenamer
             dgvFiles.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             dgvFiles.BackgroundColor = System.Drawing.SystemColors.Window;
             dgvFiles.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-            dgvFiles.ColumnHeadersHeight = 29;
+            dgvFiles.ColumnHeadersHeight = 30;
             dgvFiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIcon, colFilename, colPreview, colSeries, colVolume, colChapter, colTitle, colEdition, colSpecial });
             dgvFiles.ContextMenuStrip = cmFileView;
@@ -1555,12 +1534,12 @@ namespace RegexRenamer
             dgvFiles.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             dgvFiles.Name = "dgvFiles";
             dgvFiles.RowHeadersVisible = false;
-            dgvFiles.RowHeadersWidth = 51;
-            dgvFiles.RowTemplate.Height = 17;
+            dgvFiles.RowHeadersWidth = 50;
+            dgvFiles.RowTemplate.Height = 22;
             dgvFiles.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             dgvFiles.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             dgvFiles.ShowCellToolTips = false;
-            dgvFiles.Size = new System.Drawing.Size(1182, 911);
+            dgvFiles.Size = new System.Drawing.Size(1182, 901);
             dgvFiles.StandardTab = true;
             dgvFiles.TabIndex = 6;
             dgvFiles.CellBeginEdit += dgvFiles_CellBeginEdit;
@@ -1710,18 +1689,16 @@ namespace RegexRenamer
             // tsOptions
             // 
             tsOptions.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            tsOptions.BackColor = System.Drawing.SystemColors.ButtonFace;
             tsOptions.CanOverflow = false;
             tsOptions.Dock = System.Windows.Forms.DockStyle.None;
-            tsOptions.Font = new System.Drawing.Font("Tahoma", 8.25F);
             tsOptions.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             tsOptions.ImageScalingSize = new System.Drawing.Size(20, 20);
             tsOptions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { mnuOptions, mnuHelp });
             tsOptions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            tsOptions.Location = new System.Drawing.Point(7, 948);
+            tsOptions.Location = new System.Drawing.Point(7, 935);
             tsOptions.Name = "tsOptions";
             tsOptions.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            tsOptions.Size = new System.Drawing.Size(128, 22);
+            tsOptions.Size = new System.Drawing.Size(141, 25);
             tsOptions.TabIndex = 2;
             tsOptions.TabStop = true;
             // 
@@ -1732,7 +1709,7 @@ namespace RegexRenamer
             mnuOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmOptionsShowHidden, itmOptionsPreserveExt, itmOptionsRealtimePreview, itmOptionsAllowRenSub, itmOptionsRenameSelectedRows, itmOptionsRememberWinPos, itmOptionsAddContextMenu });
             mnuOptions.Margin = new System.Windows.Forms.Padding(0, 1, 10, 0);
             mnuOptions.Name = "mnuOptions";
-            mnuOptions.Size = new System.Drawing.Size(69, 21);
+            mnuOptions.Size = new System.Drawing.Size(75, 24);
             mnuOptions.Text = "Options";
             mnuOptions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -1740,7 +1717,7 @@ namespace RegexRenamer
             // 
             itmOptionsShowHidden.CheckOnClick = true;
             itmOptionsShowHidden.Name = "itmOptionsShowHidden";
-            itmOptionsShowHidden.Size = new System.Drawing.Size(259, 26);
+            itmOptionsShowHidden.Size = new System.Drawing.Size(279, 26);
             itmOptionsShowHidden.Text = "Show hidden files";
             itmOptionsShowHidden.Click += itmOptionsShowHidden_Click;
             // 
@@ -1748,7 +1725,7 @@ namespace RegexRenamer
             // 
             itmOptionsPreserveExt.CheckOnClick = true;
             itmOptionsPreserveExt.Name = "itmOptionsPreserveExt";
-            itmOptionsPreserveExt.Size = new System.Drawing.Size(259, 26);
+            itmOptionsPreserveExt.Size = new System.Drawing.Size(279, 26);
             itmOptionsPreserveExt.Text = "Preserve file extension";
             itmOptionsPreserveExt.Click += itmOptionsPreserveExt_Click;
             // 
@@ -1758,7 +1735,7 @@ namespace RegexRenamer
             itmOptionsRealtimePreview.CheckOnClick = true;
             itmOptionsRealtimePreview.CheckState = System.Windows.Forms.CheckState.Checked;
             itmOptionsRealtimePreview.Name = "itmOptionsRealtimePreview";
-            itmOptionsRealtimePreview.Size = new System.Drawing.Size(259, 26);
+            itmOptionsRealtimePreview.Size = new System.Drawing.Size(279, 26);
             itmOptionsRealtimePreview.Text = "Enable realtime preview";
             itmOptionsRealtimePreview.ToolTipText = "When unchecked, press ENTER in the regex fields to update the preview";
             // 
@@ -1766,7 +1743,7 @@ namespace RegexRenamer
             // 
             itmOptionsAllowRenSub.CheckOnClick = true;
             itmOptionsAllowRenSub.Name = "itmOptionsAllowRenSub";
-            itmOptionsAllowRenSub.Size = new System.Drawing.Size(259, 26);
+            itmOptionsAllowRenSub.Size = new System.Drawing.Size(279, 26);
             itmOptionsAllowRenSub.Text = "Allow rename to subfolders";
             itmOptionsAllowRenSub.Click += itmOptionsAllowRenSub_Click;
             // 
@@ -1774,7 +1751,7 @@ namespace RegexRenamer
             // 
             itmOptionsRenameSelectedRows.CheckOnClick = true;
             itmOptionsRenameSelectedRows.Name = "itmOptionsRenameSelectedRows";
-            itmOptionsRenameSelectedRows.Size = new System.Drawing.Size(259, 26);
+            itmOptionsRenameSelectedRows.Size = new System.Drawing.Size(279, 26);
             itmOptionsRenameSelectedRows.Text = "Only rename selected rows";
             // 
             // itmOptionsRememberWinPos
@@ -1783,13 +1760,13 @@ namespace RegexRenamer
             itmOptionsRememberWinPos.CheckOnClick = true;
             itmOptionsRememberWinPos.CheckState = System.Windows.Forms.CheckState.Checked;
             itmOptionsRememberWinPos.Name = "itmOptionsRememberWinPos";
-            itmOptionsRememberWinPos.Size = new System.Drawing.Size(259, 26);
+            itmOptionsRememberWinPos.Size = new System.Drawing.Size(279, 26);
             itmOptionsRememberWinPos.Text = "Remember window position";
             // 
             // itmOptionsAddContextMenu
             // 
             itmOptionsAddContextMenu.Name = "itmOptionsAddContextMenu";
-            itmOptionsAddContextMenu.Size = new System.Drawing.Size(259, 26);
+            itmOptionsAddContextMenu.Size = new System.Drawing.Size(279, 26);
             itmOptionsAddContextMenu.Text = "Add explorer context menu";
             itmOptionsAddContextMenu.Click += itmOptionsAddContextMenu_Click;
             // 
@@ -1800,7 +1777,7 @@ namespace RegexRenamer
             mnuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmHelpContents, itmHelpRegexReference, itmHelpSep1, itmHelpEmailAuthor, itmHelpReportBug, itmHelpHomepage, itmHelpSep2, itmHelpAbout });
             mnuHelp.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
             mnuHelp.Name = "mnuHelp";
-            mnuHelp.Size = new System.Drawing.Size(48, 21);
+            mnuHelp.Size = new System.Drawing.Size(55, 24);
             mnuHelp.Text = "Help";
             mnuHelp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -1808,7 +1785,7 @@ namespace RegexRenamer
             // 
             itmHelpContents.Name = "itmHelpContents";
             itmHelpContents.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            itmHelpContents.Size = new System.Drawing.Size(254, 26);
+            itmHelpContents.Size = new System.Drawing.Size(267, 26);
             itmHelpContents.Text = "Contents";
             itmHelpContents.Click += itmHelpContents_Click;
             // 
@@ -1816,52 +1793,52 @@ namespace RegexRenamer
             // 
             itmHelpRegexReference.Name = "itmHelpRegexReference";
             itmHelpRegexReference.ShortcutKeys = System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F1;
-            itmHelpRegexReference.Size = new System.Drawing.Size(254, 26);
+            itmHelpRegexReference.Size = new System.Drawing.Size(267, 26);
             itmHelpRegexReference.Text = "Regex Reference";
             itmHelpRegexReference.Click += itmHelpRegexReference_Click;
             // 
             // itmHelpSep1
             // 
             itmHelpSep1.Name = "itmHelpSep1";
-            itmHelpSep1.Size = new System.Drawing.Size(251, 6);
+            itmHelpSep1.Size = new System.Drawing.Size(264, 6);
             // 
             // itmHelpEmailAuthor
             // 
             itmHelpEmailAuthor.Name = "itmHelpEmailAuthor";
-            itmHelpEmailAuthor.Size = new System.Drawing.Size(254, 26);
+            itmHelpEmailAuthor.Size = new System.Drawing.Size(267, 26);
             itmHelpEmailAuthor.Text = "Email the author";
             itmHelpEmailAuthor.Click += itmHelpEmailAuthor_Click;
             // 
             // itmHelpReportBug
             // 
             itmHelpReportBug.Name = "itmHelpReportBug";
-            itmHelpReportBug.Size = new System.Drawing.Size(254, 26);
+            itmHelpReportBug.Size = new System.Drawing.Size(267, 26);
             itmHelpReportBug.Text = "Report a bug";
             itmHelpReportBug.Click += itmHelpReportBug_Click;
             // 
             // itmHelpHomepage
             // 
             itmHelpHomepage.Name = "itmHelpHomepage";
-            itmHelpHomepage.Size = new System.Drawing.Size(254, 26);
+            itmHelpHomepage.Size = new System.Drawing.Size(267, 26);
             itmHelpHomepage.Text = "Homepage";
             itmHelpHomepage.Click += itmHelpHomepage_Click;
             // 
             // itmHelpSep2
             // 
             itmHelpSep2.Name = "itmHelpSep2";
-            itmHelpSep2.Size = new System.Drawing.Size(251, 6);
+            itmHelpSep2.Size = new System.Drawing.Size(264, 6);
             // 
             // itmHelpAbout
             // 
             itmHelpAbout.Name = "itmHelpAbout";
-            itmHelpAbout.Size = new System.Drawing.Size(254, 26);
+            itmHelpAbout.Size = new System.Drawing.Size(267, 26);
             itmHelpAbout.Text = "About RegexRenamer";
             itmHelpAbout.Click += itmHelpAbout_Click;
             // 
             // progressBar
             // 
             progressBar.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            progressBar.Location = new System.Drawing.Point(154, 940);
+            progressBar.Location = new System.Drawing.Point(154, 930);
             progressBar.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             progressBar.Name = "progressBar";
             progressBar.Size = new System.Drawing.Size(805, 34);
@@ -1871,13 +1848,12 @@ namespace RegexRenamer
             // 
             btnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             btnCancel.Enabled = false;
-            btnCancel.Location = new System.Drawing.Point(1076, 937);
+            btnCancel.Location = new System.Drawing.Point(1076, 927);
             btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new System.Drawing.Size(113, 38);
             btnCancel.TabIndex = 3;
             btnCancel.Text = "&Cancel";
-            btnCancel.UseVisualStyleBackColor = true;
             btnCancel.Visible = false;
             btnCancel.Click += btnCancel_Click;
             // 
@@ -1892,7 +1868,6 @@ namespace RegexRenamer
             // groupBoxTop
             // 
             groupBoxTop.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            groupBoxTop.Controls.Add(pnlInfo);
             groupBoxTop.Controls.Add(lblMatch);
             groupBoxTop.Controls.Add(cmbReplace);
             groupBoxTop.Controls.Add(cmbMatch);
@@ -1908,27 +1883,9 @@ namespace RegexRenamer
             groupBoxTop.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBoxTop.Name = "groupBoxTop";
             groupBoxTop.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxTop.Size = new System.Drawing.Size(1699, 127);
+            groupBoxTop.Size = new System.Drawing.Size(1699, 131);
             groupBoxTop.TabIndex = 7;
             groupBoxTop.TabStop = false;
-            // 
-            // pnlInfo
-            // 
-            pnlInfo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            pnlInfo.Controls.Add(lblInfoFileSize);
-            pnlInfo.Location = new System.Drawing.Point(1175, 19);
-            pnlInfo.Name = "pnlInfo";
-            pnlInfo.Size = new System.Drawing.Size(199, 99);
-            pnlInfo.TabIndex = 7;
-            // 
-            // lblInfoFileSize
-            // 
-            lblInfoFileSize.AutoSize = true;
-            lblInfoFileSize.Location = new System.Drawing.Point(13, 5);
-            lblInfoFileSize.Name = "lblInfoFileSize";
-            lblInfoFileSize.Size = new System.Drawing.Size(39, 20);
-            lblInfoFileSize.TabIndex = 0;
-            lblInfoFileSize.Text = "0 Kb";
             // 
             // groupBoxFolderTree
             // 
@@ -1937,11 +1894,11 @@ namespace RegexRenamer
             groupBoxFolderTree.Controls.Add(lblPath);
             groupBoxFolderTree.Controls.Add(tvwFolders);
             groupBoxFolderTree.Controls.Add(btnNetwork);
-            groupBoxFolderTree.Location = new System.Drawing.Point(12, 132);
+            groupBoxFolderTree.Location = new System.Drawing.Point(12, 142);
             groupBoxFolderTree.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBoxFolderTree.Name = "groupBoxFolderTree";
             groupBoxFolderTree.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxFolderTree.Size = new System.Drawing.Size(504, 987);
+            groupBoxFolderTree.Size = new System.Drawing.Size(504, 977);
             groupBoxFolderTree.TabIndex = 8;
             groupBoxFolderTree.TabStop = false;
             // 
@@ -1955,11 +1912,11 @@ namespace RegexRenamer
             groupBoxFileView.Controls.Add(btnCancel);
             groupBoxFileView.Controls.Add(lblNumConflict);
             groupBoxFileView.Controls.Add(lblNumMatched);
-            groupBoxFileView.Location = new System.Drawing.Point(522, 132);
+            groupBoxFileView.Location = new System.Drawing.Point(522, 142);
             groupBoxFileView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBoxFileView.Name = "groupBoxFileView";
             groupBoxFileView.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            groupBoxFileView.Size = new System.Drawing.Size(1198, 986);
+            groupBoxFileView.Size = new System.Drawing.Size(1198, 976);
             groupBoxFileView.TabIndex = 9;
             groupBoxFileView.TabStop = false;
             // 
@@ -1980,6 +1937,7 @@ namespace RegexRenamer
             Text = "RegexRenamer";
             FormClosing += MainForm_FormClosing;
             Load += MainForm_Load;
+            Shown += MainForm_Shown;
             KeyDown += MainForm_KeyDown;
             cmFolderView.ResumeLayout(false);
             cmsRename.ResumeLayout(false);
@@ -1997,8 +1955,6 @@ namespace RegexRenamer
             tsOptions.PerformLayout();
             groupBoxTop.ResumeLayout(false);
             groupBoxTop.PerformLayout();
-            pnlInfo.ResumeLayout(false);
-            pnlInfo.PerformLayout();
             groupBoxFolderTree.ResumeLayout(false);
             groupBoxFolderTree.PerformLayout();
             groupBoxFileView.ResumeLayout(false);
@@ -2200,7 +2156,6 @@ namespace RegexRenamer
         private System.Windows.Forms.ToolStripMenuItem previewComicsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem previewMangaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem previewBooksToolStripMenuItem;
-        private System.Windows.Forms.Panel pnlInfo;
         private System.Windows.Forms.Label lblInfoFileSize;
     }
 }

@@ -266,21 +266,25 @@ namespace RegexRenamer
                 if (doingAutoNum)
                 {
                     if (doingAutoNumLetter)
+                    {
                         numStart = SequenceLetterToNumber(txtNumberingStart.Text.ToLower());
+                    }
                     else
+                    {
                         numStart = Int32.Parse(txtNumberingStart.Text);
+                    }
 
                     numInc = Int32.Parse(txtNumberingInc.Text);
                     numReset = Int32.Parse(txtNumberingReset.Text);
                 }
                 numCurrent = numStart - numInc;  // back up one
 
-
                 // regex each filename
-
                 string userReplacePattern = cmbReplace.Text;
                 if (doingAutoNum)
+                {
                     userReplacePattern = Regex.Replace(userReplacePattern, rxDoller + @"(\d+)" + rxDoller + "#", "$${$1}$$#");
+                }
 
 
                 for (int afi = 0; afi < activeFiles.Count; afi++)

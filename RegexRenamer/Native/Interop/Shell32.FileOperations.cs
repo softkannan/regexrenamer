@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
+using HWND = System.IntPtr;
+using HANDLE = System.IntPtr;
+
 namespace PInvoke;
 
 public class FileOperationAPI
