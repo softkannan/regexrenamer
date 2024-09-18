@@ -39,6 +39,7 @@ namespace RegexRenamer
     {
         #region Consts
 
+        private int MAX_VIEW_PAGE_SIZE = 200;
         private int MAX_FILES = 10000;   // file limit for filelist (was a const)
         private const int MAX_HISTORY = 20;      // number of regex history entries to keep
 
@@ -49,9 +50,10 @@ namespace RegexRenamer
         private LibraryType curLibType = LibraryType.Comic;
         private readonly Kavita.DefaultParser parser = new Kavita.DefaultParser();
 
-        private string activePath = null;     // current path
+        
         private string activeFilter = "*.*";  // current filter
 
+        private FileViewRange currentViewRange = null;
         private List<RRItem> activeFiles = new List<RRItem>();  // files in activePath displayed in filelist
         private Dictionary<string, InactiveReason> inactiveFiles = new Dictionary<string, InactiveReason>();  // files in activePath but not displayed
 
@@ -75,6 +77,21 @@ namespace RegexRenamer
         #endregion
 
         #region Properties
+
+        private string activePath = null;     // current path
+
+        private string ActivePath
+        {
+            get
+            {
+                return activePath;
+            }
+            set
+            {
+                currentViewRange = new FileViewRange() { Start = 0, End = MAX_VIEW_PAGE_SIZE } ;
+                activePath = value;
+            }
+        }
 
         // prevent setting to true if rename operation in progress
 
@@ -208,7 +225,7 @@ namespace RegexRenamer
         public MainForm(string initPath)
         {
 
-            this.activePath = initPath;
+            this.ActivePath = initPath;
 
             // draw form
             InitializeComponent();
@@ -309,8 +326,9 @@ namespace RegexRenamer
 
         public void UpdateFolderTree()
         {
+            currentViewRange = new FileViewRange { Start = 0, End = MAX_VIEW_PAGE_SIZE };
             EnableUpdates = false;
-            tvwFolders.UpdateFolderTree(activePath);
+            tvwFolders.UpdateFolderTree(ActivePath);
             EnableUpdates = true;
             UpdateFileList();
         }
@@ -439,6 +457,9 @@ namespace RegexRenamer
 
         #endregion
 
+
+
+        
     }
 }
 

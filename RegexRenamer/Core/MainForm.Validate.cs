@@ -37,7 +37,7 @@ namespace RegexRenamer
 
             // check for errors
 
-            string outputPath = activePath;
+            string outputPath = ActivePath;
             if (itmOutputMoveTo.Checked || itmOutputCopyTo.Checked)
                 outputPath = fbdMoveCopy.SelectedPath;
 

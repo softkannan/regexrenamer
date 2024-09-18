@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RegexRenamer.Utility;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
@@ -21,6 +22,7 @@ namespace RegexRenamer
             if (itmChangeCaseUppercase.Checked) return ti.ToUpper(match.Groups[1].Value);
             else if (itmChangeCaseLowercase.Checked) return ti.ToLower(match.Groups[1].Value);
             else if (itmChangeCaseTitlecase.Checked) return ti.ToTitleCase(match.Groups[1].Value.ToLower());
+            else if (itmChangeCaseCleanName.Checked) return match.Groups[1].Value.ToCleanFileName();
             else return match.Groups[1].Value;
         }
 
@@ -107,6 +109,11 @@ namespace RegexRenamer
         {
             if (e.Button == MouseButtons.Right && !itmChangeCaseNoChange.Checked)  // set default
                 itmChangeCaseNoChange.PerformClick();
+        }
+
+        private void itmChangeCaseCleanName_Click(object sender, EventArgs e)
+        {
+            ChangeCaseMenuItem(sender);
         }
     }
 }

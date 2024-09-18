@@ -45,7 +45,7 @@ namespace RegexRenamer
             }
             else if (e.KeyCode == Keys.V && (e.Modifiers & Keys.Control) == Keys.Control)
             {
-                activePath.ClipboardPasteFiles();
+                ActivePath.ClipboardPasteFiles();
                 UpdateFileList();
             }
         }
@@ -78,7 +78,7 @@ namespace RegexRenamer
             {
                 newFilename += activeFiles[afi].Extension;
             }
-            string newFullpath = Path.Combine(activePath, newFilename);
+            string newFullpath = Path.Combine(ActivePath, newFilename);
 
             // validate
             string errorMessage = ValidateFilename(newFilename, false);
@@ -153,7 +153,7 @@ namespace RegexRenamer
                     if (node.Text == prevFilename)
                     {
                         node.Text = activeFiles[afi].Name;
-                        node.Tag = activePath.GetShellFolderItem(activeFiles[afi].Filename);
+                        node.Tag = ActivePath.GetShellFolderItem(activeFiles[afi].Filename);
                         break;
                     }
                 }
@@ -234,7 +234,7 @@ namespace RegexRenamer
 
         private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            activePath.ClipboardPasteFiles();
+            ActivePath.ClipboardPasteFiles();
             UpdateFileList();
         }
 

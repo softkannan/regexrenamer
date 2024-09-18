@@ -248,7 +248,7 @@ namespace RegexRenamer
 
             // move/copy path same as activePath
 
-            if (errorMessage == null && !itmOutputRenameInPlace.Checked && fbdMoveCopy.SelectedPath == activePath)
+            if (errorMessage == null && !itmOutputRenameInPlace.Checked && fbdMoveCopy.SelectedPath == ActivePath)
             {
                 if (itmOutputMoveTo.Checked) errorMessage = "'Move to' folder is the same as the currently selected folder.";
                 else if (itmOutputCopyTo.Checked) errorMessage = "'Copy to' folder is the same as the currently selected folder.";
@@ -392,7 +392,7 @@ namespace RegexRenamer
 
                 // update folder tree in case user created new folder within fbdNetwork
 
-                if (!activePath.StartsWith(fbdMoveCopy.SelectedPath))
+                if (!ActivePath.StartsWith(fbdMoveCopy.SelectedPath))
                 {
                     DirectoryInfo parent = Directory.GetParent(fbdMoveCopy.SelectedPath);
                     if (parent != null)
@@ -406,7 +406,7 @@ namespace RegexRenamer
 
                 // show warning if same as activePath
 
-                if (fbdMoveCopy.SelectedPath == activePath)
+                if (fbdMoveCopy.SelectedPath == ActivePath)
                 {
                     string errorMessage = "This '";
                     if (clickedMenuItem == itmOutputMoveTo) errorMessage += "Move to";

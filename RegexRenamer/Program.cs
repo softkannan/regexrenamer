@@ -29,13 +29,14 @@ static class Program
 
     static void Main(string[] args)
     {
-        try
-        {
 
-            //PInvoke.NativeShell32.ResolveShortcut(@"D:\App_Launchers\Shortcuts\QuickTools\MobaXterm.lnk");
-
+#if !DEBUG
+      try
+      {
 
             Application.ThreadException += Application_ThreadException;
+
+#endif
             Application.SetHighDpiMode(HighDpiMode.DpiUnawareGdiScaled);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -53,7 +54,7 @@ static class Program
 
 
             Application.Run(new MainForm(initPath));
-
+#if !DEBUG
         }
         catch (System.Security.SecurityException)
         {
@@ -70,6 +71,8 @@ static class Program
             // handle unhandled exception (main thread)
             UnhandledException(ex);
         }
+#endif
+
     }
 
     static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)

@@ -33,9 +33,8 @@ namespace RegexRenamer.Utility
         public static string GetHumanReadableBytes(this RRItem pThis)
         {
             if(pThis == null) return string.Empty;
-
             var fileInfo = new FileInfo(pThis.Fullpath);
-
+            if ((fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory) return string.Empty;
             long bytes = fileInfo.Length;
             // Get absolute value
             var absoluteBytes = (bytes < 0 ? -bytes : bytes);

@@ -104,6 +104,7 @@ namespace RegexRenamer
             itmChangeCaseUppercase = new System.Windows.Forms.ToolStripMenuItem();
             itmChangeCaseLowercase = new System.Windows.Forms.ToolStripMenuItem();
             itmChangeCaseTitlecase = new System.Windows.Forms.ToolStripMenuItem();
+            itmChangeCaseCleanName = new System.Windows.Forms.ToolStripMenuItem();
             mnuNumbering = new System.Windows.Forms.ToolStripDropDownButton();
             txtNumberingStart = new System.Windows.Forms.ToolStripTextBox();
             txtNumberingPad = new System.Windows.Forms.ToolStripTextBox();
@@ -241,6 +242,7 @@ namespace RegexRenamer
             groupBoxTop = new System.Windows.Forms.GroupBox();
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
+            cbFilePaging = new System.Windows.Forms.ComboBox();
             cmFolderView.SuspendLayout();
             cmsRename.SuspendLayout();
             gbFilter.SuspendLayout();
@@ -771,7 +773,7 @@ namespace RegexRenamer
             // mnuChangeCase
             // 
             mnuChangeCase.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            mnuChangeCase.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmChangeCaseNoChange, itmChangeCaseSep, itmChangeCaseUppercase, itmChangeCaseLowercase, itmChangeCaseTitlecase });
+            mnuChangeCase.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmChangeCaseNoChange, itmChangeCaseSep, itmChangeCaseUppercase, itmChangeCaseLowercase, itmChangeCaseTitlecase, itmChangeCaseCleanName });
             mnuChangeCase.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
             mnuChangeCase.Name = "mnuChangeCase";
             mnuChangeCase.Padding = new System.Windows.Forms.Padding(0, 0, 8, 0);
@@ -786,35 +788,42 @@ namespace RegexRenamer
             itmChangeCaseNoChange.Checked = true;
             itmChangeCaseNoChange.CheckState = System.Windows.Forms.CheckState.Checked;
             itmChangeCaseNoChange.Name = "itmChangeCaseNoChange";
-            itmChangeCaseNoChange.Size = new System.Drawing.Size(164, 26);
+            itmChangeCaseNoChange.Size = new System.Drawing.Size(173, 26);
             itmChangeCaseNoChange.Text = "No change";
             itmChangeCaseNoChange.Click += itmChangeCaseNoChange_Click;
             // 
             // itmChangeCaseSep
             // 
             itmChangeCaseSep.Name = "itmChangeCaseSep";
-            itmChangeCaseSep.Size = new System.Drawing.Size(161, 6);
+            itmChangeCaseSep.Size = new System.Drawing.Size(170, 6);
             // 
             // itmChangeCaseUppercase
             // 
             itmChangeCaseUppercase.Name = "itmChangeCaseUppercase";
-            itmChangeCaseUppercase.Size = new System.Drawing.Size(164, 26);
+            itmChangeCaseUppercase.Size = new System.Drawing.Size(173, 26);
             itmChangeCaseUppercase.Text = "Uppercase";
             itmChangeCaseUppercase.Click += itmChangeCaseUppercase_Click;
             // 
             // itmChangeCaseLowercase
             // 
             itmChangeCaseLowercase.Name = "itmChangeCaseLowercase";
-            itmChangeCaseLowercase.Size = new System.Drawing.Size(164, 26);
+            itmChangeCaseLowercase.Size = new System.Drawing.Size(173, 26);
             itmChangeCaseLowercase.Text = "Lowercase";
             itmChangeCaseLowercase.Click += itmChangeCaseLowercase_Click;
             // 
             // itmChangeCaseTitlecase
             // 
             itmChangeCaseTitlecase.Name = "itmChangeCaseTitlecase";
-            itmChangeCaseTitlecase.Size = new System.Drawing.Size(164, 26);
+            itmChangeCaseTitlecase.Size = new System.Drawing.Size(173, 26);
             itmChangeCaseTitlecase.Text = "Title case";
             itmChangeCaseTitlecase.Click += itmChangeCaseTitlecase_Click;
+            // 
+            // itmChangeCaseCleanName
+            // 
+            itmChangeCaseCleanName.Name = "itmChangeCaseCleanName";
+            itmChangeCaseCleanName.Size = new System.Drawing.Size(173, 26);
+            itmChangeCaseCleanName.Text = "Clean Name";
+            itmChangeCaseCleanName.Click += itmChangeCaseCleanName_Click;
             // 
             // mnuNumbering
             // 
@@ -1841,7 +1850,7 @@ namespace RegexRenamer
             progressBar.Location = new System.Drawing.Point(154, 930);
             progressBar.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             progressBar.Name = "progressBar";
-            progressBar.Size = new System.Drawing.Size(805, 34);
+            progressBar.Size = new System.Drawing.Size(668, 34);
             progressBar.TabIndex = 0;
             // 
             // btnCancel
@@ -1905,6 +1914,7 @@ namespace RegexRenamer
             // groupBoxFileView
             // 
             groupBoxFileView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxFileView.Controls.Add(cbFilePaging);
             groupBoxFileView.Controls.Add(dgvFiles);
             groupBoxFileView.Controls.Add(progressBar);
             groupBoxFileView.Controls.Add(tsOptions);
@@ -1919,6 +1929,17 @@ namespace RegexRenamer
             groupBoxFileView.Size = new System.Drawing.Size(1198, 976);
             groupBoxFileView.TabIndex = 9;
             groupBoxFileView.TabStop = false;
+            // 
+            // cbFilePaging
+            // 
+            cbFilePaging.AllowDrop = true;
+            cbFilePaging.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cbFilePaging.FormattingEnabled = true;
+            cbFilePaging.Location = new System.Drawing.Point(829, 933);
+            cbFilePaging.Name = "cbFilePaging";
+            cbFilePaging.Size = new System.Drawing.Size(131, 28);
+            cbFilePaging.TabIndex = 7;
+            cbFilePaging.SelectedIndexChanged += cbFilePaging_SelectedIndexChanged;
             // 
             // MainForm
             // 
@@ -2157,6 +2178,8 @@ namespace RegexRenamer
         private System.Windows.Forms.ToolStripMenuItem previewMangaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem previewBooksToolStripMenuItem;
         private System.Windows.Forms.Label lblInfoFileSize;
+        private System.Windows.Forms.ToolStripMenuItem itmChangeCaseCleanName;
+        private System.Windows.Forms.ComboBox cbFilePaging;
     }
 }
 

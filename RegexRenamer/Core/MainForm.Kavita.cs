@@ -14,7 +14,7 @@ namespace RegexRenamer
     {
         private void setAsKavitaLibraryRootToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            setAsKavitaLibraryRootToolStripMenuItem.Tag = activePath;
+            setAsKavitaLibraryRootToolStripMenuItem.Tag = ActivePath;
         }
         private void UpdateKavitaCheck(RRItem match, string kavithaRoot, Kavita.LibraryType libType)
         {

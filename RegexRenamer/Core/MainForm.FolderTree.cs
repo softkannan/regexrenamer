@@ -60,7 +60,7 @@ namespace RegexRenamer
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
-            Clipboard.SetText(activePath);
+            Clipboard.SetText(ActivePath);
             cmFolderView.Tag = null;
         }
 
@@ -70,7 +70,7 @@ namespace RegexRenamer
 
             try
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo(activePath);
+                ProcessStartInfo startInfo = new ProcessStartInfo(ActivePath);
                 startInfo.UseShellExecute = true;
                 Process.Start(startInfo);
             }
@@ -132,8 +132,8 @@ namespace RegexRenamer
 
             // show dialog
 
-            if (activePath.StartsWith("\\\\"))
-                fbdNetwork.SelectedPath = activePath;
+            if (ActivePath.StartsWith("\\\\"))
+                fbdNetwork.SelectedPath = ActivePath;
 
             if (fbdNetwork.ShowDialog() == DialogResult.Cancel) return;
 
@@ -159,7 +159,7 @@ namespace RegexRenamer
 
             // update filelist
 
-            activePath = newPath;
+            ActivePath = newPath;
             UpdateFileList();
         }
 
@@ -187,7 +187,7 @@ namespace RegexRenamer
             tvwFolders.LabelEdit = false;
             if (!string.IsNullOrEmpty(newPath))
             {
-                activePath = newPath;   
+                ActivePath = newPath;   
             }
             UpdateFolderTree();
         }
@@ -198,7 +198,7 @@ namespace RegexRenamer
             if (tvwFolders.Tag != null && tvwFolders.SelectedNode == (TreeNode)tvwFolders.Tag)  // My Network Places
                 toolTip.Show("Click to browse the network", btnNetwork, 0, btnNetwork.Height, 5000);
 
-            activePath = tvwFolders.GetSelectedNodePath();
+            ActivePath = tvwFolders.GetSelectedNodePath();
             UpdateFileList();
         }
 
@@ -241,7 +241,7 @@ namespace RegexRenamer
 
                     e.SuppressKeyPress = true;  // prevent beep
 
-                    activePath = txtPath.Text;
+                    ActivePath = txtPath.Text;
                     toolTip.Hide(txtPath);
                     this.Update();
                     UpdateFileList();
@@ -256,8 +256,8 @@ namespace RegexRenamer
             else if (e.KeyCode == Keys.Escape)  // revert
             {
                 txtPath.BackColor = SystemColors.Window;
-                txtPath.Text = activePath;
-                txtPath.SelectionStart = activePath.Length;
+                txtPath.Text = ActivePath;
+                txtPath.SelectionStart = ActivePath.Length;
                 toolTip.Hide(txtPath);
 
                 if (tvwFolders.SelectedNode == null)

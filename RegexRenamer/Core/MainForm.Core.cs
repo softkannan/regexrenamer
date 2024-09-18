@@ -18,7 +18,11 @@ namespace RegexRenamer
     public partial class MainForm
     {
         // update directory tree/filenames/previews/validation (each cascades into the one below)
-        
+        private void cbFilePaging_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
         private void UpdateFileList()
         {
             if (!EnableUpdates) return;
@@ -29,13 +33,13 @@ namespace RegexRenamer
             // update txtPath
 
             txtPath.BackColor = SystemColors.Window;
-            txtPath.Text = activePath;
+            txtPath.Text = ActivePath;
             txtPath.Update();
 
 
             // if invalid selection, clear all
 
-            if (activePath == "")
+            if (ActivePath == "")
             {
                 activeFiles.Clear();
                 inactiveFiles.Clear();
@@ -72,7 +76,7 @@ namespace RegexRenamer
             activeFiles.Clear();
             inactiveFiles.Clear();
 
-            DirectoryInfo activeDir = new DirectoryInfo(activePath);
+            DirectoryInfo activeDir = new DirectoryInfo(ActivePath);
 
             if (RenameFolders)  // folders
             {
@@ -86,8 +90,12 @@ namespace RegexRenamer
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
-                foreach (DirectoryInfo dir in dirs)
+                //TODO: fill the paging
+                int pageEnd = dirs.Length;
+                int pageStart = 0;
+                for(int idx = pageStart; idx < pageEnd; idx++)
                 {
+                    DirectoryInfo dir = dirs[idx] as DirectoryInfo;
                     fileCount.total++;
 
                     // ignore if filtered out
@@ -132,8 +140,13 @@ namespace RegexRenamer
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
-                foreach (FileInfo file in files)
+                //TODO: fill the paging
+                int pageEnd = files.Length;
+                int pageStart = 0;
+                for(int idx = pageStart; idx < pageEnd; idx++)
                 {
+                    FileInfo file = files[idx] as FileInfo;
+
                     fileCount.total++;
 
 
@@ -168,7 +181,6 @@ namespace RegexRenamer
                     activeFiles.Add(new RRItem(file, hidden, itmOptionsPreserveExt.Checked));
                 }
             }
-
 
             // create datagridview items w/ filename
 
@@ -454,7 +466,7 @@ namespace RegexRenamer
             int filesToRename = (int)e.Argument;
             float filesRenamed = 0.5F;
 
-            string outputPath = activePath;
+            string outputPath = ActivePath;
             if (itmOutputMoveTo.Checked || itmOutputCopyTo.Checked)
                 outputPath = fbdMoveCopy.SelectedPath;
 
@@ -581,7 +593,7 @@ namespace RegexRenamer
             if (RenameFolders)
             {
                 tvwFolders.RefreshNode(tvwFolders.SelectedNode);
-                if (itmOutputMoveTo.Checked && !fbdMoveCopy.SelectedPath.StartsWith(activePath))
+                if (itmOutputMoveTo.Checked && !fbdMoveCopy.SelectedPath.StartsWith(ActivePath))
                     tvwFolders.RefreshNode(fbdMoveCopy.SelectedPath);
             }
             else if (result.RenameToSubfolders)

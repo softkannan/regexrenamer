@@ -26,19 +26,22 @@ namespace RegexRenamer
             {
                 if (key != null)
                 {
-                    if (activePath == null)
-                        activePath = (string)key.GetValue("LastPath", "");
+                    if (ActivePath == null)
+                        ActivePath = (string)key.GetValue("LastPath", "");
                     fbdMoveCopy.SelectedPath = (string)key.GetValue("MoveCopyPath", "");
-                    RenameFolders = (string)key.GetValue("RenameFolders") == "True";
+                    //RenameFolders = (string)key.GetValue("RenameFolders") == "True";
 
                     try
                     {
                         int maxFilesOverride = (int)key.GetValue("MaxFileLimit", 1000);
                         if (maxFilesOverride > MAX_FILES)
                             MAX_FILES = maxFilesOverride;
+
+                        int maxViewFilesOverride = (int)key.GetValue("MaxViewFileLimit", 200);
+                        if (maxViewFilesOverride > MAX_VIEW_PAGE_SIZE)
+                            MAX_VIEW_PAGE_SIZE = maxViewFilesOverride;
                     }
                     catch { } // ignore if wrong reg key type
-
                     key.Close();
                 }
             }
@@ -185,7 +188,7 @@ namespace RegexRenamer
             {
                 if (key != null)
                 {
-                    key.SetValue("LastPath", activePath);
+                    key.SetValue("LastPath", ActivePath);
                     key.SetValue("MoveCopyPath", fbdMoveCopy.SelectedPath);
                     key.SetValue("RenameFolders", RenameFolders);
                     key.Close();
