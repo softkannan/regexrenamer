@@ -464,7 +464,6 @@ public partial class MainForm
         for (int afi = 0; afi < _activeFiles.Count; afi++)
         {
             // abort if user cancelled
-
             if (bw.CancellationPending)
             {
                 // e.Cancel = true;       // don't use this as it prevents access to the result object
@@ -474,7 +473,6 @@ public partial class MainForm
 
 
             // skip ignored/unselected files
-
             if (itmOutputRenameInPlace.Checked)
             {
                 if (_activeFiles[afi].Name == _activeFiles[afi].Preview) continue;
@@ -491,20 +489,17 @@ public partial class MainForm
 
 
             // update progressbar
-
             bw.ReportProgress((int)((filesRenamed / filesToRename) * 100));
             filesRenamed++;
 
 
             // get new fullpath
-
             string newFullpath = Path.Combine(outputPath, _activeFiles[afi].Preview);
             if (itmOptionsPreserveExt.Checked)
                 newFullpath += _activeFiles[afi].Extension;
 
 
             // create subdirs (if any)
-
             if (_activeFiles[afi].Preview.Contains("\\"))
             {
                 string newDirectory = Path.GetDirectoryName(newFullpath);
@@ -527,7 +522,6 @@ public partial class MainForm
 
 
             // rename/move/copy, catch any errors
-
             try
             {
                 if (RenameFolders)
