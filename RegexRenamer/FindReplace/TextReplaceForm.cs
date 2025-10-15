@@ -1,7 +1,7 @@
-﻿using Config;
-using Microsoft.Extensions.DependencyModel.Resolution;
+﻿using Microsoft.Extensions.DependencyModel.Resolution;
 using Microsoft.Win32;
 using RegexRenamer.FindReplace;
+using LogEx;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

@@ -17,18 +17,27 @@ public class FolderTreeViewImageList
         ImageSize = new Size(16, 16),
         TransparentColor = Color.Transparent
     };
-    public Dictionary<string,int> KnownIndexs { get; private set; } = new Dictionary<string,int>();
+    private Dictionary<string,int> KnownIndexsNormal { get; set; } = new Dictionary<string,int>();
+    private Dictionary<string, int> KnownIndexsSelected { get; set; } = new Dictionary<string, int>();
 
-    public int GetIcon(string name)
+    public int GetIcon(string name, bool isNormal = true)
     {
-        if(KnownIndexs.TryGetValue(name, out int index)) return index;
+        if (isNormal && KnownIndexsNormal.TryGetValue(name, out int index)) return index;
+        if (!isNormal && KnownIndexsSelected.TryGetValue(name, out int selectedIndex)) return selectedIndex;
         return -1;
     }
 
-    public int AddIcon(string name, Icon icon)
+    public int AddIcon(string name, Icon icon, bool isNormal = true)
     {
-        Icons.Images.Add(icon);
-        KnownIndexs.Add(name,)
+        if (isNormal && KnownIndexsNormal.TryGetValue(name, out int index)) return index;
+        if (!isNormal && KnownIndexsSelected.TryGetValue(name, out int selectedIndex)) return selectedIndex;
 
+        Icons.Images.Add(icon);
+        if (isNormal)
+            KnownIndexsNormal.Add(name, Icons.Images.Count - 1);
+        else
+            KnownIndexsSelected.Add(name, Icons.Images.Count - 1);
+
+        return Icons.Images.Count - 1;
     }
 }

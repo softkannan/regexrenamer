@@ -66,7 +66,7 @@ public static class FolderTreeViewExtensions
         }
     }
 
-    public static void ExpandFolder(this TreeNode tn, ImageList imageList)
+    public static void ExpandFolder(this TreeNode tn, FolderTreeViewImageList imageList)
     {
         // if there's a dummy node present, clear it and replace with actual contents
         if (tn.Nodes.Count == 1 && tn.Nodes[0].Tag.ToString() == DUMMYNODE)
@@ -97,7 +97,7 @@ public static class FolderTreeViewExtensions
     {
         return  shell32.NameSpace(path);
     }
-    private static void AddRootNode(TreeView tree, ImageList imageList, KnownFolderAPI.SHShellFolder rootFolder, bool getIcons)
+    private static void AddRootNode(TreeView tree, FolderTreeViewImageList imageList, KnownFolderAPI.SHShellFolder rootFolder, bool getIcons)
     {
         Folder shell32RootFolder = GetFolder(rootFolder);
         FolderItems rootItems = shell32RootFolder.Items();
@@ -219,16 +219,42 @@ public static class FolderTreeViewExtensions
         tn.Tag = item;
         var imageIndex = 1;
         var selectedImageIndex = 2;
+        var name = item.Name;
+        var type = item.Type;
+        var path = item.Path;
+        var isFolder = item.IsFolder;
+        var isFileSystem = item.IsFileSystem;
+        var isBrowsable = item.IsBrowsable;
+
         if (getIcons)
         {
-            var normalIcon = FileIconAPI.GetIcon(item.Path, false);
-            var selectedIcon = FileIconAPI.GetIcon(item.Path, true);
+            string iconName = path;
+            if (string.Compare("System Folder", type, StringComparison.OrdinalIgnoreCase) == 0)
+                iconName = name;
+            else if (string.Compare("File Folder", type, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                iconName = type;
+                if (path.EndsWith(":\\"))
+                    iconName = path;
+            }
+
+            imageIndex = imageList.GetIcon(iconName, true);
+            selectedImageIndex = imageList.GetIcon(iconName, false);
+
+            if(imageIndex != -1 && selectedImageIndex != -1)
+            {
+                tn.ImageIndex = imageIndex;
+                tn.SelectedImageIndex = selectedImageIndex;
+                return tn;
+            }
+
+            //item.Type
+            var normalIcon = FileIconAPI.GetIcon(path, false);
+            var selectedIcon = FileIconAPI.GetIcon(path, true);
             if (normalIcon != null && selectedIcon != null)
             {
-                imageList.Images.Add(normalIcon); // normal icon
-                imageIndex = imageList.Images.Count - 1;
-                imageList.Images.Add(selectedIcon); // selected icon
-                selectedImageIndex = imageList.Images.Count - 1;
+                imageIndex = imageList.AddIcon(iconName, normalIcon); // normal icon
+                selectedImageIndex = imageIndex = imageList.AddIcon(iconName, selectedIcon,false); // selected icon
             }
         }
         tn.ImageIndex = imageIndex;

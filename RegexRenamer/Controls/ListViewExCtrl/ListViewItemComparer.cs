@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace RegexRenamer.Controls
+namespace RegexRenamer.Controls.ListViewExCtrl
 {
     public class ListViewItemComparer<T> : IEqualityComparer<T> where T : ListViewItem
     {

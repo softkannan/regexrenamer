@@ -1,5 +1,6 @@
 ﻿using Config;
 using RegexRenamer.Forms;
+using LogEx;
 using System;
 using System.Collections.Generic;
 using System.IO;

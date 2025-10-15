@@ -1,9 +1,9 @@
-﻿using Config;
-using Microsoft.VisualBasic.CompilerServices;
+﻿using Microsoft.VisualBasic.CompilerServices;
 using PdfSharp.Pdf.Filters;
 using RegexRenamer.Calbre;
 using RegexRenamer.Controls;
 using RegexRenamer.Kavita;
+using LogEx;
 using RegexRenamer.Native;
 using RegexRenamer.TxtFiles;
 using SharpCompress.Common;

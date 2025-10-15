@@ -1,4 +1,6 @@
-﻿namespace RegexRenamer.Forms
+﻿using RegexRenamer.Controls.ListViewExCtrl;
+
+namespace RegexRenamer.Forms
 {
     partial class EditMetadataForm
     {
@@ -66,7 +68,7 @@
             chkIgnoreError = new System.Windows.Forms.CheckBox();
             chkClearUseAltMethod = new System.Windows.Forms.CheckBox();
             chkApplyRecursively = new System.Windows.Forms.CheckBox();
-            fileListView = new RegexRenamer.Controls.ListViewEx();
+            fileListView = new RegexRenamer.Controls.ListViewExCtrl.ListViewEx();
             colFileName = new System.Windows.Forms.ColumnHeader();
             colTitle = new System.Windows.Forms.ColumnHeader();
             colSeries = new System.Windows.Forms.ColumnHeader();
@@ -569,7 +571,7 @@
         private System.Windows.Forms.CheckBox chkIgnoreError;
         private System.Windows.Forms.CheckBox chkClearUseAltMethod;
         private System.Windows.Forms.CheckBox chkApplyRecursively;
-        private Controls.ListViewEx fileListView;
+        private ListViewEx fileListView;
         private System.Windows.Forms.ColumnHeader colFileName;
         private System.Windows.Forms.ColumnHeader colSeries;
         private System.Windows.Forms.ColumnHeader colTitle;

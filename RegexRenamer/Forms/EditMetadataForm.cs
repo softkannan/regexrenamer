@@ -1,6 +1,7 @@
 ﻿using Config;
 using PInvoke;
 using RegexRenamer.Kavita;
+using LogEx;
 using RegexRenamer.Native;
 using RegexRenamer.Utility;
 using System;

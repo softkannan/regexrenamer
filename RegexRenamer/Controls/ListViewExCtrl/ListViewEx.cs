@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace RegexRenamer.Controls
+namespace RegexRenamer.Controls.ListViewExCtrl
 {
     public class ListViewEx : ListView
     {
@@ -14,7 +14,7 @@ namespace RegexRenamer.Controls
         public ListViewEx(): base()
         {
             _lvwColumnSorter = new ListViewColumnSorter();
-            this.ListViewItemSorter = _lvwColumnSorter;
+            ListViewItemSorter = _lvwColumnSorter;
         }
 
         protected override void OnColumnClick(ColumnClickEventArgs e)
@@ -42,7 +42,7 @@ namespace RegexRenamer.Controls
             }
 
             // Perform the sort with these new sort options.
-            this.Sort();
+            Sort();
         }
     }
 }

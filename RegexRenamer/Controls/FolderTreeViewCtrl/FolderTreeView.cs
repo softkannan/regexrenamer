@@ -92,7 +92,7 @@ public class FolderTreeView : TreeView
         // Set default image list index to folder icon
         ImageIndex = 1;    
         SelectedImageIndex = 2;
-        this.PopulateFolders(ImageList);
+        this.PopulateFolders(iconImageList);
         if (Nodes.Count > 0)
         {
             Nodes[0].Expand();
@@ -143,22 +143,19 @@ public class FolderTreeView : TreeView
         // add the Desktop icon to the image list
         try
         {
-            iconImageList.Icons.Images.Add(ExtractIconsAPI.GetDesktopIcon());
-            iconImageList.KnownIndexs.Add(KnownFolderAPI.SHShellFolder.DESKTOPDIRECTORY.ToString(), 0);
-            iconImageList.Icons.Images.Add(FileIconAPI.GetDefaultFolderIcon(false));
-            iconImageList.KnownIndexs.Add("DefaultFolder-Selected", 1);
-            iconImageList.Icons.Images.Add(FileIconAPI.GetDefaultFolderIcon(true));
-            iconImageList.KnownIndexs.Add("DefaultFolder-UnSelected", 2);
+            iconImageList.AddIcon("DefaultDESKTOPDIRECTORY", ExtractIconsAPI.GetDesktopIcon());
+            iconImageList.AddIcon("DefaultFolder", FileIconAPI.GetDefaultFolderIcon(false), true);
+            iconImageList.AddIcon("DefaultFolder", FileIconAPI.GetDefaultFolderIcon(true), false);
         }
         catch
         {
             // Create a blank icon if the desktop icon fails for some reason
             Bitmap bmp = new Bitmap(16, 16);
             Image img = bmp;
-            iconImageList.Icons.Images.Add((Image)img.Clone());
-            iconImageList.KnownIndexs.Add(KnownFolderAPI.SHShellFolder.DESKTOPDIRECTORY.ToString(), 0);
-            iconImageList.Icons.Images.Add((Image)img.Clone());
-            iconImageList.Icons.Images.Add((Image)img.Clone());
+            Icon icon = Icon.FromHandle(((Bitmap)img).GetHicon());
+            iconImageList.AddIcon("DefaultDESKTOPDIRECTORY", icon);
+            iconImageList.AddIcon("DefaultFolder", icon,true);
+            iconImageList.AddIcon("DefaultFolder", icon,false);
             bmp.Dispose();
         }
         BeginUpdate();
@@ -173,7 +170,7 @@ public class FolderTreeView : TreeView
     protected override void OnBeforeExpand(TreeViewCancelEventArgs e)
     {
         BeginUpdate();
-        e.Node.ExpandFolder(ImageList);
+        e.Node.ExpandFolder(iconImageList);
         EndUpdate();
 
         base.OnBeforeExpand(e);

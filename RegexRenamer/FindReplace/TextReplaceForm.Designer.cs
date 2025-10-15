@@ -1,4 +1,6 @@
-﻿namespace RegexRenamer.Forms
+﻿using RegexRenamer.Controls.ListViewExCtrl;
+
+namespace RegexRenamer.Forms
 {
     partial class TextReplaceForm
     {
@@ -31,7 +33,7 @@
             components = new System.ComponentModel.Container();
             bttnOk = new System.Windows.Forms.Button();
             cbTemplateNames = new System.Windows.Forms.ComboBox();
-            lstFoundItems = new RegexRenamer.Controls.ListViewEx();
+            lstFoundItems = new RegexRenamer.Controls.ListViewExCtrl.ListViewEx();
             colFoundItem = new System.Windows.Forms.ColumnHeader();
             colPreview = new System.Windows.Forms.ColumnHeader();
             bttnCancel = new System.Windows.Forms.Button();
@@ -262,7 +264,7 @@
 
         private System.Windows.Forms.Button bttnOk;
         private System.Windows.Forms.ComboBox cbTemplateNames;
-        private Controls.ListViewEx lstFoundItems;
+        private ListViewEx lstFoundItems;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.ColumnHeader colFoundItem;
         private System.Windows.Forms.ComboBox cbReplacePattern;

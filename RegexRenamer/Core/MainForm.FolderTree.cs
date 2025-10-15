@@ -293,7 +293,7 @@ namespace RegexRenamer
 
         // update file list on select different path
 
-        
+        #region TreeView Events
 
         private void tvwFolders_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
@@ -347,6 +347,10 @@ namespace RegexRenamer
                 UpdateFolderTree();
             }
         }
+        #endregion
+
+
+        #region Network path txtbox events
 
         private void txtPath_KeyDown(object sender, KeyEventArgs e)
         {
@@ -429,6 +433,7 @@ namespace RegexRenamer
         {
             toolTip.Hide(txtPath);
         }
+        #endregion
 
     }
 }

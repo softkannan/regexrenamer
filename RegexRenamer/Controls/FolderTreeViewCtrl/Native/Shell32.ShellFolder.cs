@@ -352,7 +352,7 @@ internal class KnownFolderAPI
     /// The KNOWNFOLDERID constants represent GUIDs that identify standard folders registered with the system as Known Folders.
     /// These folders are installed with Windows Vista and later operating systems, and a computer will have only folders appropriate to it installed.
     /// </summary>
-    /// <remarks>Used by <see cref="SHGetKnownFolderPath(Guid, SHKNOWN_FOLDER_FLAG, HWND, out char*)"/>.</remarks>
+    /// <remarks>Used by <see cref="SHGetKnownFolderPath(Guid, SHKF_FLAG, HWND, out string)"/>.</remarks>
     internal static class SHKnownFolderID
     {
         /// <summary>Account Pictures.</summary>

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using RegexRenamer.FindReplace;
+using LogEx;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Design;

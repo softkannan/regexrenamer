@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Collections;
 using System.Windows.Forms;
 
-namespace RegexRenamer.Controls
+namespace RegexRenamer.Controls.ListViewExCtrl
 {
     /// <summary>
     /// This class is an implementation of the 'IComparer' interface.
@@ -70,7 +70,7 @@ namespace RegexRenamer.Controls
             else if (OrderOfSort == SortOrder.Descending)
             {
                 // Descending sort is selected, return negative result of compare operation
-                return (-compareResult);
+                return -compareResult;
             }
             else
             {

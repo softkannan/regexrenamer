@@ -40,8 +40,6 @@ namespace RegexRenamer
     {
         #region Consts
 
-        private int MAX_VIEW_PAGE_SIZE = 200;
-        private int MAX_FILES = 10000;   // file limit for filelist (was a const)
         private const int MAX_HISTORY = 20;      // number of regex history entries to keep
 
         #endregion
@@ -79,7 +77,7 @@ namespace RegexRenamer
 
         #region Properties
 
-        private string activePath = null;     // current path
+        private string activePath = string.Empty;     // current path
 
         private string ActivePath
         {
@@ -222,7 +220,7 @@ namespace RegexRenamer
 
         #region Constructor
 
-        private DarkModeCS DM = null;
+        private DarkModeForms.DarkModeCS _dm = null;
         public MainForm(string initPath)
         {
 
@@ -264,6 +262,13 @@ namespace RegexRenamer
             cbModifierX.CheckedChanged += cbModifierX_CheckedChanged;
             lblStats.MouseEnter += lblStats_MouseEnter;
             lblStats.MouseLeave += lblStats_MouseLeave;
+
+
+            //_dm = new DarkModeForms.DarkModeCS(this)
+            //{
+            //    // Choose your preferred mode here:
+            //    ColorMode = DarkModeForms.DarkModeCS.DisplayMode.SystemDefault
+            //};
 
         }
 
@@ -402,16 +407,6 @@ namespace RegexRenamer
 
         #endregion
 
-
-
-
-
-
-
-
-
-
-       
     }
 }
 

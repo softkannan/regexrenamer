@@ -1,5 +1,5 @@
-﻿using Config;
-using RegexRenamer.Kavita;
+﻿using RegexRenamer.Kavita;
+using LogEx;
 using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;

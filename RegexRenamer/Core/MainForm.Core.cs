@@ -18,6 +18,9 @@ namespace RegexRenamer;
 
 public partial class MainForm
 {
+    private int MAX_VIEW_PAGE_SIZE = 200;
+    private int MAX_FILES = 10000;   // file limit for filelist (was a const)
+
     public void InitializeCore()
     {
         cbFilePaging.SelectedIndexChanged += cbFilePaging_SelectedIndexChanged;
@@ -35,20 +38,16 @@ public partial class MainForm
     private void UpdateFileList()
     {
         if (!EnableUpdates) return;
+
         dgvFiles.Tag = 0;  // reset files ignored
         _fileCount.Reset();
 
-
         // update txtPath
-
-        txtPath.BackColor = SystemColors.Window;
         txtPath.Text = ActivePath;
         txtPath.Update();
 
-
         // if invalid selection, clear all
-
-        if (ActivePath == "")
+        if (string.IsNullOrEmpty(ActivePath))
         {
             _activeFiles.Clear();
             _inactiveFiles.Clear();
@@ -61,125 +60,22 @@ public partial class MainForm
         }
 
         this.Cursor = Cursors.AppStarting;
-
-
         // create filter regex, if necessary
-
         Regex filter = _activeFilter.CreateGlobFilter(rbFilterGlob.Checked);
 
         // loop through file list, build RRItem array
-
         _activeFiles.Clear();
         _inactiveFiles.Clear();
-
-        DirectoryInfo activeDir = new DirectoryInfo(ActivePath);
-
         if (RenameFolders)  // folders
         {
-            DirectoryInfo[] dirs = new DirectoryInfo[0];
-            try
-            {
-                dirs = activeDir.GetDirectories();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            //TODO: fill the paging
-            int pageEnd = dirs.Length;
-            int pageStart = 0;
-            for(int idx = pageStart; idx < pageEnd; idx++)
-            {
-                DirectoryInfo dir = dirs[idx] as DirectoryInfo;
-                _fileCount.total++;
-
-                // ignore if filtered out
-
-                if (filter != null && filter.IsMatch(dir.Name) == cbFilterExclude.Checked)
-                {
-                    if (!_inactiveFiles.ContainsKey(dir.Name.ToLower()))
-                        _inactiveFiles.Add(dir.Name.ToLower(), InactiveReason.Filtered);
-                    _fileCount.filtered++;
-                    continue;
-                }
-
-                // ignore if hidden and not showing hidden files
-
-                bool hidden = false;
-                try
-                {
-                    hidden = (dir.Attributes & FileAttributes.Hidden) != 0;
-                }
-                catch { }  // reported System.UnauthorizedAccessException here under some versions of Samba when item is a link to /dev/null
-
-                if (hidden) _fileCount.hidden++;
-                if (!itmOptionsShowHidden.Checked && hidden)
-                {
-                    if (!_inactiveFiles.ContainsKey(dir.Name.ToLower()))
-                        _inactiveFiles.Add(dir.Name.ToLower(), InactiveReason.Hidden);
-                    continue;
-                }
-
-                _activeFiles.Add(new RRItem(dir, hidden, itmOptionsPreserveExt.Checked));
-            }
+            BuildFoldersList(filter);
         }
         else // files
         {
-            FileInfo[] files = new FileInfo[0];
-            try
-            {
-                files = activeDir.GetFiles();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            //TODO: fill the paging
-            int pageEnd = files.Length;
-            int pageStart = 0;
-            for(int idx = pageStart; idx < pageEnd; idx++)
-            {
-                FileInfo file = files[idx] as FileInfo;
-
-                _fileCount.total++;
-
-
-                // ignore if filtered out
-
-                if (filter != null && filter.IsMatch(file.Name) == cbFilterExclude.Checked)
-                {
-                    if (!_inactiveFiles.ContainsKey(file.Name.ToLower()))
-                        _inactiveFiles.Add(file.Name.ToLower(), InactiveReason.Filtered);
-                    _fileCount.filtered++;
-                    continue;
-                }
-
-
-                // ignore if hidden and not showing hidden files
-
-                bool hidden = false;
-                try
-                {
-                    hidden = (file.Attributes & FileAttributes.Hidden) != 0;
-                }
-                catch { }  // reported System.UnauthorizedAccessException here under some versions of Samba when item is a link to /dev/null
-
-                if (hidden) _fileCount.hidden++;
-                if (!itmOptionsShowHidden.Checked && hidden)
-                {
-                    if (!_inactiveFiles.ContainsKey(file.Name.ToLower()))
-                        _inactiveFiles.Add(file.Name.ToLower(), InactiveReason.Hidden);
-                    continue;
-                }
-
-                _activeFiles.Add(new RRItem(file, hidden, itmOptionsPreserveExt.Checked));
-            }
+            BuildFileList(filter);
         }
 
         // create datagridview items w/ filename
-
         dgvFiles.Rows.Clear();
 
         for (int i = 0; i < _activeFiles.Count; i++)
@@ -191,15 +87,11 @@ public partial class MainForm
                 break;
             }
 
-
             // add new item
-
             dgvFiles.Rows.Add(null, _activeFiles[i].Name, null);
             dgvFiles.Rows[i].Tag = i;  // store activeFiles index so we can refer back when under different sorting
 
-
             // add image (keyed by extension)
-
 #if !DEBUG
     try  
     {
@@ -231,23 +123,128 @@ public partial class MainForm
 #endif
         }
 
-
         _fileCount.shown = dgvFiles.Rows.Count;
         UpdateFileStats();
         UpdateSelection();
         UpdatePreview();
     }
+
+    private void BuildFileList(Regex filter)
+    {
+        DirectoryInfo activeDir = new DirectoryInfo(ActivePath);
+        FileInfo[] files = new FileInfo[0];
+        try
+        {
+            files = activeDir.GetFiles();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        //TODO: fill the paging
+        int pageEnd = files.Length;
+        int pageStart = 0;
+        for (int idx = pageStart; idx < pageEnd; idx++)
+        {
+            FileInfo file = files[idx] as FileInfo;
+
+            _fileCount.total++;
+
+
+            // ignore if filtered out
+
+            if (filter != null && filter.IsMatch(file.Name) == cbFilterExclude.Checked)
+            {
+                if (!_inactiveFiles.ContainsKey(file.Name.ToLower()))
+                    _inactiveFiles.Add(file.Name.ToLower(), InactiveReason.Filtered);
+                _fileCount.filtered++;
+                continue;
+            }
+
+
+            // ignore if hidden and not showing hidden files
+
+            bool hidden = false;
+            try
+            {
+                hidden = (file.Attributes & FileAttributes.Hidden) != 0;
+            }
+            catch { }  // reported System.UnauthorizedAccessException here under some versions of Samba when item is a link to /dev/null
+
+            if (hidden) _fileCount.hidden++;
+            if (!itmOptionsShowHidden.Checked && hidden)
+            {
+                if (!_inactiveFiles.ContainsKey(file.Name.ToLower()))
+                    _inactiveFiles.Add(file.Name.ToLower(), InactiveReason.Hidden);
+                continue;
+            }
+
+            _activeFiles.Add(new RRItem(file, hidden, itmOptionsPreserveExt.Checked));
+        }
+    }
+
+    private void BuildFoldersList(Regex filter)
+    {
+        DirectoryInfo activeDir = new DirectoryInfo(ActivePath);
+        DirectoryInfo[] dirs = new DirectoryInfo[0];
+        try
+        {
+            dirs = activeDir.GetDirectories();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        //TODO: fill the paging
+        int pageEnd = dirs.Length;
+        int pageStart = 0;
+        for (int idx = pageStart; idx < pageEnd; idx++)
+        {
+            DirectoryInfo dir = dirs[idx] as DirectoryInfo;
+            _fileCount.total++;
+
+            // ignore if filtered out
+            if (filter != null && filter.IsMatch(dir.Name) == cbFilterExclude.Checked)
+            {
+                if (!_inactiveFiles.ContainsKey(dir.Name.ToLower()))
+                    _inactiveFiles.Add(dir.Name.ToLower(), InactiveReason.Filtered);
+                _fileCount.filtered++;
+                continue;
+            }
+
+            // ignore if hidden and not showing hidden files
+            bool hidden = false;
+            try
+            {
+                hidden = (dir.Attributes & FileAttributes.Hidden) != 0;
+            }
+            catch { }  // reported System.UnauthorizedAccessException here under some versions of Samba when item is a link to /dev/null
+
+            if (hidden) _fileCount.hidden++;
+            if (!itmOptionsShowHidden.Checked && hidden)
+            {
+                if (!_inactiveFiles.ContainsKey(dir.Name.ToLower()))
+                    _inactiveFiles.Add(dir.Name.ToLower(), InactiveReason.Hidden);
+                continue;
+            }
+
+            _activeFiles.Add(new RRItem(dir, hidden, itmOptionsPreserveExt.Checked));
+        }
+    }
+
     private void UpdatePreview()
     {
         if (!EnableUpdates || !_validMatch) return;
 
         this.Cursor = Cursors.AppStarting;
 
+        string matchingPattern = cmbMatch.Text;
         const string rxDoller = @"(?<=(?:^|[^$])(?:\$\$)*)\$";  // regex for an actual (non-escaped) doller sign
 
         // generate preview
-
-        if (cmbMatch.Text != "")
+        if (!string.IsNullOrWhiteSpace(matchingPattern))
         {
             // compile regex
             RegexOptions options = RegexOptions.None | RegexOptions.Compiled;
@@ -255,7 +252,7 @@ public partial class MainForm
             if (cbModifierI.Checked) { options |= RegexOptions.IgnoreCase; }
             if (cbModifierX.Checked) { options |= RegexOptions.IgnorePatternWhitespace; }
             //main regex
-            Regex regex = new Regex(cmbMatch.Text, options);
+            Regex regex = new Regex(matchingPattern, options);
 
             // auto numbering
             int numCurrent = 0, numInc = 0, numStart = 0, numReset = 0;
@@ -382,7 +379,6 @@ public partial class MainForm
 
 
         // update file list
-
         for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)
         {
             int afi = (int)dgvFiles.Rows[dfi].Tag;
@@ -401,12 +397,10 @@ public partial class MainForm
 
 
         // do preview filename validation
-
         UpdateValidation();
 
 
         // redraw
-
         dgvFiles.Sort(this.dgvFiles.SortedColumn ?? this.colFilename,
                        dgvFiles.SortOrder == SortOrder.Descending ? ListSortDirection.Descending : ListSortDirection.Ascending);  // resort
         this.Cursor = Cursors.Default;
@@ -426,7 +420,6 @@ public partial class MainForm
 
 
         // keep selection cleared
-
         if (!itmOptionsRenameSelectedRows.Checked)
             dgvFiles.ClearSelection();
 
@@ -575,18 +568,15 @@ public partial class MainForm
     private void bgwRename_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
         // re-throw exception if one occured during rename
-
         if (e.Error != null)
             throw e.Error;
 
 
         // get result
-
         RenameResult result = (RenameResult)e.Result;
 
 
         // if necessary, refresh nodes in folder tree
-
         if (RenameFolders)
         {
             tvwFolders.RefreshNode(tvwFolders.SelectedNode);
@@ -603,12 +593,10 @@ public partial class MainForm
 
 
         // update stats
-
         _countFilesRenamed += result.FilesRenamed;
 
 
         // swap rename/cancel buttons
-
         btnCancel.Visible = false;
         btnRename.Visible = true;
         btnCancel.Enabled = false;
@@ -617,14 +605,12 @@ public partial class MainForm
 
 
         // hide progress bar
-
         progressBar.Visible = false;
         tsOptions.Visible = lblNumMatched.Visible = lblNumConflict.Visible = true;
         UnFocusAll();
 
 
         // show error dialog if any errors occured
-
         if (result.AnyErrors)
             result.ShowErrorDialog(strFile);
 
@@ -632,19 +618,15 @@ public partial class MainForm
         if (!result.AnyErrors && !result.Cancelled)
         {
             // save regex to history
-
             string regexMatch = (string)cmbMatch.Tag;
             cmbMatch.AddUniqueItem(regexMatch);
             string regexReplace = (string)cmbReplace.Tag;
             cmbReplace.AddUniqueItem(regexReplace);
             SaveRegexHistory();
-
-            //ResetFields();
         }
 
 
         // reactivate form & refresh filelist
-
         SetFormActive(true);
         UpdateFileList();
         cmbMatch.Focus();

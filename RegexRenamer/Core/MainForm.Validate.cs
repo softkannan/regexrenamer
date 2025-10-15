@@ -199,12 +199,12 @@ namespace RegexRenamer
                     dgvFiles.Rows[dfi].Cells[2].Style.ForeColor = SystemColors.WindowText;
             }
 
-            if (DM != null)
+            if (_dm != null)
             {
-                dgvFiles.BackgroundColor = DM.OScolors.Control;
-                dgvFiles.GridColor = DM.OScolors.Accent;
-                dgvFiles.RowsDefaultCellStyle.BackColor = DM.OScolors.Surface;
-                dgvFiles.AlternatingRowsDefaultCellStyle.BackColor = DM.OScolors.Control;
+                dgvFiles.BackgroundColor = _dm.OScolors.Control;
+                dgvFiles.GridColor = _dm.OScolors.SecondaryLight;
+                dgvFiles.RowsDefaultCellStyle.BackColor = _dm.OScolors.Surface;
+                dgvFiles.AlternatingRowsDefaultCellStyle.BackColor = _dm.OScolors.Control;
             }
             else
             {
@@ -395,9 +395,9 @@ namespace RegexRenamer
 
             if (errorMessage == null)
             {
-                if (DM != null)
+                if (_dm != null)
                 {
-                    cmbMatch.BackColor = DM.OScolors.Control;
+                    cmbMatch.BackColor = _dm.OScolors.Control;
                 }
                 else
                 {

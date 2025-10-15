@@ -1,5 +1,5 @@
 ﻿using Microsoft.Win32;
-using RegexRenamer.Controls;
+using RegexRenamer.Controls.ListViewExCtrl;
 using System;
 using System.Collections.Generic;
 using System.Linq;
