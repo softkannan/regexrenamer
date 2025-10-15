@@ -37,7 +37,9 @@ static class Program
             Application.ThreadException += Application_ThreadException;
 
 #endif
-            Application.SetHighDpiMode(HighDpiMode.DpiUnawareGdiScaled);
+        Config.UserConfig.LoadConfig();
+        Config.UserConfig.Inst.Process();
+        Application.SetHighDpiMode(HighDpiMode.DpiUnawareGdiScaled);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

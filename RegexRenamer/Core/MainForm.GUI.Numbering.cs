@@ -12,7 +12,15 @@ namespace RegexRenamer
     public partial class MainForm
     {
         // letter sequences
+        private void InitializeNumbering()
+        {
+            txtNumberingStart.TextChanged += txtNumberingStart_TextChanged;
+            txtNumberingPad.TextChanged += txtNumberingPad_TextChanged;
+            txtNumberingInc.TextChanged += txtNumberingInc_TextChanged;
+            txtNumberingReset.TextChanged += txtNumberingReset_TextChanged;
+            mnuNumbering.MouseDown += mnuNumbering_MouseDown;
 
+        }
         private static string SequenceNumberToLetter(int i)
         {
             int dividend = i;
@@ -96,12 +104,12 @@ namespace RegexRenamer
             // if all valid, update preview
 
             textBox.Tag = !error;
-            validNumber = (bool)mnuNumbering.DropDownItems[0].Tag
+            _validNumber = (bool)mnuNumbering.DropDownItems[0].Tag
                         && (bool)mnuNumbering.DropDownItems[1].Tag
                         && (bool)mnuNumbering.DropDownItems[2].Tag
                         && (bool)mnuNumbering.DropDownItems[3].Tag;
 
-            if (validNumber)
+            if (_validNumber)
                 UpdatePreview();
         }
         private void txtNumberingStart_TextChanged(object sender, EventArgs e)

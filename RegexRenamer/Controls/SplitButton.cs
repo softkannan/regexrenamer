@@ -25,6 +25,9 @@ namespace RegexRenamer.Controls
             this.AutoSize = true;
         }
 
+        [DefaultValue(false)]
+        public bool ShowMenuAlways { get; set; } = false;
+
         [DefaultValue(true)]
         public bool ShowSplit
         {
@@ -43,6 +46,7 @@ namespace RegexRenamer.Controls
         }
 
         // private PushButtonState State
+        [DefaultValue(PushButtonState.Normal)]
         public PushButtonState State  // [xiperware] made public
         {
             get
@@ -61,7 +65,7 @@ namespace RegexRenamer.Controls
 
         public override Size GetPreferredSize(Size proposedSize)
         {
-            Size preferredSize = base.GetPreferredSize( proposedSize );
+            Size preferredSize = base.GetPreferredSize(proposedSize);
             if (showSplit && !string.IsNullOrEmpty(Text) && TextRenderer.MeasureText(Text, Font).Width + PushButtonWidth > preferredSize.Width)
             {
                 return preferredSize + new Size(PushButtonWidth + BorderSize * 2, 0);
@@ -99,7 +103,7 @@ namespace RegexRenamer.Controls
         {
             if (showSplit)
             {
-                if (kevent.KeyCode.Equals(Keys.Down))
+                if (kevent.KeyCode.Equals(Keys.Down) || ShowMenuAlways)
                 {
                     ShowContextMenuStrip();
                 }
@@ -139,14 +143,13 @@ namespace RegexRenamer.Controls
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            // if( !showSplit )
             if (!showSplit || e.Button != MouseButtons.Left)  // [xiperware] prevent cms on right-click
             {
                 base.OnMouseDown(e);
                 return;
             }
 
-            if (dropDownRectangle.Contains(e.Location))
+            if (dropDownRectangle.Contains(e.Location) || ShowMenuAlways)
             {
                 ShowContextMenuStrip();
             }
@@ -200,7 +203,7 @@ namespace RegexRenamer.Controls
                 return;
             }
 
-            if (ContextMenuStrip == null || !ContextMenuStrip.Visible)
+            if ((ContextMenuStrip == null || !ContextMenuStrip.Visible) && ShowMenuAlways == false)
             {
                 SetButtonDrawState();
                 if (Bounds.Contains(Parent.PointToClient(Cursor.Position)) && !dropDownRectangle.Contains(mevent.Location))
@@ -242,11 +245,11 @@ namespace RegexRenamer.Controls
 
             int internalBorder = BorderSize;
             Rectangle focusRect =
-          new Rectangle( internalBorder,
+          new Rectangle(internalBorder,
                         internalBorder,
                         bounds.Width - dropDownRectangle.Width - internalBorder,
                         // bounds.Height - ( internalBorder * 2 ) );
-                        bounds.Height - ( internalBorder * 2 ) - 1 );  // [xiperware] shift label up 1px
+                        bounds.Height - (internalBorder * 2) - 1);  // [xiperware] shift label up 1px
 
             // bool drawSplitLine = (State == PushButtonState.Hot || State == PushButtonState.Pressed || !Application.RenderWithVisualStyles);
             bool drawSplitLine = true;  // [xiperware] always draw split line
@@ -308,12 +311,12 @@ namespace RegexRenamer.Controls
 
         private void PaintArrow(Graphics g, Rectangle dropDownRect)
         {
-            Point middle = new Point( Convert.ToInt32( dropDownRect.Left + dropDownRect.Width / 2 ), Convert.ToInt32( dropDownRect.Top + dropDownRect.Height / 2 ) );
+            Point middle = new Point(Convert.ToInt32(dropDownRect.Left + dropDownRect.Width / 2), Convert.ToInt32(dropDownRect.Top + dropDownRect.Height / 2));
 
             //if the width is odd - favor pushing it over one pixel right.
             middle.X += (dropDownRect.Width % 2);
 
-            Point[] arrow = new Point[] { new Point( middle.X - 2, middle.Y - 1 ), new Point( middle.X + 3, middle.Y - 1 ), new Point( middle.X, middle.Y + 2 ) };
+            Point[] arrow = new Point[] { new Point(middle.X - 2, middle.Y - 1), new Point(middle.X + 3, middle.Y - 1), new Point(middle.X, middle.Y + 2) };
 
             g.FillPolygon(SystemBrushes.ControlText, arrow);
         }

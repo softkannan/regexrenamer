@@ -10,12 +10,25 @@ namespace RegexRenamer
 {
     public partial class MainForm
     {
+        private void InitializeFilter()
+        {
+            rbFilterRegex.CheckedChanged += rbFilterRegex_CheckedChanged;
+            rbFilterRegex.Click += rbFilterRegex_Click;
+            rbFilterGlob.Click += rbFilterGlob_Click;
+            txtFilter.TextChanged += txtFilter_TextChanged;
+            txtFilter.KeyDown += txtFilter_KeyDown;
+            txtFilter.Leave += txtFilter_Leave;
+            txtFilter.MouseDown += txtFilter_MouseDown;
+            txtFilter.MouseUp += txtFilter_MouseUp;
+            cbFilterExclude.CheckedChanged += cbFilterExclude_CheckedChanged;
+        }
+
         // FILTER
         private void ApplyFilter()
         {
-            if (!EnableUpdates || !validFilter) return;
+            if (!EnableUpdates || !_validFilter) return;
 
-            activeFilter = txtFilter.Text;
+            _activeFilter = txtFilter.Text;
             UpdateFileList();
         }
         private void rbFilterRegex_CheckedChanged(object sender, EventArgs e)
@@ -24,19 +37,19 @@ namespace RegexRenamer
             {
                 EnableUpdates = false;
                 txtFilter.Text = "*.*";
-                activeFilter = "*.*";
+                _activeFilter = "*.*";
                 EnableUpdates = true;
             }
             else if (rbFilterRegex.Checked && (txtFilter.Text == "*.*" || txtFilter.Text == "*"))
             {
                 EnableUpdates = false;
                 txtFilter.Text = ".*";
-                activeFilter = ".*";
+                _activeFilter = ".*";
                 EnableUpdates = true;
             }
             else
             {
-                activeFilter = "";
+                _activeFilter = "";
                 ValidateFilter();
             }
         }
@@ -56,7 +69,7 @@ namespace RegexRenamer
         {
             if (e.KeyCode == Keys.Enter)  // apply filter
             {
-                if (validFilter)
+                if (_validFilter)
                     e.SuppressKeyPress = true;  // prevent beep on enter if valid filter
 
                 ApplyFilter();
@@ -64,13 +77,13 @@ namespace RegexRenamer
             else if (e.KeyCode == Keys.Escape)  // revert
             {
                 EnableUpdates = false;
-                txtFilter.Text = activeFilter;
+                txtFilter.Text = _activeFilter;
                 EnableUpdates = true;
 
-                validFilter = true;
+                _validFilter = true;
                 txtFilter.BackColor = SystemColors.Window;
                 toolTip.Hide(txtFilter);
-                txtFilter.SelectionStart = activeFilter.Length;
+                txtFilter.SelectionStart = _activeFilter.Length;
 
                 e.SuppressKeyPress = true;  // prevent beep
             }
@@ -80,16 +93,16 @@ namespace RegexRenamer
             if (cbFilterExclude.Focused || rbFilterGlob.Focused || rbFilterRegex.Focused) return;
 
             EnableUpdates = false;
-            txtFilter.Text = activeFilter;
+            txtFilter.Text = _activeFilter;
             EnableUpdates = true;
 
-            validFilter = true;
+            _validFilter = true;
             txtFilter.BackColor = SystemColors.Window;
             toolTip.Hide(txtFilter);
         }
         private void cbFilterExclude_CheckedChanged(object sender, EventArgs e)
         {
-            if (validFilter)
+            if (_validFilter)
                 ApplyFilter();
             else
                 txtFilter.Focus();
@@ -100,13 +113,7 @@ namespace RegexRenamer
         {
             if (e.Button == MouseButtons.Right && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
             {
-                lastControlRightClicked = txtFilter;
-                txtFilter.ContextMenuStrip = cmsBlank;  // prevent default cms from being displayed
-                txtFilter.Focus();
-                if (rbFilterGlob.Checked)
-                    cmGlobMatch.Show(txtFilter, e.Location);
-                else
-                    cmRegexMatch.Show(txtFilter, e.Location);
+                regExCtxMenu.ShowGlobMenu(txtFilter, rbFilterGlob.Checked, e.Location);
             }
         }
         private void txtFilter_MouseUp(object sender, MouseEventArgs e)

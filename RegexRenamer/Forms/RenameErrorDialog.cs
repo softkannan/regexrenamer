@@ -14,6 +14,7 @@
 
 
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -43,6 +44,8 @@ namespace RegexRenamer
       lvwErrors.Items[lvwErrors.Items.Count - 1].SubItems.Add( "" );
       lvwErrors.Items[lvwErrors.Items.Count - 1].SubItems.Add( errorMessage.Replace( "\r\n", " " ) ).ForeColor = Color.Red;
     }
+
+        [DefaultValue("")]
     public string Message
     {
       set { lblMessage.Text = value; }

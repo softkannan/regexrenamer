@@ -1052,11 +1052,11 @@ public class MyRenderer : ToolStripProfessionalRenderer
         base.OnRenderItemBackground(e);
 
         // Only draw border for ComboBox items
-        if (e.Item is ComboBox)
-        {
-            Rectangle rect = new Rectangle(Point.Empty, e.Item.Size);
-            e.Graphics.DrawRectangle(new Pen(MyColors.ControlLight, 1), rect);
-        }
+        //if (e.Item is ComboBox)
+        //{
+        //    Rectangle rect = new Rectangle(Point.Empty, e.Item.Size);
+        //    e.Graphics.DrawRectangle(new Pen(MyColors.ControlLight, 1), rect);
+        //}
     }
 
     // For Menu Items BackColor:

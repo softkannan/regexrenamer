@@ -96,5 +96,19 @@ namespace RegexRenamer.Utility
             return selectedFiles;
         }
 
+       
+
+        public static List<FileInfo> GetAllFileInfo(this DataGridView pThis, List<RRItem> activeFiles)
+        {
+            List<FileInfo> selectedFiles = new List<FileInfo>();
+            foreach (DataGridViewRow row in pThis.Rows)
+            {
+                var afi = (int)row.Tag;
+                selectedFiles.Add(new FileInfo(activeFiles[afi].Fullpath));
+            }
+
+            return selectedFiles;
+        }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿using RegexRenamer.Native;
+﻿using RegexRenamer.Controls.FolderTreeViewCtrl;
+using RegexRenamer.Forms;
+using RegexRenamer.Native;
 using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
@@ -15,9 +17,125 @@ namespace RegexRenamer
 {
     public partial class MainForm
     {
-        PInvoke.ShellContextMenu ctxMenu = new PInvoke.ShellContextMenu();
+        PInvoke.ShellContextMenu _shellCtxMenu = new PInvoke.ShellContextMenu();
+        private ContextMenuStrip cmFolderView;
+        private ToolStripMenuItem setAsKavitaLibraryRootFolderViewToolStripMenuItem;
+        private void CreateFolderViewMenu()
+        {
+            cmFolderView = new System.Windows.Forms.ContextMenuStrip(components);
+            setAsKavitaLibraryRootFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var explorerContextMenuFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var renameFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var deleteFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var pasteFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var cutFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var copyFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var copyPathFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var openInExplorerFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var editMetadataFolderViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 
-        private void explorerContextMenuToolStripMenuItem_Click(object sender, EventArgs e)
+
+            // 
+            // cmFolderView
+            // 
+            cmFolderView.ImageScalingSize = new System.Drawing.Size(20, 20);
+            cmFolderView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { setAsKavitaLibraryRootFolderViewToolStripMenuItem, explorerContextMenuFolderViewToolStripMenuItem, renameFolderViewToolStripMenuItem, deleteFolderViewToolStripMenuItem, pasteFolderViewToolStripMenuItem, cutFolderViewToolStripMenuItem, copyFolderViewToolStripMenuItem, copyPathFolderViewToolStripMenuItem, openInExplorerFolderViewToolStripMenuItem, editMetadataFolderViewToolStripMenuItem });
+            cmFolderView.Name = "cmFileView";
+            cmFolderView.Size = new System.Drawing.Size(209, 246);
+            // 
+            // setAsKavitaLibraryRootFolderViewToolStripMenuItem
+            // 
+            setAsKavitaLibraryRootFolderViewToolStripMenuItem.Name = "setAsKavitaLibraryRootFolderViewToolStripMenuItem";
+            setAsKavitaLibraryRootFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            setAsKavitaLibraryRootFolderViewToolStripMenuItem.Text = "Set As Kavita Library Root";
+            // 
+            // explorerContextMenuFolderViewToolStripMenuItem
+            // 
+            explorerContextMenuFolderViewToolStripMenuItem.Name = "explorerContextMenuFolderViewToolStripMenuItem";
+            explorerContextMenuFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            explorerContextMenuFolderViewToolStripMenuItem.Text = "Explorer Context Menu";
+            // 
+            // renameFolderViewToolStripMenuItem
+            // 
+            renameFolderViewToolStripMenuItem.Name = "renameFolderViewToolStripMenuItem";
+            renameFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            renameFolderViewToolStripMenuItem.Text = "Rename";
+            // 
+            // deleteFolderViewToolStripMenuItem
+            // 
+            deleteFolderViewToolStripMenuItem.Name = "deleteFolderViewToolStripMenuItem";
+            deleteFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            deleteFolderViewToolStripMenuItem.Text = "Delete";
+            // 
+            // pasteFolderViewToolStripMenuItem
+            // 
+            pasteFolderViewToolStripMenuItem.Name = "pasteFolderViewToolStripMenuItem";
+            pasteFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            pasteFolderViewToolStripMenuItem.Text = "Paste";
+            // 
+            // cutFolderViewToolStripMenuItem
+            // 
+            cutFolderViewToolStripMenuItem.Name = "cutFolderViewToolStripMenuItem";
+            cutFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            cutFolderViewToolStripMenuItem.Text = "Cut";
+            // 
+            // copyFolderViewToolStripMenuItem
+            // 
+            copyFolderViewToolStripMenuItem.Name = "copyFolderViewToolStripMenuItem";
+            copyFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            copyFolderViewToolStripMenuItem.Text = "Copy";
+            // 
+            // copyPathFolderViewToolStripMenuItem
+            // 
+            copyPathFolderViewToolStripMenuItem.Name = "copyPathFolderViewToolStripMenuItem";
+            copyPathFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            copyPathFolderViewToolStripMenuItem.Text = "Copy Path";
+            // 
+            // openInExplorerFolderViewToolStripMenuItem
+            // 
+            openInExplorerFolderViewToolStripMenuItem.Name = "openInExplorerFolderViewToolStripMenuItem";
+            openInExplorerFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            openInExplorerFolderViewToolStripMenuItem.Text = "Open In Explorer";
+            // 
+            // editMetadataFolderViewToolStripMenuItem
+            // 
+            editMetadataFolderViewToolStripMenuItem.Name = "editMetadataFolderViewToolStripMenuItem";
+            editMetadataFolderViewToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            editMetadataFolderViewToolStripMenuItem.Text = "Clear / Edit Metadata";
+
+            setAsKavitaLibraryRootFolderViewToolStripMenuItem.Click += setAsKavitaLibraryRootFolderViewToolStripMenuItem_Click;
+            explorerContextMenuFolderViewToolStripMenuItem.Click += explorerContextMenuFolderViewToolStripMenuItem_Click;
+            renameFolderViewToolStripMenuItem.Click += renameFolderViewToolStripMenuItem_Click;
+            deleteFolderViewToolStripMenuItem.Click += deleteFolderViewToolStripMenuItem_Click;
+            pasteFolderViewToolStripMenuItem.Click += pasteFolderViewToolStripMenuItem_Click;
+            cutFolderViewToolStripMenuItem.Click += cutFolderViewToolStripMenuItem_Click;
+            copyFolderViewToolStripMenuItem.Click += copyFolderViewToolStripMenuItem_Click;
+            copyPathFolderViewToolStripMenuItem.Click += copyPathFolderViewToolStripMenuItem_Click;
+            openInExplorerFolderViewToolStripMenuItem.Click += openInExplorerFolderViewToolStripMenuItem_Click;
+            editMetadataFolderViewToolStripMenuItem.Click += editFolderViewMetadataFolderToolStripMenuItem_Click;
+        }
+        private void InitializeFolderTreeView()
+        {
+            CreateFolderViewMenu();
+
+            tvwFolders.AfterLabelEdit += tvwFolders_AfterLabelEdit;
+            tvwFolders.AfterSelect += tvwFolders_AfterSelect;
+            tvwFolders.NodeMouseClick += tvwFolders_NodeMouseClick;
+            tvwFolders.KeyUp += tvwFolders_KeyUp;
+
+            btnNetwork.Click += bttnNetwork_Click;
+            txtPath.Enter += txtPath_Enter;
+            txtPath.KeyDown += txtPath_KeyDown;
+            txtPath.Leave += txtPath_Leave;
+        }
+
+        #region Folder View Context Menu
+
+        private void setAsKavitaLibraryRootFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            setAsKavitaLibraryRootFolderViewToolStripMenuItem.Tag = ActivePath;
+        }
+        private void explorerContextMenuFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -26,11 +144,11 @@ namespace RegexRenamer
 
             DirectoryInfo dirInfo  = new DirectoryInfo(destPath);
             //ctxMenu.ShowContextMenu(new []{ dirInfo }, this.PointToScreen(Cursor.Position));
-            ctxMenu.ShowContextMenu(new []{ dirInfo }, location);
+            _shellCtxMenu.ShowContextMenu(new []{ dirInfo }, location);
             cmFolderView.Tag = null;
         }
 
-        private void renameToolStripMenuItem_Click(object sender, EventArgs e)
+        private void renameFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -40,7 +158,7 @@ namespace RegexRenamer
             cmFolderView.Tag = null;
         }
 
-        private void newFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        private void newFolderFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -56,7 +174,7 @@ namespace RegexRenamer
             cmFolderView.Tag = null;
         }
 
-        private void copyPathToolStripMenuItem_Click(object sender, EventArgs e)
+        private void copyPathFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -64,7 +182,7 @@ namespace RegexRenamer
             cmFolderView.Tag = null;
         }
 
-        private void openInExplorerToolStripMenuItem_Click(object sender, EventArgs e)
+        private void openInExplorerFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -81,7 +199,7 @@ namespace RegexRenamer
             cmFolderView.Tag = null;
         }
 
-        private void pasteToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void pasteFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -92,7 +210,7 @@ namespace RegexRenamer
             cmFolderView.Tag = null;
         }
 
-        private void deleteToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void deleteFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -103,7 +221,7 @@ namespace RegexRenamer
             cmFolderView.Tag = null;
         }
 
-        private void copyToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void copyFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -113,7 +231,7 @@ namespace RegexRenamer
             cmFolderView.Tag = null;
         }
 
-        private void cutToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void cutFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
 
@@ -122,10 +240,20 @@ namespace RegexRenamer
             srcPath.CopyFilesToClipboad(true);
             cmFolderView.Tag = null;
         }
+        private void editFolderViewMetadataFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var selectedFiles = dgvFiles.GetAllFileInfo(_activeFiles);
+            using (EditMetadataForm editMetaForm = new EditMetadataForm(ActivePath, _activeFilter, "Modify Metadata", "Edit"))
+            {
+                editMetaForm.ShowDialog();
+            }
+        }
+       
         // FOLDER TREE
+        #endregion
 
         // browse network button
-        private void btnNetwork_Click(object sender, EventArgs e)
+        private void bttnNetwork_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates) return;
 
@@ -164,6 +292,9 @@ namespace RegexRenamer
         }
 
         // update file list on select different path
+
+        
+
         private void tvwFolders_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             if (!EnableUpdates) return;
@@ -183,6 +314,12 @@ namespace RegexRenamer
                 return;
             }
 
+            if (string.IsNullOrEmpty(e.Label))
+                return;
+
+            if(e.Node.Text == e.Label) 
+                return;
+            
             var newPath = e.Node.RenameFolder(e.Label);
             tvwFolders.LabelEdit = false;
             if (!string.IsNullOrEmpty(newPath))

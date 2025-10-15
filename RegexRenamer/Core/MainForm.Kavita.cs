@@ -12,14 +12,23 @@ namespace RegexRenamer
 {
     public partial class MainForm
     {
-        private void setAsKavitaLibraryRootToolStripMenuItem_Click(object sender, EventArgs e)
+        private void InitializeKavita()
         {
-            setAsKavitaLibraryRootToolStripMenuItem.Tag = ActivePath;
+            noneToolStripMenuItem.Click += noneToolStripMenuItem_Click;
+            previewComicsToolStripMenuItem.Click += previewComicsToolStripMenuItem_Click;
+            previewMangaToolStripMenuItem.Click += previewMangaToolStripMenuItem_Click;
+            previewBooksToolStripMenuItem.Click += previewBooksToolStripMenuItem_Click;
         }
+
+        
         private void UpdateKavitaCheck(RRItem match, string kavithaRoot, Kavita.LibraryType libType)
         {
-            var parseInfo = parser.Parse(match.PreviewFullPath, kavithaRoot, libType);
-            match.Info = parseInfo;
+            var parseInfo = _parser.ParseFile(match.PreviewFullPath,kavithaRoot, kavithaRoot, libType,true);
+            match.ParseInfo = parseInfo;
+
+            //var comicInfo = parser.GetComicInfo(match.PreviewFullPath, true); //, kavithaRoot, libType);
+            //match.ComicInfo = comicInfo;
+            
         }
         private void KavitaMenuItem(object sender)
         {
@@ -75,19 +84,19 @@ namespace RegexRenamer
                 mnuKavitaCheck.Font = new Font("Tahoma", 8.25F, FontStyle.Bold);
                 mnuKavitaCheck.Padding = new Padding(0, 0, 0, 0);
 
-                curLibType = LibraryType.Comic;
+                _curLibType = LibraryType.Comic;
 
                 if (previewComicsToolStripMenuItem.Checked)
                 {
-                    curLibType = LibraryType.Comic;
+                    _curLibType = LibraryType.Comic;
                 }
                 else if (previewMangaToolStripMenuItem.Checked)
                 {
-                    curLibType = LibraryType.Manga;
+                    _curLibType = LibraryType.Manga;
                 }
                 else if (previewBooksToolStripMenuItem.Checked)
                 {
-                    curLibType = LibraryType.Book;
+                    _curLibType = LibraryType.Book;
                 }
             }
 

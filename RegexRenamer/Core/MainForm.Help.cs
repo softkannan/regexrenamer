@@ -12,6 +12,20 @@ namespace RegexRenamer
 {
     public partial class MainForm
     {
+        private void InitializeOptionsHelp()
+        {
+            itmOptionsShowHidden.Click += itmOptionsShowHidden_Click;
+            itmOptionsPreserveExt.Click += itmOptionsPreserveExt_Click;
+            itmOptionsAllowRenSub.Click += itmOptionsAllowRenSub_Click;
+            itmOptionsAddContextMenu.Click += itmOptionsAddContextMenu_Click;
+            itmHelpContents.Click += itmHelpContents_Click;
+            itmHelpRegexReference.Click += itmHelpRegexReference_Click;
+            itmHelpEmailAuthor.Click += itmHelpEmailAuthor_Click;
+            itmHelpReportBug.Click += itmHelpReportBug_Click;
+            itmHelpHomepage.Click += itmHelpHomepage_Click;
+            itmHelpAbout.Click += itmHelpAbout_Click;
+        }
+
         // OPTIONS/HELP
 
         // options
@@ -25,12 +39,12 @@ namespace RegexRenamer
             this.Update();
 
             // update activeFiles
-            for (int afi = 0; afi < activeFiles.Count; afi++)
-                activeFiles[afi].PreserveExt = itmOptionsPreserveExt.Checked;
+            for (int afi = 0; afi < _activeFiles.Count; afi++)
+                _activeFiles[afi].PreserveExt = itmOptionsPreserveExt.Checked;
 
             // update filename column
             for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)
-                dgvFiles.Rows[dfi].Cells[1].Value = activeFiles[(int)dgvFiles.Rows[dfi].Tag].Name;
+                dgvFiles.Rows[dfi].Cells[1].Value = _activeFiles[(int)dgvFiles.Rows[dfi].Tag].Name;
 
             // update preview column
             UpdatePreview();
@@ -127,11 +141,11 @@ namespace RegexRenamer
         }
         private void itmHelpAbout_Click(object sender, EventArgs e)
         {
-            if (aboutForm == null)
-                aboutForm = new About();
+            if (_aboutForm == null)
+                _aboutForm = new About();
 
-            aboutForm.SetStats(countProgLaunches, countFilesRenamed);
-            aboutForm.ShowDialog(this);
+            _aboutForm.SetStats(_countProgLaunches, _countFilesRenamed);
+            _aboutForm.ShowDialog(this);
         }
     }
 }

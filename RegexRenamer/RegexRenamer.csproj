@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <ApplicationIcon>appicon.ico</ApplicationIcon>
     <StartupObject>RegexRenamer.Program</StartupObject>
@@ -10,8 +10,10 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <Platforms>AnyCPU</Platforms>
     <SignAssembly>True</SignAssembly>
+	<UseWPF>true</UseWPF>
     <AssemblyOriginatorKeyFile>RegexRenamer.snk</AssemblyOriginatorKeyFile>
-    <UseWPF>True</UseWPF>
+	<ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+	<ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <CodeAnalysisLogFile>bin\Debug\RegexRenamer.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
@@ -27,11 +29,20 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Native\Shell32.ContextMenu.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Controls\FolderTreeView.cs">
+    <None Remove="Assets\Config\UserConfig.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Controls\FolderTreeViewCtrl\FolderTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
     <BaseApplicationManifest Include="Properties\app.manifest" />
@@ -43,11 +54,28 @@
     <Content Include="appicon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Assets\Config\UserConfig.json" />
+    <EmbeddedResource Include="Assets\FindReplaceTemplate\ProcessCrimeNovel.json" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Native\Interop\Shell32.ContextMenu.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="itext" Version="9.3.0" />
+    <PackageReference Include="itext.bouncy-castle-adapter" Version="9.3.0" />
+    <PackageReference Include="itext.bouncy-castle-fips-adapter" Version="9.3.0" />
+    <PackageReference Include="itext.commons" Version="9.3.0" />
+    <PackageReference Include="itext.font-asian" Version="9.3.0" />
+    <PackageReference Include="itext.pdfcalligraph" Version="5.0.3" />
+    <PackageReference Include="itext.pdfhtml" Version="6.2.1" />
+    <PackageReference Include="itext.pdfoptimizer" Version="4.1.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="PDFsharp" Version="6.2.2" />
+    <PackageReference Include="QuestPDF" Version="2025.7.2" />
+    <PackageReference Include="SharpCompress" Version="0.40.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="VersOne.Epub" Version="3.3.4" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Interop.Shell32">
@@ -55,7 +83,7 @@
     </Reference>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="COPY &quot;$(ProjectDir)\Documents\Regex Quick Reference.chm&quot; &quot;$(OutDir)\.&quot;&#xD;&#xA;COPY &quot;$(ProjectDir)\Documents\RegexRenamer.chm&quot; &quot;$(OutDir)\.&quot;" />
+    <Exec Command="COPY &quot;$(ProjectDir)\Documents\Regex Quick Reference.chm&quot; &quot;$(OutDir)\.&quot;&#xD;&#xA;COPY &quot;$(ProjectDir)\Documents\RegexRenamer.chm&quot; &quot;$(OutDir)\.&quot;&#xD;&#xA;if $(ConfigurationName) == Release (&#xD;&#xA;XCOPY /s /K /D /H /Y &quot;$(OutDir)&quot; &quot;$(ProjectDir)\.Build&quot;&#xD;&#xA;)" />
   </Target>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="if NOT EXIST &quot;$(ProjectDir)\RegexRenamer.snk&quot; (&#xD;&#xA;&quot;$(TargetFrameworkSDKToolsDirectory)sn.exe&quot; -k &quot;$(ProjectDir)\RegexRenamer.snk&quot;&#xD;&#xA;)&#xD;&#xA;&quot;$(TargetFrameworkSDKToolsDirectory)tlbimp.exe&quot; &quot;$(SystemRoot)\System32\shell32.dll&quot; /out:&quot;$(ProjectDir)\Common\Interop.Shell32.dll&quot; /keyfile:&quot;$(ProjectDir)\RegexRenamer.snk&quot; /asmversion:1.0.0.0 /nologo /machine:&quot;Agnostic&quot; /strictref" />

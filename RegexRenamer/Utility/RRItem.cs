@@ -20,7 +20,8 @@ namespace RegexRenamer.Utility
         public bool PreserveExt;  // true if 'Preserve file extension' checked
         public bool Selected;     // true if row is currently selected
 
-        public Kavita.ParserInfo Info;
+        public Kavita.ComicInfo ComicInfo;
+        public Kavita.ParserInfo ParseInfo;
 
         public RRItem(FileInfo fi, bool hidden, bool preserveext)
         {

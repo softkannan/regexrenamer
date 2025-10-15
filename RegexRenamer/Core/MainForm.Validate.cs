@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Forms;
 
 namespace RegexRenamer
@@ -25,7 +24,7 @@ namespace RegexRenamer
             {
                 int afi = (int)dgvFiles.Rows[dfi].Tag;              // afi = activeFiles index
 
-                string preview = activeFiles[afi].PreviewExt.ToLower();
+                string preview = _activeFiles[afi].PreviewExt.ToLower();
 
                 if (!hashPreview.ContainsKey(preview))
                     hashPreview.Add(preview, new List<int>());
@@ -44,7 +43,7 @@ namespace RegexRenamer
             for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)
             {
                 int afi = (int)dgvFiles.Rows[dfi].Tag;
-                string preview = activeFiles[afi].PreviewExt.ToLower();
+                string preview = _activeFiles[afi].PreviewExt.ToLower();
 
 
                 // skip if already has an error, or an ignored file
@@ -53,17 +52,17 @@ namespace RegexRenamer
 
                 if (itmOutputRenameInPlace.Checked)
                 {
-                    if (activeFiles[afi].Name == activeFiles[afi].Preview) continue;
+                    if (_activeFiles[afi].Name == _activeFiles[afi].Preview) continue;
                 }
                 else
                 {
-                    if (!activeFiles[afi].Matched) continue;
+                    if (!_activeFiles[afi].Matched) continue;
                 }
 
 
                 // check for valid filename
 
-                string validFilenameErrmsg = ValidateFilename(activeFiles[afi].PreviewExt, itmOptionsAllowRenSub.Checked);
+                string validFilenameErrmsg = ValidateFilename(_activeFiles[afi].PreviewExt, itmOptionsAllowRenSub.Checked);
 
                 if (validFilenameErrmsg != null)
                 {
@@ -74,7 +73,7 @@ namespace RegexRenamer
 
                 // check for dupe filename conflicts
 
-                if (!activeFiles[afi].Preview.Contains("\\")
+                if (!_activeFiles[afi].Preview.Contains("\\")
                     && (itmOutputRenameInPlace.Checked || itmOutputBackupTo.Checked))  // destination is same directory
                 {
                     // check against active files
@@ -89,7 +88,7 @@ namespace RegexRenamer
                                 hasError[dfi2] = true;
 
                             int afi2 = (int)dgvFiles.Rows[dfi2].Tag;
-                            dgvFiles.Rows[dfi2].Cells[2].Tag = "The " + strFilename + " '" + activeFiles[afi2].PreviewExt
+                            dgvFiles.Rows[dfi2].Cells[2].Tag = "The " + strFilename + " '" + _activeFiles[afi2].PreviewExt
                                                              + "' conflicts with another " + strFile + " in the preview column.";
                         }
                         continue;
@@ -98,16 +97,16 @@ namespace RegexRenamer
 
                     // check against inactive files
 
-                    if (inactiveFiles.ContainsKey(preview))
+                    if (_inactiveFiles.ContainsKey(preview))
                     {
-                        switch (inactiveFiles[preview])
+                        switch (_inactiveFiles[preview])
                         {
                             case InactiveReason.Filtered:
-                                dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '" + activeFiles[afi].PreviewExt
+                                dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '" + _activeFiles[afi].PreviewExt
                                                                 + "' already exists in this directory but is currently filtered out.";
                                 break;
                             case InactiveReason.Hidden:
-                                dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '" + activeFiles[afi].PreviewExt
+                                dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '" + _activeFiles[afi].PreviewExt
                                                                 + "' already exists in this directory as a hidden " + strFile + ".";
                                 break;
                         }
@@ -119,10 +118,10 @@ namespace RegexRenamer
 
                     if (dgvFiles.Rows.Count < 2000)  // this check is expensive, only run if < 2000 items
                     {
-                        string previewFullpath = Path.Combine(outputPath, activeFiles[afi].PreviewExt);
+                        string previewFullpath = Path.Combine(outputPath, _activeFiles[afi].PreviewExt);
                         if (RenameFolders ? File.Exists(previewFullpath) : Directory.Exists(previewFullpath))
                         {
-                            dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '" + activeFiles[afi].PreviewExt
+                            dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '" + _activeFiles[afi].PreviewExt
                                                             + "' conflicts with a " + (RenameFolders ? "file" : "folder")
                                                             + " in the current path.";
                             continue;
@@ -131,12 +130,12 @@ namespace RegexRenamer
                 }
                 else  // destination is other directory, check against file system
                 {
-                    string previewFullpath = Path.Combine(outputPath, activeFiles[afi].PreviewExt);
+                    string previewFullpath = Path.Combine(outputPath, _activeFiles[afi].PreviewExt);
 
                     if (RenameFolders ? Directory.Exists(previewFullpath) : File.Exists(previewFullpath))
                     {
                         dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '"
-                                                        + Path.GetFileName(activeFiles[afi].PreviewExt)
+                                                        + Path.GetFileName(_activeFiles[afi].PreviewExt)
                                                         + "' already exists in the destination folder.";
                         continue;
                     }
@@ -144,7 +143,7 @@ namespace RegexRenamer
                     if (RenameFolders ? File.Exists(previewFullpath) : Directory.Exists(previewFullpath))
                     {
                         dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '"
-                                                        + Path.GetFileName(activeFiles[afi].PreviewExt) + "' conflicts with a "
+                                                        + Path.GetFileName(_activeFiles[afi].PreviewExt) + "' conflicts with a "
                                                         + (RenameFolders ? "file" : "folder") + " in the destination path.";
                         continue;
                     }
@@ -155,18 +154,18 @@ namespace RegexRenamer
 
                 if (itmOutputBackupTo.Checked)
                 {
-                    string previewFullpath = Path.Combine(fbdMoveCopy.SelectedPath, activeFiles[afi].Filename);
+                    string previewFullpath = Path.Combine(fbdMoveCopy.SelectedPath, _activeFiles[afi].Filename);
 
                     if (File.Exists(previewFullpath))
                     {
-                        dgvFiles.Rows[dfi].Cells[2].Tag = "The original filename '" + activeFiles[afi].Filename
+                        dgvFiles.Rows[dfi].Cells[2].Tag = "The original filename '" + _activeFiles[afi].Filename
                                                         + "' already exists in the selected backup folder.";
                         continue;
                     }
 
                     if (Directory.Exists(previewFullpath))
                     {
-                        dgvFiles.Rows[dfi].Cells[2].Tag = "The original filename '" + activeFiles[afi].Filename
+                        dgvFiles.Rows[dfi].Cells[2].Tag = "The original filename '" + _activeFiles[afi].Filename
                                                         + "' conflicts with a folder in the selected backup path.";
                         continue;
                     }
@@ -181,20 +180,20 @@ namespace RegexRenamer
             {
                 int afi = (int)dgvFiles.Rows[dfi].Tag;
 
-                if (activeFiles[afi].Matched)
+                if (_activeFiles[afi].Matched)
                     dgvFiles.Rows[dfi].Cells[1].Style.ForeColor = Color.Blue;
-                else if (activeFiles[afi].Hidden)
+                else if (_activeFiles[afi].Hidden)
                     dgvFiles.Rows[dfi].Cells[1].Style.ForeColor = SystemColors.GrayText;
                 else
                     dgvFiles.Rows[dfi].Cells[1].Style.ForeColor = SystemColors.WindowText;
 
                 if (dgvFiles.Rows[dfi].Cells[2].Tag != null)
                     dgvFiles.Rows[dfi].Cells[2].Style.ForeColor = Color.Red;
-                else if (itmOutputRenameInPlace.Checked && activeFiles[afi].Name != activeFiles[afi].Preview)
+                else if (itmOutputRenameInPlace.Checked && _activeFiles[afi].Name != _activeFiles[afi].Preview)
                     dgvFiles.Rows[dfi].Cells[2].Style.ForeColor = Color.Blue;
-                else if (!itmOutputRenameInPlace.Checked && activeFiles[afi].Matched)
+                else if (!itmOutputRenameInPlace.Checked && _activeFiles[afi].Matched)
                     dgvFiles.Rows[dfi].Cells[2].Style.ForeColor = Color.Blue;
-                else if (activeFiles[afi].Hidden)
+                else if (_activeFiles[afi].Hidden)
                     dgvFiles.Rows[dfi].Cells[2].Style.ForeColor = SystemColors.GrayText;
                 else
                     dgvFiles.Rows[dfi].Cells[2].Style.ForeColor = SystemColors.WindowText;
@@ -219,8 +218,8 @@ namespace RegexRenamer
 
             int matched = 0, conflict = 0;
 
-            for (int i = 0; i < activeFiles.Count; i++)
-                if (activeFiles[i].Matched) matched++;
+            for (int i = 0; i < _activeFiles.Count; i++)
+                if (_activeFiles[i].Matched) matched++;
 
             foreach (DataGridViewRow row in dgvFiles.Rows)
                 if (row.Cells[2].Tag != null)
@@ -379,13 +378,13 @@ namespace RegexRenamer
             {
                 txtFilter.BackColor = SystemColors.Window;
                 toolTip.Hide(txtFilter);
-                validFilter = true;
+                _validFilter = true;
             }
             else
             {
                 txtFilter.BackColor = Color.MistyRose;
                 toolTip.Show(errorMessage, txtFilter, 0, txtFilter.Height);
-                validFilter = false;
+                _validFilter = false;
             }
         }
 
@@ -405,13 +404,13 @@ namespace RegexRenamer
                     cmbMatch.BackColor = SystemColors.Window;
                 }
                 toolTip.Hide(cmbMatch);
-                validMatch = true;
+                _validMatch = true;
             }
             else
             {
                 cmbMatch.BackColor = Color.MistyRose;
                 toolTip.Show(errorMessage, cmbMatch, 0, cmbMatch.Height);
-                validMatch = false;
+                _validMatch = false;
             }
         }
     }

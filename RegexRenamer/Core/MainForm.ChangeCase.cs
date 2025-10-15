@@ -15,6 +15,16 @@ namespace RegexRenamer
     {
         // regex match evaluator for changing case
 
+        private void InitializeChangeCase()
+        {
+            itmChangeCaseNoChange.Click += (sender,e) => ChangeCaseMenuItem(sender); 
+            itmChangeCaseUppercase.Click += (sender, e) => ChangeCaseMenuItem(sender);
+            itmChangeCaseLowercase.Click += (sender, e) => ChangeCaseMenuItem(sender);
+            itmChangeCaseTitlecase.Click += (sender, e) => ChangeCaseMenuItem(sender);
+            itmChangeCaseCleanName.Click += (sender, e) => ChangeCaseMenuItem(sender);
+            mnuChangeCase.MouseDown += mnuChangeCase_MouseDown;
+        }
+
         private string MatchEvalChangeCase(Match match)
         {
             TextInfo ti = new CultureInfo("en").TextInfo;
@@ -89,31 +99,11 @@ namespace RegexRenamer
             UpdatePreview();
         }
 
-        private void itmChangeCaseNoChange_Click(object sender, EventArgs e)
-        {
-            ChangeCaseMenuItem(sender);
-        }
-        private void itmChangeCaseUppercase_Click(object sender, EventArgs e)
-        {
-            ChangeCaseMenuItem(sender);
-        }
-        private void itmChangeCaseLowercase_Click(object sender, EventArgs e)
-        {
-            ChangeCaseMenuItem(sender);
-        }
-        private void itmChangeCaseTitlecase_Click(object sender, EventArgs e)
-        {
-            ChangeCaseMenuItem(sender);
-        }
+        
         private void mnuChangeCase_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && !itmChangeCaseNoChange.Checked)  // set default
                 itmChangeCaseNoChange.PerformClick();
-        }
-
-        private void itmChangeCaseCleanName_Click(object sender, EventArgs e)
-        {
-            ChangeCaseMenuItem(sender);
         }
     }
 }

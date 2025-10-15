@@ -279,11 +279,11 @@ namespace RegexRenamer.Native
 
         public static void ApplyTheme(this Control pThis)
         {
-            if (ThemeName.Light_Theme == false)
-            {
-                SetPreferredAppMode(PreferredAppMode.AllowDark);
-                FlushMenuThemes();
-            }
+            //if (ThemeName.Light_Theme == false)
+            //{
+            //    SetPreferredAppMode(PreferredAppMode.AllowDark);
+            //    FlushMenuThemes();
+            //}
 
             foreach (Control control in pThis.Controls)
             {

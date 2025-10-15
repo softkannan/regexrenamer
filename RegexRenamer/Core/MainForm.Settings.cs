@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using RegexRenamer.FindReplace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -89,8 +90,8 @@ namespace RegexRenamer
             {
                 if (key != null)
                 {
-                    countProgLaunches = (int)key.GetValue("ProgramLaunches", 0) + 1;
-                    countFilesRenamed = (int)key.GetValue("FilesRenamed", 0);
+                    _countProgLaunches = (int)key.GetValue("ProgramLaunches", 0) + 1;
+                    _countFilesRenamed = (int)key.GetValue("FilesRenamed", 0);
 
                     key.Close();
                 }
@@ -105,8 +106,8 @@ namespace RegexRenamer
                 {
                     int cpl = (int)key.GetValue("CountProgLaunches", 0);
                     int cfr = (int)key.GetValue("CountFilesRenamed", 0);
-                    if (cpl > 0) countProgLaunches = cpl;
-                    if (cfr > 0) countFilesRenamed = cfr;
+                    if (cpl > 0) _countProgLaunches = cpl;
+                    if (cfr > 0) _countFilesRenamed = cfr;
 
                     key.DeleteValue("CountProgLaunches", false);
                     key.DeleteValue("CountFilesRenamed", false);
@@ -219,8 +220,8 @@ namespace RegexRenamer
             {
                 if (key != null)
                 {
-                    key.SetValue("ProgramLaunches", countProgLaunches);
-                    key.SetValue("FilesRenamed", countFilesRenamed);
+                    key.SetValue("ProgramLaunches", _countProgLaunches);
+                    key.SetValue("FilesRenamed", _countFilesRenamed);
                     key.Close();
                 }
             }
@@ -249,48 +250,14 @@ namespace RegexRenamer
 
         private void LoadRegexHistory()
         {
-#if !DEBUG
-      try
-      {
-#endif
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\RegexRenamer\\History"))
-            {
-                if (key == null) return;
+            cmbMatch.LoadFromRegistry();
+            cmbReplace.LoadFromRegistry();
 
-                this.cmbMatch.Items.Clear();
-
-                foreach (string name in key.GetValueNames())
-                    this.cmbMatch.Items.Add(key.GetValue(name));
-
-                key.Close();
-            }
-#if !DEBUG
-      }
-      catch {}
-#endif
         }
         private void SaveRegexHistory()
         {
-#if !DEBUG
-      try
-      {
-#endif
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Software\\RegexRenamer\\History"))
-            {
-                if (key == null) return;
-
-                foreach (string name in key.GetValueNames())
-                    key.DeleteValue(name);
-
-                for (int i = 0; i < this.cmbMatch.Items.Count; i++)
-                    key.SetValue(i.ToString("00"), this.cmbMatch.Items[i]);  // update padding if changing MAX_HISTORY
-
-                key.Close();
-            }
-#if !DEBUG
-      }
-      catch {}
-#endif
+            cmbMatch.SaveToRegistry();
+            cmbReplace.SaveToRegistry();
         }
 
 

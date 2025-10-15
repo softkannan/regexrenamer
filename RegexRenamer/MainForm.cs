@@ -30,7 +30,8 @@ using System.Security;
 using RegexRenamer.Kavita;
 using RegexRenamer.Utility;
 using System.Threading;
-using RegexRenamer.Native;        // FieldInfo
+using RegexRenamer.Native;
+using RegexRenamer.Forms;        // FieldInfo
 
 
 namespace RegexRenamer
@@ -47,26 +48,26 @@ namespace RegexRenamer
 
         #region Variables
 
-        private LibraryType curLibType = LibraryType.Comic;
-        private readonly Kavita.DefaultParser parser = new Kavita.DefaultParser();
+        private LibraryType _curLibType = LibraryType.Comic;
+        private readonly Kavita.ReadingItemService _parser = new Kavita.ReadingItemService(new Kavita.DirectoryService());
 
-        
-        private string activeFilter = "*.*";  // current filter
 
-        private FileViewRange currentViewRange = null;
-        private List<RRItem> activeFiles = new List<RRItem>();  // files in activePath displayed in filelist
-        private Dictionary<string, InactiveReason> inactiveFiles = new Dictionary<string, InactiveReason>();  // files in activePath but not displayed
+        private string _activeFilter = "*.*";  // current filter
 
-        private bool validFilter = true;      // file filter is valid
-        private bool validMatch = true;      // regex match expression is valid
-        private bool validNumber = true;      // numbering menu options are all valid
+        private FileViewRange _currentViewRange = null;
+        private List<RRItem> _activeFiles = new List<RRItem>();  // files in activePath displayed in filelist
+        private Dictionary<string, InactiveReason> _inactiveFiles = new Dictionary<string, InactiveReason>();  // files in activePath but not displayed
 
-        private int countProgLaunches = 1;    // counters for
-        private int countFilesRenamed = 0;    // about-dialog stats
+        private bool _validFilter = true;      // file filter is valid
+        private bool _validMatch = true;      // regex match expression is valid
+        private bool _validNumber = true;      // numbering menu options are all valid
 
-        private FileCount fileCount = new FileCount();  // holds file counts (total/shown/filtered/hidden)
+        private int _countProgLaunches = 1;    // counters for
+        private int _countFilesRenamed = 0;    // about-dialog stats
 
-        private About aboutForm;
+        private FileCount _fileCount = new FileCount();  // holds file counts (total/shown/filtered/hidden)
+
+        private About _aboutForm;
 
         private enum InactiveReason
         {
@@ -88,7 +89,7 @@ namespace RegexRenamer
             }
             set
             {
-                currentViewRange = new FileViewRange() { Start = 0, End = MAX_VIEW_PAGE_SIZE } ;
+                _currentViewRange = new FileViewRange() { Start = 0, End = MAX_VIEW_PAGE_SIZE };
                 activePath = value;
             }
         }
@@ -158,7 +159,7 @@ namespace RegexRenamer
                 itmOutputMoveTo.ToolTipText = itmOutputMoveTo.ToolTipText.Replace(oldCapFile, strCapFile);
                 itmOutputCopyTo.ToolTipText = renameFolders ? "Unavailable during folder rename" : "Files that match are copied and the copies are renamed";
                 itmOutputBackupTo.ToolTipText = renameFolders ? "Unavailable during folder rename" : "Files that match are copied and the originals are renamed";
-                miRegexReplaceOrigAll.Text = miRegexReplaceOrigAll.Text.Replace(oldFilename, strFilename);
+                regExCtxMenu.UpdateOrigFilename(oldFilename,strFilename);
                 itmOptionsShowHidden.Text = itmOptionsShowHidden.Text.Replace(oldFile, strFile);
                 colFilename.HeaderText = strCapFilename;
             }
@@ -221,7 +222,7 @@ namespace RegexRenamer
 
         #region Constructor
 
-        private DarkModeCS DM =null;
+        private DarkModeCS DM = null;
         public MainForm(string initPath)
         {
 
@@ -243,90 +244,34 @@ namespace RegexRenamer
             //FieldInfo fieldInfo = fbdNetwork.GetType().GetField("rootFolder", BindingFlags.NonPublic | BindingFlags.Instance);
             //fieldInfo.SetValue(fbdNetwork, (Environment.SpecialFolder)0x0012);  // My Network Places
 
-            // add insert args to regex context menu items
+            InitializeInsertRegExContextMenu();
 
-            miRegexMatchMatchSingleChar.Tag = new InsertArgs(".");
-            miRegexMatchMatchDigit.Tag = new InsertArgs("\\d");
-            miRegexMatchMatchAlpha.Tag = new InsertArgs("\\w");
-            miRegexMatchMatchSpace.Tag = new InsertArgs("\\s");
-            miRegexMatchMatchMultiChar.Tag = new InsertArgs(".*");
-            miRegexMatchMatchNonDigit.Tag = new InsertArgs("\\D");
-            miRegexMatchMatchNonAlpha.Tag = new InsertArgs("\\W");
-            miRegexMatchMatchNonSpace.Tag = new InsertArgs("\\S");
+            InitializeGUICore();
+            InitializeChangeCase();
+            InitializeFolderTreeView();
+            InitializeFileListView();
+            InitializeCore();
+            InitializeFilter();
+            InitializeOptionsHelp();
+            InitializeKavita();
 
-            miRegexMatchAnchorStart.Tag = new InsertArgs("^", "", "group");
-            miRegexMatchAnchorEnd.Tag = new InsertArgs("", "$", "group");
-            miRegexMatchAnchorStartEnd.Tag = new InsertArgs("^", "$", "group");
-            miRegexMatchAnchorBound.Tag = new InsertArgs("\\b", "", "wrap");
-            miRegexMatchAnchorNonBound.Tag = new InsertArgs("\\B", "", "wrap");
+            FormClosing += MainForm_FormClosing;
+            Load += MainForm_Load;
+            Shown += MainForm_Shown;
+            KeyDown += MainForm_KeyDown;
+            cbModifierI.CheckedChanged += cbModifierI_CheckedChanged;
+            cbModifierG.CheckedChanged += cbModifierG_CheckedChanged;
+            cbModifierX.CheckedChanged += cbModifierX_CheckedChanged;
+            lblStats.MouseEnter += lblStats_MouseEnter;
+            lblStats.MouseLeave += lblStats_MouseLeave;
 
-            miRegexMatchGroupCapt.Tag = new InsertArgs("(", ")");
-            miRegexMatchGroupNonCapt.Tag = new InsertArgs("(?:", ")");
-            miRegexMatchGroupAlt.Tag = new InsertArgs("(", "|)", -1, 0);
-
-            miRegexMatchQuantZeroOneG.Tag = new InsertArgs("", "?", "group");
-            miRegexMatchQuantOneMoreG.Tag = new InsertArgs("", "+", "group");
-            miRegexMatchQuantZeroMoreG.Tag = new InsertArgs("", "*", "group");
-            miRegexMatchQuantExactG.Tag = new InsertArgs("", "{n}", -2, 1, "group");
-            miRegexMatchQuantAtLeastG.Tag = new InsertArgs("", "{n,}", -3, 1, "group");
-            miRegexMatchQuantBetweenG.Tag = new InsertArgs("", "{n,m}", -4, 3, "group");
-            miRegexMatchQuantZeroOneL.Tag = new InsertArgs("", "??", "group");
-            miRegexMatchQuantOneMoreL.Tag = new InsertArgs("", "+?", "group");
-            miRegexMatchQuantZeroMoreL.Tag = new InsertArgs("", "*?", "group");
-            miRegexMatchQuantExactL.Tag = new InsertArgs("", "{n}?", -3, 1, "group");
-            miRegexMatchQuantAtLeastL.Tag = new InsertArgs("", "{n,}?", -4, 1, "group");
-            miRegexMatchQuantBetweenL.Tag = new InsertArgs("", "{n,m}?", -5, 3, "group");
-
-            miRegexMatchClassPos.Tag = new InsertArgs("[", "]");
-            miRegexMatchClassNeg.Tag = new InsertArgs("[^", "]");
-            miRegexMatchClassLower.Tag = new InsertArgs("[a-z]");
-            miRegexMatchClassUpper.Tag = new InsertArgs("[A-Z]");
-
-            miRegexMatchCaptCreateUnnamed.Tag = new InsertArgs("(", ")");
-            miRegexMatchCaptMatchUnnamed.Tag = new InsertArgs("\\n", "", 1, 1);
-            miRegexMatchCaptCreateNamed.Tag = new InsertArgs("(?<name>", ")", 3, 4);
-            miRegexMatchCaptMatchNamed.Tag = new InsertArgs("\\<name>", "", 2, 4);
-
-            miRegexMatchLookPosAhead.Tag = new InsertArgs("(?=", ")");
-            miRegexMatchLookNegAhead.Tag = new InsertArgs("(?!", ")");
-            miRegexMatchLookPosBehind.Tag = new InsertArgs("(?<=", ")");
-            miRegexMatchLookNegBehind.Tag = new InsertArgs("(?<!", ")");
-
-            miRegexMatchLiteralDot.Tag = new InsertArgs("\\.");
-            miRegexMatchLiteralQuestion.Tag = new InsertArgs("\\?");
-            miRegexMatchLiteralPlus.Tag = new InsertArgs("\\+");
-            miRegexMatchLiteralStar.Tag = new InsertArgs("\\*");
-            miRegexMatchLiteralCaret.Tag = new InsertArgs("\\^");
-            miRegexMatchLiteralDollar.Tag = new InsertArgs("\\$");
-            miRegexMatchLiteralBackslash.Tag = new InsertArgs("\\\\");
-            miRegexMatchLiteralOpenRound.Tag = new InsertArgs("\\(");
-            miRegexMatchLiteralCloseRound.Tag = new InsertArgs("\\)");
-            miRegexMatchLiteralOpenSquare.Tag = new InsertArgs("\\[");
-            miRegexMatchLiteralCloseSquare.Tag = new InsertArgs("\\]");
-            miRegexMatchLiteralOpenCurly.Tag = new InsertArgs("\\{");
-            miRegexMatchLiteralCloseCurly.Tag = new InsertArgs("\\}");
-            miRegexMatchLiteralPipe.Tag = new InsertArgs("\\|");
-
-            miRegexReplaceCaptureUnnamed.Tag = new InsertArgs("$n", "", 1, 1);
-            miRegexReplaceCaptureNamed.Tag = new InsertArgs("${name}", "", 2, 4);
-
-            miRegexReplaceOrigMatched.Tag = new InsertArgs("$0");
-            miRegexReplaceOrigBefore.Tag = new InsertArgs("$`");
-            miRegexReplaceOrigAfter.Tag = new InsertArgs("$'");
-            miRegexReplaceOrigAll.Tag = new InsertArgs("$_");
-
-            miRegexReplaceSpecialNumSeq.Tag = new InsertArgs("$#");
-            miRegexReplaceLiteralDollar.Tag = new InsertArgs("$$");
-
-            miGlobMatchSingle.Tag = new InsertArgs("?");
-            miGlobMatchMultiple.Tag = new InsertArgs("*");
         }
 
         #endregion
 
         public void UpdateFolderTree()
         {
-            currentViewRange = new FileViewRange { Start = 0, End = MAX_VIEW_PAGE_SIZE };
+            _currentViewRange = new FileViewRange { Start = 0, End = MAX_VIEW_PAGE_SIZE };
             EnableUpdates = false;
             tvwFolders.UpdateFolderTree(ActivePath);
             EnableUpdates = true;
@@ -459,7 +404,14 @@ namespace RegexRenamer
 
 
 
-        
+
+
+
+
+
+
+
+       
     }
 }
 

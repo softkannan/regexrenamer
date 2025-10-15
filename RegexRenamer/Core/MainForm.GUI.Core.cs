@@ -14,6 +14,40 @@ namespace RegexRenamer
 {
     public partial class MainForm
     {
+        private void InitializeGUICore()
+        {
+            cmbMatch.SelectedIndexChanged += cmbMatch_SelectedIndexChanged;
+            cmbMatch.TextChanged += cmbMatch_TextChanged;
+            cmbMatch.Enter += cmbMatch_Enter;
+            cmbMatch.KeyDown += cmbMatch_KeyDown;
+            cmbMatch.Leave += cmbMatch_Leave;
+            cmbMatch.MouseDown += cmbMatch_MouseDown;
+            cmbMatch.MouseUp += cmbMatch_MouseUp;
+            //cmbMatch.ContextMenuStrip = cmRegexMatch;
+
+            cmbReplace.TextChanged += cmbReplace_TextChanged;
+            cmbReplace.KeyDown += cmbReplace_KeyDown;
+            cmbReplace.Leave += cmbReplace_Leave;
+            cmbReplace.MouseDown += cmbReplace_MouseDown;
+            cmbReplace.MouseUp += cmbReplace_MouseUp;
+           // cmbReplace.ContextMenuStrip = cmRegexReplace;
+
+            btnRename.Click += btnRename_Click;
+            btnCancel.Click += btnCancel_Click;
+
+            cmsRename.Opening += cmsRename_Opening;
+
+            itmRenameFiles.Click += itmRenameFiles_Click;
+            itmRenameFolders.Click += itmRenameFolders_Click;
+
+            itmOutputRenameInPlace.Click += itmOutputRenameInPlace_Click;
+            itmOutputMoveTo.Click += itmOutputMoveTo_Click;
+            itmOutputCopyTo.Click += itmOutputCopyTo_Click;
+            itmOutputBackupTo.Click += itmOutputBackupTo_Click;
+
+            mnuMoveCopy.MouseDown += mnuMoveCopy_MouseDown;
+        }
+
         // MATCH & REPLACE
         private void cmbMatch_TextChanged(object sender, EventArgs e)
         {
@@ -91,7 +125,7 @@ namespace RegexRenamer
 
             if (e.KeyCode == Keys.Enter && !itmOptionsRealtimePreview.Checked)  // enter (when no realtime preview) = gen preview
             {
-                if (validMatch && PreviewNeedsUpdate)
+                if (_validMatch && PreviewNeedsUpdate)
                 {
                     UpdatePreview();
                     e.SuppressKeyPress = true;
@@ -128,7 +162,7 @@ namespace RegexRenamer
         {
             if (e.KeyCode == Keys.Enter && !itmOptionsRealtimePreview.Checked)  // enter (when no realtime preview) = gen preview
             {
-                if (validMatch && PreviewNeedsUpdate)
+                if (_validMatch && PreviewNeedsUpdate)
                 {
                     UpdatePreview();
                     e.SuppressKeyPress = true;
@@ -156,11 +190,7 @@ namespace RegexRenamer
         {
             if (e.Button == MouseButtons.Right && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
             {
-                lastControlRightClicked = cmbMatch;
-                cmbMatch.ContextMenuStrip = cmsBlank;  // prevent default cms from being displayed
-                if (!cmbMatch.Focused)  // prevent combobox from selecting all if already focused
-                    cmbMatch.Focus();
-                cmRegexMatch.Show(cmbMatch, e.Location);
+                regExCtxMenu.ShowMatchMenu(cmbMatch, e.Location);
             }
         }
         private void cmbMatch_MouseUp(object sender, MouseEventArgs e)
@@ -172,10 +202,7 @@ namespace RegexRenamer
         {
             if (e.Button == MouseButtons.Right && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
             {
-                lastControlRightClicked = cmbReplace;
-                cmbReplace.ContextMenuStrip = cmsBlank;  // prevent default cms from being displayed
-                cmbReplace.Focus();
-                cmRegexReplace.Show(cmbReplace, e.Location);
+                regExCtxMenu.ShowReplaceMenu(cmbReplace, e.Location);
             }
         }
         private void cmbReplace_MouseUp(object sender, MouseEventArgs e)
@@ -194,7 +221,7 @@ namespace RegexRenamer
 
             // invalid match regex
 
-            if (!validMatch) errorMessage = "The match regular expression in invalid.";
+            if (!_validMatch) errorMessage = "The match regular expression in invalid.";
 
 
             // preview errors exist
@@ -204,7 +231,7 @@ namespace RegexRenamer
                 foreach (DataGridViewRow row in dgvFiles.Rows)
                 {
                     int afi = (int)row.Tag;
-                    if (itmOptionsRenameSelectedRows.Checked && !activeFiles[afi].Selected)
+                    if (itmOptionsRenameSelectedRows.Checked && !_activeFiles[afi].Selected)
                         continue;  // ignore unselected rows
 
                     if (row.Cells[2].Tag != null)
@@ -222,7 +249,7 @@ namespace RegexRenamer
 
             if (errorMessage == null)
             {
-                foreach (RRItem file in activeFiles)
+                foreach (RRItem file in _activeFiles)
                 {
                     if (itmOptionsRenameSelectedRows.Checked && !file.Selected)
                         continue;  // ignore unselected rows
@@ -270,7 +297,7 @@ namespace RegexRenamer
             bool beginWithInvalidChars = false;
             Regex regexInvalidChars = new Regex("(^|\\\\)[ .]");
 
-            foreach (RRItem file in activeFiles)
+            foreach (RRItem file in _activeFiles)
             {
                 if (itmOutputRenameInPlace.Checked)
                 {
