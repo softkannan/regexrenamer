@@ -17,9 +17,7 @@ namespace RegexRenamer
             bool[] hasError = new bool[dgvFiles.Rows.Count];
             Dictionary<string, List<int>> hashPreview = new Dictionary<string, List<int>>();
 
-
             // generate hash of preview filenames (value = list of dfi indexes)
-
             for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)  // dfi = dgvFiles index
             {
                 int afi = (int)dgvFiles.Rows[dfi].Tag;              // afi = activeFiles index
@@ -35,7 +33,6 @@ namespace RegexRenamer
 
 
             // check for errors
-
             string outputPath = ActivePath;
             if (itmOutputMoveTo.Checked || itmOutputCopyTo.Checked)
                 outputPath = fbdMoveCopy.SelectedPath;
@@ -45,9 +42,7 @@ namespace RegexRenamer
                 int afi = (int)dgvFiles.Rows[dfi].Tag;
                 string preview = _activeFiles[afi].PreviewExt.ToLower();
 
-
                 // skip if already has an error, or an ignored file
-
                 if (hasError[dfi]) continue;
 
                 if (itmOutputRenameInPlace.Checked)
@@ -59,9 +54,7 @@ namespace RegexRenamer
                     if (!_activeFiles[afi].Matched) continue;
                 }
 
-
                 // check for valid filename
-
                 string validFilenameErrmsg = ValidateFilename(_activeFiles[afi].PreviewExt, itmOptionsAllowRenSub.Checked);
 
                 if (validFilenameErrmsg != null)
@@ -70,14 +63,11 @@ namespace RegexRenamer
                     continue;
                 }
 
-
                 // check for dupe filename conflicts
-
                 if (!_activeFiles[afi].Preview.Contains("\\")
                     && (itmOutputRenameInPlace.Checked || itmOutputBackupTo.Checked))  // destination is same directory
                 {
                     // check against active files
-
                     if (hashPreview[preview].Count > 1)
                     {
                         foreach (int dfi2 in hashPreview[preview])
@@ -94,9 +84,7 @@ namespace RegexRenamer
                         continue;
                     }
 
-
                     // check against inactive files
-
                     if (_inactiveFiles.ContainsKey(preview))
                     {
                         switch (_inactiveFiles[preview])
@@ -113,9 +101,7 @@ namespace RegexRenamer
                         continue;
                     }
 
-
                     // check for file-folder conflicts
-
                     if (dgvFiles.Rows.Count < 2000)  // this check is expensive, only run if < 2000 items
                     {
                         string previewFullpath = Path.Combine(outputPath, _activeFiles[afi].PreviewExt);
@@ -131,7 +117,6 @@ namespace RegexRenamer
                 else  // destination is other directory, check against file system
                 {
                     string previewFullpath = Path.Combine(outputPath, _activeFiles[afi].PreviewExt);
-
                     if (RenameFolders ? Directory.Exists(previewFullpath) : File.Exists(previewFullpath))
                     {
                         dgvFiles.Rows[dfi].Cells[2].Tag = "The " + strFilename + " '"
@@ -151,11 +136,9 @@ namespace RegexRenamer
 
 
                 // if doing 'Backup to' (files only), also check original names against backup path
-
                 if (itmOutputBackupTo.Checked)
                 {
                     string previewFullpath = Path.Combine(fbdMoveCopy.SelectedPath, _activeFiles[afi].Filename);
-
                     if (File.Exists(previewFullpath))
                     {
                         dgvFiles.Rows[dfi].Cells[2].Tag = "The original filename '" + _activeFiles[afi].Filename
@@ -175,7 +158,6 @@ namespace RegexRenamer
 
 
             // update filename/preview column colour
-
             for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)
             {
                 int afi = (int)dgvFiles.Rows[dfi].Tag;
@@ -215,11 +197,10 @@ namespace RegexRenamer
             }
 
             // update matched/conflicts counters
-
             int matched = 0, conflict = 0;
 
-            for (int i = 0; i < _activeFiles.Count; i++)
-                if (_activeFiles[i].Matched) matched++;
+            for (int idx = 0; idx < _activeFiles.Count; idx++)
+                if (_activeFiles[idx].Matched) matched++;
 
             foreach (DataGridViewRow row in dgvFiles.Rows)
                 if (row.Cells[2].Tag != null)
@@ -230,7 +211,6 @@ namespace RegexRenamer
         }
 
         // validate glob/regex/filename
-
         private string ValidateGlob(string testGlob)
         {
             Regex regex = new Regex("([\\\\/:\"<>|])");
@@ -240,6 +220,7 @@ namespace RegexRenamer
             else
                 return null;
         }
+
         private string ValidateRegex(string testRegex)
         {
             try
@@ -263,9 +244,7 @@ namespace RegexRenamer
         {
             Match match;
 
-
             // invalid character
-
             string[] parts = allowRenSub ? testFilename.Split('\\') : new string[] { testFilename };
             for (int i = 0; i < parts.Length; i++)
             {
@@ -281,18 +260,14 @@ namespace RegexRenamer
                         return "The " + strFilename + " '" + parts[i] + "' contains an invalid character: '" + match.Groups[0].Value + "'.";
             }
 
-
             // starts with "\"
-
             if (testFilename.StartsWith("\\"))
                 if (parts.Length > 2)
                     return "The subfolder cannot begin with '\\'.";
                 else
                     return "The " + strFilename + " cannot begin with a backslash.";
 
-
             // element is empty
-
             for (int i = 0; i < parts.Length; i++)
             {
                 if (parts[i] == "")
@@ -302,9 +277,7 @@ namespace RegexRenamer
                         return "The " + strFilename + " cannot end with a backslash.";
             }
 
-
             // element is [ .]+ (eg, "/../", "/ /", ...)
-
             for (int i = 0; i < parts.Length; i++)
             {
                 match = regValidateOnlyDotSpace.Match(parts[i]);  // ^[ .]+$
@@ -315,9 +288,7 @@ namespace RegexRenamer
                         return "Invalid " + strFilename + ": '" + parts[i] + "'.";
             }
 
-
             // element ends with [ .]+
-
             for (int i = 0; i < parts.Length; i++)
             {
                 match = regValidateEndsInDotSpace.Match(parts[i]);  // ([ .]+)$
@@ -327,7 +298,6 @@ namespace RegexRenamer
                     else
                         return "The " + strFilename + " '" + parts[i] + "' ends with invalid character(s): '" + match.Groups[0].Value + "'.";
             }
-
 
             return null;
         }

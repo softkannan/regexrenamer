@@ -17,7 +17,10 @@ namespace RegexRenamer
             itmOptionsShowHidden.Click += itmOptionsShowHidden_Click;
             itmOptionsPreserveExt.Click += itmOptionsPreserveExt_Click;
             itmOptionsAllowRenSub.Click += itmOptionsAllowRenSub_Click;
+            // Adds the context menu option to Windows Explorer (requires admin rights)
+            itmOptionsAddContextMenu.Enabled = false; 
             itmOptionsAddContextMenu.Click += itmOptionsAddContextMenu_Click;
+
             itmHelpContents.Click += itmHelpContents_Click;
             itmHelpRegexReference.Click += itmHelpRegexReference_Click;
             itmHelpEmailAuthor.Click += itmHelpEmailAuthor_Click;

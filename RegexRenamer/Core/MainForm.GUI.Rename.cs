@@ -32,13 +32,15 @@ namespace RegexRenamer
             cmbReplace.MouseUp += cmbReplace_MouseUp;
            // cmbReplace.ContextMenuStrip = cmRegexReplace;
 
-            btnRename.Click += btnRename_Click;
             btnCancel.Click += btnCancel_Click;
 
+            // rename button & menu
+            btnRename.Click += btnRename_Click;
             cmsRename.Opening += cmsRename_Opening;
-
-            itmRenameFiles.Click += itmRenameFiles_Click;
-            itmRenameFolders.Click += itmRenameFolders_Click;
+            //rename files split button menu
+            renameFilesCMSRenameItem.Click += itmRenameFiles_Click;
+            // rename folders split button menu
+            renameFoldersCMSRenameItem.Click += itmRenameFolders_Click;
 
             itmOutputRenameInPlace.Click += itmOutputRenameInPlace_Click;
             itmOutputMoveTo.Click += itmOutputMoveTo_Click;

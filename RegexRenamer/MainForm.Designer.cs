@@ -49,11 +49,11 @@ namespace RegexRenamer
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            tvwFolders = new RegexRenamer.Controls.FolderTreeViewCtrl.FolderTreeView();
+            tvwFolders = new FolderTreeView();
             btnRename = new RegexRenamer.Controls.SplitButton();
             cmsRename = new System.Windows.Forms.ContextMenuStrip(components);
-            itmRenameFiles = new System.Windows.Forms.ToolStripMenuItem();
-            itmRenameFolders = new System.Windows.Forms.ToolStripMenuItem();
+            renameFilesCMSRenameItem = new System.Windows.Forms.ToolStripMenuItem();
+            renameFoldersCMSRenameItem = new System.Windows.Forms.ToolStripMenuItem();
             cmbReplace = new RegexRenamer.Controls.MyComboBox();
             cmbMatch = new RegexRenamer.Controls.MyComboBox();
             gbFilter = new System.Windows.Forms.GroupBox();
@@ -179,26 +179,26 @@ namespace RegexRenamer
             // 
             cmsRename.AutoSize = false;
             cmsRename.ImageScalingSize = new System.Drawing.Size(20, 20);
-            cmsRename.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { itmRenameFiles, itmRenameFolders });
+            cmsRename.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { renameFilesCMSRenameItem, renameFoldersCMSRenameItem });
             cmsRename.Name = "cmsRename";
             cmsRename.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             cmsRename.Size = new System.Drawing.Size(130, 48);
             // 
-            // itmRenameFiles
+            // renameFilesCMSRenameItem
             // 
-            itmRenameFiles.AutoSize = false;
-            itmRenameFiles.Checked = true;
-            itmRenameFiles.CheckState = System.Windows.Forms.CheckState.Checked;
-            itmRenameFiles.Name = "itmRenameFiles";
-            itmRenameFiles.Size = new System.Drawing.Size(129, 22);
-            itmRenameFiles.Text = "Rename files";
+            renameFilesCMSRenameItem.AutoSize = false;
+            renameFilesCMSRenameItem.Checked = true;
+            renameFilesCMSRenameItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            renameFilesCMSRenameItem.Name = "renameFilesCMSRenameItem";
+            renameFilesCMSRenameItem.Size = new System.Drawing.Size(129, 22);
+            renameFilesCMSRenameItem.Text = "Rename files";
             // 
-            // itmRenameFolders
+            // renameFoldersCMSRenameItem
             // 
-            itmRenameFolders.AutoSize = false;
-            itmRenameFolders.Name = "itmRenameFolders";
-            itmRenameFolders.Size = new System.Drawing.Size(129, 22);
-            itmRenameFolders.Text = "Rename folders";
+            renameFoldersCMSRenameItem.AutoSize = false;
+            renameFoldersCMSRenameItem.Name = "renameFoldersCMSRenameItem";
+            renameFoldersCMSRenameItem.Size = new System.Drawing.Size(129, 22);
+            renameFoldersCMSRenameItem.Text = "Rename folders";
             // 
             // cmbReplace
             // 
@@ -292,10 +292,10 @@ namespace RegexRenamer
             // 
             rbFilterRegex.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             rbFilterRegex.AutoSize = true;
-            rbFilterRegex.Location = new System.Drawing.Point(95, 43);
+            rbFilterRegex.Location = new System.Drawing.Point(94, 43);
             rbFilterRegex.Margin = new System.Windows.Forms.Padding(4);
             rbFilterRegex.Name = "rbFilterRegex";
-            rbFilterRegex.Size = new System.Drawing.Size(56, 19);
+            rbFilterRegex.Size = new System.Drawing.Size(57, 19);
             rbFilterRegex.TabIndex = 3;
             rbFilterRegex.Text = "Regex";
             // 
@@ -412,10 +412,10 @@ namespace RegexRenamer
             // 
             cbModifierX.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             cbModifierX.AutoSize = true;
-            cbModifierX.Location = new System.Drawing.Point(872, 61);
+            cbModifierX.Location = new System.Drawing.Point(871, 61);
             cbModifierX.Margin = new System.Windows.Forms.Padding(4);
             cbModifierX.Name = "cbModifierX";
-            cbModifierX.Size = new System.Drawing.Size(36, 19);
+            cbModifierX.Size = new System.Drawing.Size(37, 19);
             cbModifierX.TabIndex = 5;
             cbModifierX.Tag = false;
             cbModifierX.Text = "/x";
@@ -898,48 +898,48 @@ namespace RegexRenamer
             // 
             itmHelpContents.Name = "itmHelpContents";
             itmHelpContents.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            itmHelpContents.Size = new System.Drawing.Size(211, 22);
+            itmHelpContents.Size = new System.Drawing.Size(212, 22);
             itmHelpContents.Text = "Contents";
             // 
             // itmHelpRegexReference
             // 
             itmHelpRegexReference.Name = "itmHelpRegexReference";
             itmHelpRegexReference.ShortcutKeys = System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F1;
-            itmHelpRegexReference.Size = new System.Drawing.Size(211, 22);
+            itmHelpRegexReference.Size = new System.Drawing.Size(212, 22);
             itmHelpRegexReference.Text = "Regex Reference";
             // 
             // itmHelpSep1
             // 
             itmHelpSep1.Name = "itmHelpSep1";
-            itmHelpSep1.Size = new System.Drawing.Size(208, 6);
+            itmHelpSep1.Size = new System.Drawing.Size(209, 6);
             // 
             // itmHelpEmailAuthor
             // 
             itmHelpEmailAuthor.Name = "itmHelpEmailAuthor";
-            itmHelpEmailAuthor.Size = new System.Drawing.Size(211, 22);
+            itmHelpEmailAuthor.Size = new System.Drawing.Size(212, 22);
             itmHelpEmailAuthor.Text = "Email the author";
             // 
             // itmHelpReportBug
             // 
             itmHelpReportBug.Name = "itmHelpReportBug";
-            itmHelpReportBug.Size = new System.Drawing.Size(211, 22);
+            itmHelpReportBug.Size = new System.Drawing.Size(212, 22);
             itmHelpReportBug.Text = "Report a bug";
             // 
             // itmHelpHomepage
             // 
             itmHelpHomepage.Name = "itmHelpHomepage";
-            itmHelpHomepage.Size = new System.Drawing.Size(211, 22);
+            itmHelpHomepage.Size = new System.Drawing.Size(212, 22);
             itmHelpHomepage.Text = "Homepage";
             // 
             // itmHelpSep2
             // 
             itmHelpSep2.Name = "itmHelpSep2";
-            itmHelpSep2.Size = new System.Drawing.Size(208, 6);
+            itmHelpSep2.Size = new System.Drawing.Size(209, 6);
             // 
             // itmHelpAbout
             // 
             itmHelpAbout.Name = "itmHelpAbout";
-            itmHelpAbout.Size = new System.Drawing.Size(211, 22);
+            itmHelpAbout.Size = new System.Drawing.Size(212, 22);
             itmHelpAbout.Text = "About RegexRenamer";
             // 
             // progressBar
@@ -1122,8 +1122,8 @@ namespace RegexRenamer
         private System.Windows.Forms.ToolStripMenuItem itmOptionsRememberWinPos;
         private Controls.SplitButton btnRename;
         private System.Windows.Forms.ContextMenuStrip cmsRename;
-        private System.Windows.Forms.ToolStripMenuItem itmRenameFiles;
-        private System.Windows.Forms.ToolStripMenuItem itmRenameFolders;
+        private System.Windows.Forms.ToolStripMenuItem renameFilesCMSRenameItem;
+        private System.Windows.Forms.ToolStripMenuItem renameFoldersCMSRenameItem;
         private System.Windows.Forms.Label lblNumMatched;
         private System.Windows.Forms.Label lblNumConflict;
         private System.Windows.Forms.Label lblStats;

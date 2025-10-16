@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,7 @@ public partial class MainForm
     public void InitializeCore()
     {
         cbFilePaging.SelectedIndexChanged += cbFilePaging_SelectedIndexChanged;
+
         bgwRename.DoWork += bgwRename_DoWork;
         bgwRename.ProgressChanged += bgwRename_ProgressChanged;
         bgwRename.RunWorkerCompleted += bgwRename_RunWorkerCompleted;
@@ -148,12 +150,9 @@ public partial class MainForm
         for (int idx = pageStart; idx < pageEnd; idx++)
         {
             FileInfo file = files[idx] as FileInfo;
-
             _fileCount.total++;
 
-
             // ignore if filtered out
-
             if (filter != null && filter.IsMatch(file.Name) == cbFilterExclude.Checked)
             {
                 if (!_inactiveFiles.ContainsKey(file.Name.ToLower()))
@@ -162,9 +161,7 @@ public partial class MainForm
                 continue;
             }
 
-
             // ignore if hidden and not showing hidden files
-
             bool hidden = false;
             try
             {
@@ -234,6 +231,17 @@ public partial class MainForm
         }
     }
 
+    private string MatchEvalChangeCase(Match match)
+    {
+        TextInfo ti = new CultureInfo("ta").TextInfo;
+
+        if (itmChangeCaseUppercase.Checked) return ti.ToUpper(match.Groups[1].Value);
+        else if (itmChangeCaseLowercase.Checked) return ti.ToLower(match.Groups[1].Value);
+        else if (itmChangeCaseTitlecase.Checked) return ti.ToTitleCase(match.Groups[1].Value.ToLower());
+        else if (itmChangeCaseCleanName.Checked) return match.Groups[1].Value.ToCleanFileName();
+        else return match.Groups[1].Value;
+    }
+
     private void UpdatePreview()
     {
         if (!EnableUpdates || !_validMatch) return;
@@ -241,56 +249,65 @@ public partial class MainForm
         this.Cursor = Cursors.AppStarting;
 
         string matchingPattern = cmbMatch.Text;
+        string userReplacePattern = cmbReplace.Text;
+
+        // Starting number (or letter)
+        string numberingStart = txtNumberingStart.Text;
+        // Increment by x each file (may be negative)
+        string numberingIncStep = txtNumberingInc.Text;
+        // Reset to starting number every x files
+        string numberingReset = txtNumberingReset.Text;
+        //Eg: \"0000\" means 14 => 0014
+        string numberingPad = txtNumberingPad.Text;
+
+        var noChangeCase = itmChangeCaseNoChange.Checked;
+        var showKavita = noneToolStripMenuItem.Checked == false;
+
         const string rxDoller = @"(?<=(?:^|[^$])(?:\$\$)*)\$";  // regex for an actual (non-escaped) doller sign
 
         // generate preview
         if (!string.IsNullOrWhiteSpace(matchingPattern))
         {
-            // compile regex
-            RegexOptions options = RegexOptions.None | RegexOptions.Compiled;
-            int count = cbModifierG.Checked ? -1 : 1;
-            if (cbModifierI.Checked) { options |= RegexOptions.IgnoreCase; }
-            if (cbModifierX.Checked) { options |= RegexOptions.IgnorePatternWhitespace; }
+            var (options, count) = GetRegexOptions();
+            
             //main regex
             Regex regex = new Regex(matchingPattern, options);
 
             // auto numbering
-            int numCurrent = 0, numInc = 0, numStart = 0, numReset = 0;
+            int numCurrent = 0, numIncStep = 0, numStart = 0, numReset = 0;
             string numFormatted = "";
             bool doingAutoNum = false;
             bool doingAutoNumLetter = false;  // number sequence is actually a-z letter sequence
             bool doingAutoNumLetterUpper = false;  // letter sequence is uppercase
 
-            if (this._validNumber && Regex.IsMatch(this.cmbReplace.Text, rxDoller + "#"))
+            if (this._validNumber && Regex.IsMatch(userReplacePattern, rxDoller + "#"))
                 doingAutoNum = true;
 
-            Match match = Regex.Match(this.txtNumberingStart.Text, @"^(([a-z]+)|([A-Z]+))$");
+            Match match = Regex.Match(numberingStart, @"^(([a-z]+)|([A-Z]+))$");
             doingAutoNumLetter = match.Success;
             doingAutoNumLetterUpper = match.Success && match.Groups[3].Length > 0;
 
+            // validate numbering inputs and parse to int
             if (doingAutoNum)
             {
+                // if starting is letter sequence, then increment step and reset must be 1
                 if (doingAutoNumLetter)
-                {
-                    numStart = SequenceLetterToNumber(txtNumberingStart.Text.ToLower());
-                }
+                    numStart = SequenceLetterToNumber(numberingStart.ToLower());
                 else
-                {
-                    numStart = Int32.Parse(txtNumberingStart.Text);
-                }
+                    numStart = Int32.Parse(numberingStart);
 
-                numInc = Int32.Parse(txtNumberingInc.Text);
-                numReset = Int32.Parse(txtNumberingReset.Text);
+                numIncStep = Int32.Parse(numberingIncStep);
+                // Reset to starting number every x files
+                numReset = Int32.Parse(numberingReset);
             }
-            numCurrent = numStart - numInc;  // back up one
+            // backup one step so first file is correct after initial increment
+            numCurrent = numStart - numIncStep;  // back up one
 
-            // regex each filename
-            string userReplacePattern = cmbReplace.Text;
+            // 
             if (doingAutoNum)
             {
                 userReplacePattern = Regex.Replace(userReplacePattern, rxDoller + @"(\d+)" + rxDoller + "#", "$${$1}$$#");
             }
-
 
             for (int afi = 0; afi < _activeFiles.Count; afi++)
             {
@@ -299,24 +316,21 @@ public partial class MainForm
                 _activeFiles[afi].ParseInfo = null;
                 _activeFiles[afi].Matched = regex.IsMatch(_activeFiles[afi].Name);
 
-
                 // if not, bail early, don't incrememnt autonum
-
                 if (!_activeFiles[afi].Matched)
                 {
                     _activeFiles[afi].Preview = _activeFiles[afi].Name;
                     continue;
                 }
 
-
-                // else, matched
-
+                // increment autonum and replace numbering pattern with current number
                 string replacePattern;
-
                 if (doingAutoNum)
                 {
-                    numCurrent += numInc;
+                    // increment number with current step
+                    numCurrent += numIncStep;
 
+                    // Apply number reset logic
                     if (numReset != 0 && (numCurrent - numStart) % numReset == 0)
                         numCurrent = numStart;
 
@@ -327,7 +341,7 @@ public partial class MainForm
                             if (numCurrent < 0)
                                 numFormatted = "$#";
                             else
-                                numFormatted = numCurrent.ToString(txtNumberingPad.Text);
+                                numFormatted = numCurrent.ToString(numberingPad);
                         }
                         else  // letter sequence
                         {
@@ -347,15 +361,19 @@ public partial class MainForm
                     replacePattern = userReplacePattern;
                 }
 
-                if (!itmChangeCaseNoChange.Checked)
+                // enclose the replace pattern with \n so we can do Title-case 
+                if (!noChangeCase)
                     replacePattern = "\n" + replacePattern + "\n";  // delimit change-case boundaries
 
+                // do replace and store preview
                 _activeFiles[afi].Preview = regex.Replace(_activeFiles[afi].Name, replacePattern, count);
 
-                if (!itmChangeCaseNoChange.Checked)
+                // if change case selected, then do it now, looks for all \n delimited sections,
+                if (!noChangeCase)
                     _activeFiles[afi].Preview = Regex.Replace(_activeFiles[afi].Preview, @"\n([^\n]*)\n", new MatchEvaluator(MatchEvalChangeCase));
 
-                if (!noneToolStripMenuItem.Checked)
+                // if kavita preview is selected, then get the kavita parse info and attach to the item
+                if (showKavita)
                 {
                     var curKavitaRoot = setAsKavitaLibraryRootFolderViewToolStripMenuItem.Tag as string;
                     curKavitaRoot ??= Directory.GetDirectoryRoot(_activeFiles[afi].Fullpath);
@@ -363,6 +381,7 @@ public partial class MainForm
                     UpdateKavitaCheck(_activeFiles[afi], curKavitaRoot, _curLibType);
                 }
 
+                // if preview is empty, use original name
                 if (_activeFiles[afi].Preview.Length == 0)
                     _activeFiles[afi].Preview = _activeFiles[afi].Name;
             }
@@ -376,7 +395,6 @@ public partial class MainForm
                 file.Matched = false;
             }
         }
-
 
         // update file list
         for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)
@@ -395,16 +413,14 @@ public partial class MainForm
             }
         }
 
-
         // do preview filename validation
         UpdateValidation();
-
 
         // redraw
         dgvFiles.Sort(this.dgvFiles.SortedColumn ?? this.colFilename,
                        dgvFiles.SortOrder == SortOrder.Descending ? ListSortDirection.Descending : ListSortDirection.Ascending);  // resort
+        
         this.Cursor = Cursors.Default;
-
 
         // show warning if any ignored files
         int fileNum = 0;
@@ -418,13 +434,24 @@ public partial class MainForm
             dgvFiles.Tag = 0;  // prevent re-display
         }
 
-
         // keep selection cleared
         if (!itmOptionsRenameSelectedRows.Checked)
             dgvFiles.ClearSelection();
 
-
         PreviewNeedsUpdate = false;
+    }
+
+    private Tuple<RegexOptions,int> GetRegexOptions()
+    {
+        RegexOptions options;
+        int count;
+        // compile regex
+        options = RegexOptions.None | RegexOptions.Compiled;
+        count = cbModifierG.Checked ? -1 : 1;
+        if (cbModifierI.Checked) { options |= RegexOptions.IgnoreCase; }
+        if (cbModifierX.Checked) { options |= RegexOptions.IgnorePatternWhitespace; }
+
+        return Tuple.Create(options, count);
     }
 
     private void UpdateSelection()

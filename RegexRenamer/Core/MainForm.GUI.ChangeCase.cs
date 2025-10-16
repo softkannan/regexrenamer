@@ -25,16 +25,7 @@ namespace RegexRenamer
             mnuChangeCase.MouseDown += mnuChangeCase_MouseDown;
         }
 
-        private string MatchEvalChangeCase(Match match)
-        {
-            TextInfo ti = new CultureInfo("en").TextInfo;
-
-            if (itmChangeCaseUppercase.Checked) return ti.ToUpper(match.Groups[1].Value);
-            else if (itmChangeCaseLowercase.Checked) return ti.ToLower(match.Groups[1].Value);
-            else if (itmChangeCaseTitlecase.Checked) return ti.ToTitleCase(match.Groups[1].Value.ToLower());
-            else if (itmChangeCaseCleanName.Checked) return match.Groups[1].Value.ToCleanFileName();
-            else return match.Groups[1].Value;
-        }
+       
 
         // UPPER MENUS
 

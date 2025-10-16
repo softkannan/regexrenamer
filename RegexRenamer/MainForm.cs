@@ -125,10 +125,10 @@ namespace RegexRenamer
 
                 // update menu
 
-                if (itmRenameFolders.Checked != renameFolders)
+                if (renameFoldersCMSRenameItem.Checked != renameFolders)
                 {
-                    itmRenameFiles.Checked = !renameFolders;
-                    itmRenameFolders.Checked = renameFolders;
+                    renameFilesCMSRenameItem.Checked = !renameFolders;
+                    renameFoldersCMSRenameItem.Checked = renameFolders;
                 }
 
 
