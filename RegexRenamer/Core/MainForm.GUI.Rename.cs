@@ -217,17 +217,12 @@ namespace RegexRenamer
         private void btnRename_Click(object sender, EventArgs e)
         {
             // check for errors
-
             string errorMessage = null;
 
-
             // invalid match regex
-
             if (!_validMatch) errorMessage = "The match regular expression in invalid.";
 
-
             // preview errors exist
-
             if (errorMessage == null)
             {
                 foreach (DataGridViewRow row in dgvFiles.Rows)
@@ -244,11 +239,8 @@ namespace RegexRenamer
                 }
             }
 
-
             // no files need renaming
-
             int filesToRename = 0;
-
             if (errorMessage == null)
             {
                 foreach (RRItem file in _activeFiles)
@@ -264,9 +256,7 @@ namespace RegexRenamer
                 if (filesToRename == 0) errorMessage = "There are no " + strFile + "s to rename.";
             }
 
-
             // move/copy path doesn't exist
-
             if (errorMessage == null && !itmOutputRenameInPlace.Checked && !Directory.Exists(fbdMoveCopy.SelectedPath))
             {
                 if (itmOutputMoveTo.Checked) errorMessage = "'Move to' folder '" + fbdMoveCopy.SelectedPath + "' is not a valid path.";
@@ -274,9 +264,7 @@ namespace RegexRenamer
                 else if (itmOutputBackupTo.Checked) errorMessage = "'Backup to' folder '" + fbdMoveCopy.SelectedPath + "' is not a valid path.";
             }
 
-
             // move/copy path same as activePath
-
             if (errorMessage == null && !itmOutputRenameInPlace.Checked && fbdMoveCopy.SelectedPath == ActivePath)
             {
                 if (itmOutputMoveTo.Checked) errorMessage = "'Move to' folder is the same as the currently selected folder.";
@@ -284,18 +272,14 @@ namespace RegexRenamer
                 else if (itmOutputBackupTo.Checked) errorMessage = "'Backup to' folder is the same as the currently selected folder.";
             }
 
-
             // if error found, display dialog & abort
-
             if (errorMessage != null)
             {
                 MessageBox.Show(errorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-
             // warn if any files start with space or dot
-
             bool beginWithInvalidChars = false;
             Regex regexInvalidChars = new Regex("(^|\\\\)[ .]");
 
@@ -329,9 +313,7 @@ namespace RegexRenamer
                     return;
             }
 
-
             // remember regex history string to store later (in case the user changes the fields during rename)
-
             string regexString = "/" + cmbMatch.Text + "/" + cmbReplace.Text + "/";
             if (cbModifierI.Checked) regexString += "i";
             if (cbModifierG.Checked) regexString += "g";
@@ -339,17 +321,13 @@ namespace RegexRenamer
 
             cmbMatch.Tag = regexString;
 
-
             // change button to cancel
-
             btnRename.Visible = false;
             btnCancel.Visible = true;
             btnRename.Enabled = false;
             btnCancel.Enabled = true;
 
-
             // init progressbar
-
             progressBar.Value = 0;
             tsOptions.Visible = lblNumMatched.Visible = lblNumConflict.Visible = false;
             progressBar.Visible = true;
@@ -357,12 +335,10 @@ namespace RegexRenamer
 
 
             // semi-disable form during rename
-
             SetFormActive(false);
 
 
             // perform rename operation in background thread
-
             bgwRename.RunWorkerAsync(filesToRename);
 
         }
@@ -402,7 +378,6 @@ namespace RegexRenamer
             if (clickedMenuItem != itmOutputRenameInPlace)
             {
                 // update dialog text
-
                 if (clickedMenuItem == itmOutputMoveTo)
                     fbdMoveCopy.Description = "During the rename operation, " + strFile + "s that match the current regex will be "
                                             + "moved to the selected folder and renamed (if necessary).";
@@ -415,12 +390,10 @@ namespace RegexRenamer
 
 
                 // show dialog, ignore if cancelled
-
                 if (fbdMoveCopy.ShowDialog() != DialogResult.OK) return;
 
 
                 // update folder tree in case user created new folder within fbdNetwork
-
                 if (!ActivePath.StartsWith(fbdMoveCopy.SelectedPath))
                 {
                     DirectoryInfo parent = Directory.GetParent(fbdMoveCopy.SelectedPath);
@@ -434,7 +407,6 @@ namespace RegexRenamer
 
 
                 // show warning if same as activePath
-
                 if (fbdMoveCopy.SelectedPath == ActivePath)
                 {
                     string errorMessage = "This '";
@@ -449,7 +421,6 @@ namespace RegexRenamer
 
 
             // update checked marks
-
             for (int i = 0; i < mnuMoveCopy.DropDownItems.Count; i++)
             {
                 if (i == 1) continue;  // seperator
@@ -462,7 +433,6 @@ namespace RegexRenamer
 
 
             // set button text to bold if an option selected
-
             if (itmOutputRenameInPlace.Checked)
             {
                 mnuMoveCopy.Font = new Font("Tahoma", 8.25F);
@@ -476,7 +446,6 @@ namespace RegexRenamer
 
 
             // redo validation
-
             this.Update();
             UpdateValidation();
         }
