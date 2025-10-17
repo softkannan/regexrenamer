@@ -1,11 +1,9 @@
 ﻿using Microsoft.VisualBasic.CompilerServices;
 using PdfSharp.Pdf.Filters;
-using RegexRenamer.Calbre;
 using RegexRenamer.Controls;
-using RegexRenamer.Kavita;
 using LogEx;
 using RegexRenamer.Native;
-using RegexRenamer.TxtFiles;
+using RegexRenamer.Tools.TxtFiles;
 using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
@@ -18,6 +16,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using RegexRenamer.Tools.Calbre;
+using RegexRenamer.Tools.EBookPDFTools;
 
 namespace RegexRenamer.Forms;
 

@@ -27,11 +27,12 @@ using RegexRenamer.Controls;      // ExtractIcons
 using Microsoft.Win32;          // Registry
 using System.Reflection;
 using System.Security;
-using RegexRenamer.Kavita;
 using RegexRenamer.Utility;
 using System.Threading;
 using RegexRenamer.Native;
-using RegexRenamer.Forms;        // FieldInfo
+using RegexRenamer.Forms;
+using RegexRenamer.Rename;
+using RegexRenamer.Tools.Kavita;        // FieldInfo
 
 
 namespace RegexRenamer
@@ -46,54 +47,22 @@ namespace RegexRenamer
 
         #region Variables
 
-        private LibraryType _curLibType = LibraryType.Comic;
-        private readonly Kavita.ReadingItemService _parser = new Kavita.ReadingItemService(new Kavita.DirectoryService());
-
 
         private string _activeFilter = "*.*";  // current filter
-
-        private FileViewRange _currentViewRange = null;
-        private List<RRItem> _activeFiles = new List<RRItem>();  // files in activePath displayed in filelist
-        private Dictionary<string, InactiveReason> _inactiveFiles = new Dictionary<string, InactiveReason>();  // files in activePath but not displayed
-
-        private bool _validFilter = true;      // file filter is valid
-        private bool _validMatch = true;      // regex match expression is valid
-        private bool _validNumber = true;      // numbering menu options are all valid
+        private FilesStore _fileStore = new FilesStore();  // files in activePath displayed in filelist
 
         private int _countProgLaunches = 1;    // counters for
         private int _countFilesRenamed = 0;    // about-dialog stats
 
-        private FileCount _fileCount = new FileCount();  // holds file counts (total/shown/filtered/hidden)
-
         private About _aboutForm;
-
-        private enum InactiveReason
-        {
-            Hidden,
-            Filtered
-        }
 
         #endregion
 
         #region Properties
 
-        private string activePath = string.Empty;     // current path
-
-        private string ActivePath
-        {
-            get
-            {
-                return activePath;
-            }
-            set
-            {
-                _currentViewRange = new FileViewRange() { Start = 0, End = MAX_VIEW_PAGE_SIZE };
-                activePath = value;
-            }
-        }
+        private string _activePath =  string.Empty;
 
         // prevent setting to true if rename operation in progress
-
         private bool enableUpdates = true;
         private bool EnableUpdates
         {
@@ -110,7 +79,6 @@ namespace RegexRenamer
 
 
         // when toggling rename folders, update menus, change strings, etc.
-
         private bool renameFolders = false;
         private bool RenameFolders
         {
@@ -165,7 +133,6 @@ namespace RegexRenamer
 
 
         // "file"/"folder" strings used throughout the program
-
         private string strFile
         {
             get
@@ -197,7 +164,6 @@ namespace RegexRenamer
 
 
         // used when realtime update is disabled
-
         private string prevMatch;
         private string prevReplace;
         private bool PreviewNeedsUpdate
@@ -224,7 +190,7 @@ namespace RegexRenamer
         public MainForm(string initPath)
         {
 
-            this.ActivePath = initPath;
+            this._activePath = initPath;
 
             // draw form
             InitializeComponent();
@@ -276,9 +242,8 @@ namespace RegexRenamer
 
         public void UpdateFolderTree()
         {
-            _currentViewRange = new FileViewRange { Start = 0, End = MAX_VIEW_PAGE_SIZE };
             EnableUpdates = false;
-            tvwFolders.UpdateFolderTree(ActivePath);
+            tvwFolders.UpdateFolderTree(_activePath);
             EnableUpdates = true;
             UpdateFileList();
         }
@@ -288,7 +253,6 @@ namespace RegexRenamer
         // MAINFORM
 
         // load settings, update folder tree view
-
         private void MainForm_Load(object sender, EventArgs e)
         {
             // disable help menuitems if files are missing

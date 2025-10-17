@@ -1,5 +1,4 @@
-﻿using RegexRenamer.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using PInvoke;
 using static System.Net.Mime.MediaTypeNames;
+using RegexRenamer.Rename;
 
 namespace RegexRenamer.Native
 {
@@ -30,7 +30,7 @@ namespace RegexRenamer.Native
             data.SetText(fileText, TextDataFormat.UnicodeText);
             Clipboard.SetDataObject(data);
         }
-        public static void CopyFilesToClipboad(this List<RRItem> pThis, bool move = false)
+        public static void CopyFilesToClipboad(this List<RenameItemInfo> pThis, bool move = false)
         {
             var dropEffect = move ? DragDropEffects.Move : DragDropEffects.Copy;
 

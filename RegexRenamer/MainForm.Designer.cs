@@ -78,6 +78,7 @@ namespace RegexRenamer
             txtPath = new System.Windows.Forms.TextBox();
             lblNumMatched = new System.Windows.Forms.Label();
             lblNumConflict = new System.Windows.Forms.Label();
+            chkShowInfo = new System.Windows.Forms.CheckBox();
             tsMenu = new System.Windows.Forms.ToolStrip();
             mnuChangeCase = new System.Windows.Forms.ToolStripDropDownButton();
             itmChangeCaseNoChange = new System.Windows.Forms.ToolStripMenuItem();
@@ -98,25 +99,17 @@ namespace RegexRenamer
             itmOutputCopyTo = new System.Windows.Forms.ToolStripMenuItem();
             itmOutputBackupTo = new System.Windows.Forms.ToolStripMenuItem();
             mnuKavitaCheck = new System.Windows.Forms.ToolStripDropDownButton();
-            noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            useMetadataKavitaMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            noneKavitaMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            previewComicsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            previewMangaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            previewBooksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            previewComicsKavitaMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            previewMangaKavitaMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            previewBooksKavitaMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ttPreviewError = new System.Windows.Forms.ToolTip(components);
             fbdNetwork = new System.Windows.Forms.FolderBrowserDialog();
             fbdMoveCopy = new System.Windows.Forms.FolderBrowserDialog();
             lblPath = new System.Windows.Forms.Label();
             dgvFiles = new System.Windows.Forms.DataGridView();
-            colIcon = new System.Windows.Forms.DataGridViewImageColumn();
-            colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colPreview = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colTitle = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSeries = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colVolume = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colChapter = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
             tsOptions = new System.Windows.Forms.ToolStrip();
             mnuOptions = new System.Windows.Forms.ToolStripDropDownButton();
             itmOptionsShowHidden = new System.Windows.Forms.ToolStripMenuItem();
@@ -141,7 +134,18 @@ namespace RegexRenamer
             groupBoxTop = new System.Windows.Forms.GroupBox();
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
-            cbFilePaging = new System.Windows.Forms.ComboBox();
+            colIcon = new System.Windows.Forms.DataGridViewImageColumn();
+            colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colPreview = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colExt = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colFileSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colTitle = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSeries = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colVolume = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colChapter = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
             cmsRename.SuspendLayout();
             gbFilter.SuspendLayout();
             pnlStats.SuspendLayout();
@@ -470,6 +474,19 @@ namespace RegexRenamer
             lblNumConflict.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             toolTip.SetToolTip(lblNumConflict, "Number of conflicts");
             // 
+            // chkShowInfo
+            // 
+            chkShowInfo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            chkShowInfo.AutoSize = true;
+            chkShowInfo.Location = new System.Drawing.Point(913, 21);
+            chkShowInfo.Margin = new System.Windows.Forms.Padding(4);
+            chkShowInfo.Name = "chkShowInfo";
+            chkShowInfo.Size = new System.Drawing.Size(79, 19);
+            chkShowInfo.TabIndex = 7;
+            chkShowInfo.Tag = false;
+            chkShowInfo.Text = "Show Info";
+            toolTip.SetToolTip(chkShowInfo, "Extended regex (ignore unescaped spaces)");
+            // 
             // tsMenu
             // 
             tsMenu.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
@@ -637,7 +654,7 @@ namespace RegexRenamer
             // 
             mnuKavitaCheck.AutoToolTip = false;
             mnuKavitaCheck.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            mnuKavitaCheck.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { noneToolStripMenuItem, toolStripSeparator1, previewComicsToolStripMenuItem, previewMangaToolStripMenuItem, previewBooksToolStripMenuItem });
+            mnuKavitaCheck.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { useMetadataKavitaMenuItem, noneKavitaMenuItem, toolStripSeparator1, previewComicsKavitaMenuItem, previewMangaKavitaMenuItem, previewBooksKavitaMenuItem });
             mnuKavitaCheck.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
             mnuKavitaCheck.Name = "mnuKavitaCheck";
             mnuKavitaCheck.Padding = new System.Windows.Forms.Padding(0, 0, 50, 0);
@@ -646,36 +663,42 @@ namespace RegexRenamer
             mnuKavitaCheck.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             mnuKavitaCheck.ToolTipText = "Preview Kavitha Parsed Values";
             // 
-            // noneToolStripMenuItem
+            // useMetadataKavitaMenuItem
             // 
-            noneToolStripMenuItem.Checked = true;
-            noneToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            noneToolStripMenuItem.Name = "noneToolStripMenuItem";
-            noneToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
-            noneToolStripMenuItem.Text = "None";
+            useMetadataKavitaMenuItem.Name = "useMetadataKavitaMenuItem";
+            useMetadataKavitaMenuItem.Size = new System.Drawing.Size(158, 22);
+            useMetadataKavitaMenuItem.Text = "Use Metadata";
+            // 
+            // noneKavitaMenuItem
+            // 
+            noneKavitaMenuItem.Checked = true;
+            noneKavitaMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            noneKavitaMenuItem.Name = "noneKavitaMenuItem";
+            noneKavitaMenuItem.Size = new System.Drawing.Size(158, 22);
+            noneKavitaMenuItem.Text = "None";
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new System.Drawing.Size(155, 6);
             // 
-            // previewComicsToolStripMenuItem
+            // previewComicsKavitaMenuItem
             // 
-            previewComicsToolStripMenuItem.Name = "previewComicsToolStripMenuItem";
-            previewComicsToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
-            previewComicsToolStripMenuItem.Text = "Preview Comics";
+            previewComicsKavitaMenuItem.Name = "previewComicsKavitaMenuItem";
+            previewComicsKavitaMenuItem.Size = new System.Drawing.Size(158, 22);
+            previewComicsKavitaMenuItem.Text = "Preview Comics";
             // 
-            // previewMangaToolStripMenuItem
+            // previewMangaKavitaMenuItem
             // 
-            previewMangaToolStripMenuItem.Name = "previewMangaToolStripMenuItem";
-            previewMangaToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
-            previewMangaToolStripMenuItem.Text = "Preview Manga";
+            previewMangaKavitaMenuItem.Name = "previewMangaKavitaMenuItem";
+            previewMangaKavitaMenuItem.Size = new System.Drawing.Size(158, 22);
+            previewMangaKavitaMenuItem.Text = "Preview Manga";
             // 
-            // previewBooksToolStripMenuItem
+            // previewBooksKavitaMenuItem
             // 
-            previewBooksToolStripMenuItem.Name = "previewBooksToolStripMenuItem";
-            previewBooksToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
-            previewBooksToolStripMenuItem.Text = "Preview Books";
+            previewBooksKavitaMenuItem.Name = "previewBooksKavitaMenuItem";
+            previewBooksKavitaMenuItem.Size = new System.Drawing.Size(158, 22);
+            previewBooksKavitaMenuItem.Text = "Preview Books";
             // 
             // ttPreviewError
             // 
@@ -708,7 +731,7 @@ namespace RegexRenamer
             dgvFiles.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
             dgvFiles.ColumnHeadersHeight = 30;
             dgvFiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIcon, colFilename, colPreview, colTitle, colSeries, colVolume, colChapter, colEdition, colSpecial });
+            dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIcon, colFilename, colPreview, colExt, colFileSize, colModified, colTitle, colSeries, colVolume, colChapter, colEdition, colSpecial });
             dgvFiles.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             dgvFiles.GridColor = System.Drawing.SystemColors.Control;
             dgvFiles.Location = new System.Drawing.Point(6, 15);
@@ -723,85 +746,6 @@ namespace RegexRenamer
             dgvFiles.Size = new System.Drawing.Size(1034, 676);
             dgvFiles.StandardTab = true;
             dgvFiles.TabIndex = 6;
-            // 
-            // colIcon
-            // 
-            colIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            colIcon.HeaderText = "";
-            colIcon.MinimumWidth = 6;
-            colIcon.Name = "colIcon";
-            colIcon.ReadOnly = true;
-            colIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            colIcon.Width = 20;
-            // 
-            // colFilename
-            // 
-            colFilename.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            colFilename.HeaderText = "Filename";
-            colFilename.MinimumWidth = 6;
-            colFilename.Name = "colFilename";
-            // 
-            // colPreview
-            // 
-            colPreview.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            colPreview.HeaderText = "Preview";
-            colPreview.MinimumWidth = 6;
-            colPreview.Name = "colPreview";
-            colPreview.ReadOnly = true;
-            // 
-            // colTitle
-            // 
-            colTitle.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            colTitle.HeaderText = "Title";
-            colTitle.MinimumWidth = 6;
-            colTitle.Name = "colTitle";
-            colTitle.ReadOnly = true;
-            colTitle.Visible = false;
-            // 
-            // colSeries
-            // 
-            colSeries.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            colSeries.HeaderText = "Series";
-            colSeries.MinimumWidth = 6;
-            colSeries.Name = "colSeries";
-            colSeries.ReadOnly = true;
-            colSeries.Visible = false;
-            // 
-            // colVolume
-            // 
-            colVolume.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colVolume.HeaderText = "Volume";
-            colVolume.MinimumWidth = 6;
-            colVolume.Name = "colVolume";
-            colVolume.ReadOnly = true;
-            colVolume.Visible = false;
-            // 
-            // colChapter
-            // 
-            colChapter.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colChapter.HeaderText = "Chapters";
-            colChapter.MinimumWidth = 6;
-            colChapter.Name = "colChapter";
-            colChapter.ReadOnly = true;
-            colChapter.Visible = false;
-            // 
-            // colEdition
-            // 
-            colEdition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colEdition.HeaderText = "Edition";
-            colEdition.MinimumWidth = 6;
-            colEdition.Name = "colEdition";
-            colEdition.ReadOnly = true;
-            colEdition.Visible = false;
-            // 
-            // colSpecial
-            // 
-            colSpecial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colSpecial.HeaderText = "Special";
-            colSpecial.MinimumWidth = 6;
-            colSpecial.Name = "colSpecial";
-            colSpecial.ReadOnly = true;
-            colSpecial.Visible = false;
             // 
             // tsOptions
             // 
@@ -948,7 +892,7 @@ namespace RegexRenamer
             progressBar.Location = new System.Drawing.Point(135, 698);
             progressBar.Margin = new System.Windows.Forms.Padding(4);
             progressBar.Name = "progressBar";
-            progressBar.Size = new System.Drawing.Size(584, 26);
+            progressBar.Size = new System.Drawing.Size(703, 26);
             progressBar.TabIndex = 0;
             // 
             // btnCancel
@@ -971,6 +915,7 @@ namespace RegexRenamer
             // groupBoxTop
             // 
             groupBoxTop.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxTop.Controls.Add(chkShowInfo);
             groupBoxTop.Controls.Add(lblMatch);
             groupBoxTop.Controls.Add(cmbReplace);
             groupBoxTop.Controls.Add(cmbMatch);
@@ -1004,7 +949,6 @@ namespace RegexRenamer
             // groupBoxFileView
             // 
             groupBoxFileView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            groupBoxFileView.Controls.Add(cbFilePaging);
             groupBoxFileView.Controls.Add(dgvFiles);
             groupBoxFileView.Controls.Add(progressBar);
             groupBoxFileView.Controls.Add(tsOptions);
@@ -1018,17 +962,118 @@ namespace RegexRenamer
             groupBoxFileView.TabIndex = 9;
             groupBoxFileView.TabStop = false;
             // 
-            // cbFilePaging
+            // colIcon
             // 
-            cbFilePaging.AllowDrop = true;
-            cbFilePaging.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            cbFilePaging.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cbFilePaging.FormattingEnabled = true;
-            cbFilePaging.Location = new System.Drawing.Point(725, 700);
-            cbFilePaging.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            cbFilePaging.Name = "cbFilePaging";
-            cbFilePaging.Size = new System.Drawing.Size(115, 23);
-            cbFilePaging.TabIndex = 7;
+            colIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colIcon.HeaderText = "";
+            colIcon.MinimumWidth = 6;
+            colIcon.Name = "colIcon";
+            colIcon.ReadOnly = true;
+            colIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            colIcon.Width = 20;
+            // 
+            // colFilename
+            // 
+            colFilename.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            colFilename.HeaderText = "Filename";
+            colFilename.MinimumWidth = 6;
+            colFilename.Name = "colFilename";
+            // 
+            // colPreview
+            // 
+            colPreview.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            colPreview.HeaderText = "Preview";
+            colPreview.MinimumWidth = 6;
+            colPreview.Name = "colPreview";
+            colPreview.ReadOnly = true;
+            // 
+            // colExt
+            // 
+            colExt.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colExt.HeaderText = "Ext";
+            colExt.Name = "colExt";
+            colExt.ReadOnly = true;
+            colExt.Visible = false;
+            colExt.Width = 48;
+            // 
+            // colFileSize
+            // 
+            colFileSize.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            colFileSize.HeaderText = "Size";
+            colFileSize.Name = "colFileSize";
+            colFileSize.ReadOnly = true;
+            colFileSize.Visible = false;
+            colFileSize.Width = 52;
+            // 
+            // colModified
+            // 
+            colModified.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            colModified.HeaderText = "Modified";
+            colModified.MinimumWidth = 10;
+            colModified.Name = "colModified";
+            colModified.ReadOnly = true;
+            colModified.Visible = false;
+            colModified.Width = 80;
+            // 
+            // colTitle
+            // 
+            colTitle.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            colTitle.HeaderText = "Title";
+            colTitle.MinimumWidth = 6;
+            colTitle.Name = "colTitle";
+            colTitle.ReadOnly = true;
+            colTitle.Visible = false;
+            colTitle.Width = 54;
+            // 
+            // colSeries
+            // 
+            colSeries.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            colSeries.HeaderText = "Series";
+            colSeries.MinimumWidth = 6;
+            colSeries.Name = "colSeries";
+            colSeries.ReadOnly = true;
+            colSeries.Visible = false;
+            colSeries.Width = 62;
+            // 
+            // colVolume
+            // 
+            colVolume.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colVolume.HeaderText = "Volume";
+            colVolume.MinimumWidth = 6;
+            colVolume.Name = "colVolume";
+            colVolume.ReadOnly = true;
+            colVolume.Visible = false;
+            colVolume.Width = 72;
+            // 
+            // colChapter
+            // 
+            colChapter.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colChapter.HeaderText = "Chapters";
+            colChapter.MinimumWidth = 6;
+            colChapter.Name = "colChapter";
+            colChapter.ReadOnly = true;
+            colChapter.Visible = false;
+            colChapter.Width = 79;
+            // 
+            // colEdition
+            // 
+            colEdition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colEdition.HeaderText = "Edition";
+            colEdition.MinimumWidth = 6;
+            colEdition.Name = "colEdition";
+            colEdition.ReadOnly = true;
+            colEdition.Visible = false;
+            colEdition.Width = 69;
+            // 
+            // colSpecial
+            // 
+            colSpecial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            colSpecial.HeaderText = "Special";
+            colSpecial.MinimumWidth = 6;
+            colSpecial.Name = "colSpecial";
+            colSpecial.ReadOnly = true;
+            colSpecial.Visible = false;
+            colSpecial.Width = 69;
             // 
             // MainForm
             // 
@@ -1140,17 +1185,21 @@ namespace RegexRenamer
         private System.Windows.Forms.GroupBox groupBoxFolderTree;
         private System.Windows.Forms.GroupBox groupBoxFileView;
         private System.Windows.Forms.ToolStripDropDownButton mnuKavitaCheck;
-        private System.Windows.Forms.ToolStripMenuItem noneToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem noneKavitaMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem previewComicsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem previewMangaToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem previewBooksToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem previewComicsKavitaMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem previewMangaKavitaMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem previewBooksKavitaMenuItem;
         private System.Windows.Forms.Label lblInfoFileSize;
         private System.Windows.Forms.ToolStripMenuItem itmChangeCaseCleanName;
-        private System.Windows.Forms.ComboBox cbFilePaging;
+        private System.Windows.Forms.ToolStripMenuItem useMetadataKavitaMenuItem;
+        private System.Windows.Forms.CheckBox chkShowInfo;
         private System.Windows.Forms.DataGridViewImageColumn colIcon;
         private System.Windows.Forms.DataGridViewTextBoxColumn colFilename;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPreview;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colExt;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colFileSize;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colModified;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTitle;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSeries;
         private System.Windows.Forms.DataGridViewTextBoxColumn colVolume;

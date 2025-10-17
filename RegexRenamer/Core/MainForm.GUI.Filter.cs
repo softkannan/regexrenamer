@@ -10,6 +10,10 @@ namespace RegexRenamer
 {
     public partial class MainForm
     {
+        private bool _validFilter = true;      // file filter is valid
+        private bool _validMatch = true;      // regex match expression is valid
+        private bool _validNumber = true;      // numbering menu options are all valid
+
         private void InitializeFilter()
         {
             rbFilterRegex.CheckedChanged += rbFilterRegex_CheckedChanged;

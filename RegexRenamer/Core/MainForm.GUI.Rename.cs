@@ -1,4 +1,4 @@
-﻿using RegexRenamer.Utility;
+﻿using RegexRenamer.Rename;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -228,7 +228,7 @@ namespace RegexRenamer
                 foreach (DataGridViewRow row in dgvFiles.Rows)
                 {
                     int afi = (int)row.Tag;
-                    if (itmOptionsRenameSelectedRows.Checked && !_activeFiles[afi].Selected)
+                    if (itmOptionsRenameSelectedRows.Checked && !_fileStore.Files[afi].Selected)
                         continue;  // ignore unselected rows
 
                     if (row.Cells[2].Tag != null)
@@ -243,7 +243,7 @@ namespace RegexRenamer
             int filesToRename = 0;
             if (errorMessage == null)
             {
-                foreach (RRItem file in _activeFiles)
+                foreach (RenameItemInfo file in _fileStore.Files)
                 {
                     if (itmOptionsRenameSelectedRows.Checked && !file.Selected)
                         continue;  // ignore unselected rows
@@ -265,7 +265,7 @@ namespace RegexRenamer
             }
 
             // move/copy path same as activePath
-            if (errorMessage == null && !itmOutputRenameInPlace.Checked && fbdMoveCopy.SelectedPath == ActivePath)
+            if (errorMessage == null && !itmOutputRenameInPlace.Checked && fbdMoveCopy.SelectedPath == _activePath)
             {
                 if (itmOutputMoveTo.Checked) errorMessage = "'Move to' folder is the same as the currently selected folder.";
                 else if (itmOutputCopyTo.Checked) errorMessage = "'Copy to' folder is the same as the currently selected folder.";
@@ -283,7 +283,7 @@ namespace RegexRenamer
             bool beginWithInvalidChars = false;
             Regex regexInvalidChars = new Regex("(^|\\\\)[ .]");
 
-            foreach (RRItem file in _activeFiles)
+            foreach (RenameItemInfo file in _fileStore.Files)
             {
                 if (itmOutputRenameInPlace.Checked)
                 {
@@ -394,7 +394,7 @@ namespace RegexRenamer
 
 
                 // update folder tree in case user created new folder within fbdNetwork
-                if (!ActivePath.StartsWith(fbdMoveCopy.SelectedPath))
+                if (!_activePath.StartsWith(fbdMoveCopy.SelectedPath))
                 {
                     DirectoryInfo parent = Directory.GetParent(fbdMoveCopy.SelectedPath);
                     if (parent != null)
@@ -407,7 +407,7 @@ namespace RegexRenamer
 
 
                 // show warning if same as activePath
-                if (fbdMoveCopy.SelectedPath == ActivePath)
+                if (fbdMoveCopy.SelectedPath == _activePath)
                 {
                     string errorMessage = "This '";
                     if (clickedMenuItem == itmOutputMoveTo) errorMessage += "Move to";

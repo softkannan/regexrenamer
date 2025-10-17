@@ -21,33 +21,7 @@ namespace RegexRenamer
             mnuNumbering.MouseDown += mnuNumbering_MouseDown;
 
         }
-        private static string SequenceNumberToLetter(int i)
-        {
-            int dividend = i;
-            string columnName = String.Empty;
-
-            while (dividend > 0)
-            {
-                int modulo = (dividend - 1) % 26;
-                columnName = Convert.ToChar(97 + modulo) + columnName;  // note: A-Z = 65-90, a-z = 97-122
-                dividend = (dividend - modulo) / 26;
-            }
-
-            return columnName;
-        }
-        private static int SequenceLetterToNumber(string letter)
-        {
-            int number = 0;
-            int pow = 1;
-            for (int i = letter.Length - 1; i >= 0; i--)
-            {
-                number += (letter[i] - 'a' + 1) * pow;
-                pow *= 26;
-            }
-
-            return number;
-        }
-
+        
         // numbering
         private void NumberingMenuItem(object sender)
         {

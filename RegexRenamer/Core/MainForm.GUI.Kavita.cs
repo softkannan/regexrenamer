@@ -1,4 +1,4 @@
-﻿using RegexRenamer.Kavita;
+﻿using RegexRenamer.Tools.Kavita;
 using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
@@ -12,24 +12,25 @@ namespace RegexRenamer
 {
     public partial class MainForm
     {
+        private LibraryType _kavitaPreviewLibType = LibraryType.Comic;
+        private string _kavitaLibRootpath = string.Empty;
+        private bool _kavitaUseMetadata = true;
+
         private void InitializeKavita()
         {
-            noneToolStripMenuItem.Click += noneToolStripMenuItem_Click;
-            previewComicsToolStripMenuItem.Click += previewComicsToolStripMenuItem_Click;
-            previewMangaToolStripMenuItem.Click += previewMangaToolStripMenuItem_Click;
-            previewBooksToolStripMenuItem.Click += previewBooksToolStripMenuItem_Click;
+            useMetadataKavitaMenuItem.Checked = _kavitaUseMetadata;
+            useMetadataKavitaMenuItem.Click += (s, e) =>
+            {
+                _kavitaUseMetadata = !_kavitaUseMetadata;
+                useMetadataKavitaMenuItem.Checked = _kavitaUseMetadata;
+                UpdatePreview();
+            };
+            noneKavitaMenuItem.Click += noneToolStripMenuItem_Click;
+            previewComicsKavitaMenuItem.Click += previewComicsToolStripMenuItem_Click;
+            previewMangaKavitaMenuItem.Click += previewMangaToolStripMenuItem_Click;
+            previewBooksKavitaMenuItem.Click += previewBooksToolStripMenuItem_Click;
         }
-
         
-        private void UpdateKavitaCheck(RRItem match, string kavithaRoot, Kavita.LibraryType libType)
-        {
-            var parseInfo = _parser.ParseFile(match.PreviewFullPath,kavithaRoot, kavithaRoot, libType,true);
-            match.ParseInfo = parseInfo;
-
-            //var comicInfo = parser.GetComicInfo(match.PreviewFullPath, true); //, kavithaRoot, libType);
-            //match.ComicInfo = comicInfo;
-            
-        }
         private void KavitaMenuItem(object sender)
         {
             if (!EnableUpdates) return;
@@ -39,10 +40,9 @@ namespace RegexRenamer
 
 
             // update checked marks
-
-            for (int i = 0; i < mnuKavitaCheck.DropDownItems.Count; i++)
+            for (int i = 1; i < mnuKavitaCheck.DropDownItems.Count; i++)
             {
-                if (i == 1) continue;  // seperator
+                if (i == 2) continue;  // seperator
 
                 if (mnuKavitaCheck.DropDownItems[i] == checkedMenuItem)
                     ((ToolStripMenuItem)mnuKavitaCheck.DropDownItems[i]).Checked = true;
@@ -50,10 +50,8 @@ namespace RegexRenamer
                     ((ToolStripMenuItem)mnuKavitaCheck.DropDownItems[i]).Checked = false;
             }
 
-
             // set default match/replace values (if empty)
-
-            if (checkedMenuItem != noneToolStripMenuItem)
+            if (checkedMenuItem != noneKavitaMenuItem)
             {
                 if (cmbMatch.Text == "")
                 {
@@ -72,7 +70,7 @@ namespace RegexRenamer
 
             // set button text to bold if an option selected
 
-            if (noneToolStripMenuItem.Checked)
+            if (noneKavitaMenuItem.Checked)
             {
                 mnuKavitaCheck.Font = new Font("Tahoma", 8.25F);
                 mnuKavitaCheck.Padding = new Padding(0, 0, 8, 0);
@@ -84,25 +82,24 @@ namespace RegexRenamer
                 mnuKavitaCheck.Font = new Font("Tahoma", 8.25F, FontStyle.Bold);
                 mnuKavitaCheck.Padding = new Padding(0, 0, 0, 0);
 
-                _curLibType = LibraryType.Comic;
+                _kavitaPreviewLibType = LibraryType.Comic;
 
-                if (previewComicsToolStripMenuItem.Checked)
+                if (previewComicsKavitaMenuItem.Checked)
                 {
-                    _curLibType = LibraryType.Comic;
+                    _kavitaPreviewLibType = LibraryType.Comic;
                 }
-                else if (previewMangaToolStripMenuItem.Checked)
+                else if (previewMangaKavitaMenuItem.Checked)
                 {
-                    _curLibType = LibraryType.Manga;
+                    _kavitaPreviewLibType = LibraryType.Manga;
                 }
-                else if (previewBooksToolStripMenuItem.Checked)
+                else if (previewBooksKavitaMenuItem.Checked)
                 {
-                    _curLibType = LibraryType.Book;
+                    _kavitaPreviewLibType = LibraryType.Book;
                 }
             }
 
 
             // update preview
-
             this.Update();
             UpdatePreview();
         }

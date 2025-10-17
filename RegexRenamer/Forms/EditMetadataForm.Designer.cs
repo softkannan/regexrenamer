@@ -68,7 +68,7 @@ namespace RegexRenamer.Forms
             chkIgnoreError = new System.Windows.Forms.CheckBox();
             chkClearUseAltMethod = new System.Windows.Forms.CheckBox();
             chkApplyRecursively = new System.Windows.Forms.CheckBox();
-            fileListView = new RegexRenamer.Controls.ListViewExCtrl.ListViewEx();
+            fileListView = new ListViewEx();
             colFileName = new System.Windows.Forms.ColumnHeader();
             colTitle = new System.Windows.Forms.ColumnHeader();
             colSeries = new System.Windows.Forms.ColumnHeader();
@@ -78,6 +78,7 @@ namespace RegexRenamer.Forms
             cmbLanguage = new RegexRenamer.Controls.MyComboBox();
             label6 = new System.Windows.Forms.Label();
             chkShowExisting = new System.Windows.Forms.CheckBox();
+            cbModifierG = new System.Windows.Forms.CheckBox();
             tsMenu.SuspendLayout();
             cmFileList.SuspendLayout();
             SuspendLayout();
@@ -199,7 +200,7 @@ namespace RegexRenamer.Forms
             // 
             cbModifierI.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             cbModifierI.AutoSize = true;
-            cbModifierI.Location = new System.Drawing.Point(1113, 14);
+            cbModifierI.Location = new System.Drawing.Point(1112, 14);
             cbModifierI.Margin = new System.Windows.Forms.Padding(4);
             cbModifierI.Name = "cbModifierI";
             cbModifierI.Size = new System.Drawing.Size(34, 19);
@@ -211,10 +212,10 @@ namespace RegexRenamer.Forms
             // 
             cbModifierX.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             cbModifierX.AutoSize = true;
-            cbModifierX.Location = new System.Drawing.Point(1113, 37);
+            cbModifierX.Location = new System.Drawing.Point(1112, 60);
             cbModifierX.Margin = new System.Windows.Forms.Padding(4);
             cbModifierX.Name = "cbModifierX";
-            cbModifierX.Size = new System.Drawing.Size(36, 19);
+            cbModifierX.Size = new System.Drawing.Size(37, 19);
             cbModifierX.TabIndex = 9;
             cbModifierX.Tag = false;
             cbModifierX.Text = "/x";
@@ -389,7 +390,7 @@ namespace RegexRenamer.Forms
             // 
             chkIgnoreError.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkIgnoreError.AutoSize = true;
-            chkIgnoreError.Location = new System.Drawing.Point(1113, 59);
+            chkIgnoreError.Location = new System.Drawing.Point(1112, 83);
             chkIgnoreError.Name = "chkIgnoreError";
             chkIgnoreError.Size = new System.Drawing.Size(88, 19);
             chkIgnoreError.TabIndex = 105;
@@ -400,7 +401,7 @@ namespace RegexRenamer.Forms
             // 
             chkClearUseAltMethod.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkClearUseAltMethod.AutoSize = true;
-            chkClearUseAltMethod.Location = new System.Drawing.Point(1113, 84);
+            chkClearUseAltMethod.Location = new System.Drawing.Point(1112, 106);
             chkClearUseAltMethod.Name = "chkClearUseAltMethod";
             chkClearUseAltMethod.Size = new System.Drawing.Size(92, 19);
             chkClearUseAltMethod.TabIndex = 106;
@@ -411,7 +412,7 @@ namespace RegexRenamer.Forms
             // 
             chkApplyRecursively.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkApplyRecursively.AutoSize = true;
-            chkApplyRecursively.Location = new System.Drawing.Point(1113, 109);
+            chkApplyRecursively.Location = new System.Drawing.Point(1112, 129);
             chkApplyRecursively.Name = "chkApplyRecursively";
             chkApplyRecursively.Size = new System.Drawing.Size(119, 19);
             chkApplyRecursively.TabIndex = 107;
@@ -484,18 +485,31 @@ namespace RegexRenamer.Forms
             // 
             chkShowExisting.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkShowExisting.AutoSize = true;
-            chkShowExisting.Location = new System.Drawing.Point(1113, 134);
+            chkShowExisting.Location = new System.Drawing.Point(1112, 152);
             chkShowExisting.Name = "chkShowExisting";
-            chkShowExisting.Size = new System.Drawing.Size(98, 19);
+            chkShowExisting.Size = new System.Drawing.Size(99, 19);
             chkShowExisting.TabIndex = 111;
             chkShowExisting.Text = "Show Existing";
             chkShowExisting.UseVisualStyleBackColor = true;
+            // 
+            // cbModifierG
+            // 
+            cbModifierG.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            cbModifierG.AutoSize = true;
+            cbModifierG.Location = new System.Drawing.Point(1111, 37);
+            cbModifierG.Margin = new System.Windows.Forms.Padding(4);
+            cbModifierG.Name = "cbModifierG";
+            cbModifierG.Size = new System.Drawing.Size(38, 19);
+            cbModifierG.TabIndex = 112;
+            cbModifierG.Tag = false;
+            cbModifierG.Text = "/g";
             // 
             // EditMetadataForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1284, 742);
+            Controls.Add(cbModifierG);
             Controls.Add(chkShowExisting);
             Controls.Add(cmbLanguage);
             Controls.Add(label6);
@@ -581,5 +595,6 @@ namespace RegexRenamer.Forms
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ColumnHeader colLanguage;
         private System.Windows.Forms.CheckBox chkShowExisting;
+        private System.Windows.Forms.CheckBox cbModifierG;
     }
 }

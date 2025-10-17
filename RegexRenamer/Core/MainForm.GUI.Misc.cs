@@ -27,6 +27,27 @@ namespace RegexRenamer
             itmHelpReportBug.Click += itmHelpReportBug_Click;
             itmHelpHomepage.Click += itmHelpHomepage_Click;
             itmHelpAbout.Click += itmHelpAbout_Click;
+
+            chkShowInfo.Click += ChkShowInfo_Click;
+        }
+
+
+        private void SetShowInfoColumnVisibility(bool visible)
+        {
+            colModified.Visible = visible;
+            colFileSize.Visible = visible;
+            colExt.Visible = visible;
+        }
+
+        private void ChkShowInfo_Click(object sender, EventArgs e)
+        {
+            if (!EnableUpdates) return;
+
+            SetShowInfoColumnVisibility(chkShowInfo.Checked);
+
+            // update preview
+            this.Update();
+            UpdatePreview();
         }
 
         // OPTIONS/HELP
@@ -42,12 +63,12 @@ namespace RegexRenamer
             this.Update();
 
             // update activeFiles
-            for (int afi = 0; afi < _activeFiles.Count; afi++)
-                _activeFiles[afi].PreserveExt = itmOptionsPreserveExt.Checked;
+            for (int afi = 0; afi < _fileStore.Files.Count; afi++)
+                _fileStore.Files[afi].PreserveExt = itmOptionsPreserveExt.Checked;
 
             // update filename column
             for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)
-                dgvFiles.Rows[dfi].Cells[1].Value = _activeFiles[(int)dgvFiles.Rows[dfi].Tag].Name;
+                dgvFiles.Rows[dfi].Cells[1].Value = _fileStore.Files[(int)dgvFiles.Rows[dfi].Tag].Name;
 
             // update preview column
             UpdatePreview();

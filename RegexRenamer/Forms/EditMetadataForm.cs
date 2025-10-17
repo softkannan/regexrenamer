@@ -1,9 +1,7 @@
 ﻿using Config;
 using PInvoke;
-using RegexRenamer.Kavita;
 using LogEx;
 using RegexRenamer.Native;
-using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,6 +17,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Windows.ApplicationModel.VoiceCommands;
+using RegexRenamer.Rename;
+using RegexRenamer.Tools.EBookPDFTools;
+using RegexRenamer.Tools.Kavita;
+using RegexRenamer.Utility.RegexMenu;
 
 namespace RegexRenamer.Forms;
 
@@ -29,6 +31,8 @@ public partial class EditMetadataForm : Form
     private readonly string _activePath;
     private readonly string _searchPattern;
 
+    private RegExContextMenuProvider regExCtxMenu;
+
     private void InitilaizeForm(string title)
     {
         InitializeComponent();
@@ -37,22 +41,47 @@ public partial class EditMetadataForm : Form
         bttnClear.Click += async (s, e) => await PerformAction("Clear");
         bttnApply.Click += async (s, e) => await PerformAction("Apply");
 
+        // Matching pattern combo box
         cmbMatch.MouseDown += cmbMatch_MouseDown;
         cmbMatch.MouseUp += cmbMatch_MouseUp;
+        cmbMatch.LostFocus += (s, e) => UpdatePreview();
 
-        //Numbering
+        //Auto Numbering
         txtNumberingStart.TextChanged += txtNumberingStart_TextChanged;
         txtNumberingPad.TextChanged += txtNumberingPad_TextChanged;
         txtNumberingInc.TextChanged += txtNumberingInc_TextChanged;
         txtNumberingReset.TextChanged += txtNumberingReset_TextChanged;
         mnuNumbering.MouseDown += mnuNumbering_MouseDown;
 
+        // Replace pattern combo boxes
         cmbAuthor.LostFocus += CmbReplace_LostFocus;
+        cmbAuthor.MouseDown += cmbReplace_MouseDown;
+        cmbAuthor.MouseUp += cmbReplace_MouseUp;
         cmbSeries.LostFocus += CmbReplace_LostFocus;
+        cmbSeries.MouseDown += cmbReplace_MouseDown;
+        cmbSeries.MouseUp += cmbReplace_MouseUp;
         cmbTitle.LostFocus += CmbReplace_LostFocus;
+        cmbTitle.MouseDown += cmbReplace_MouseDown;
+        cmbTitle.MouseUp += cmbReplace_MouseUp;
         cmbVolume.LostFocus += CmbReplace_LostFocus;
+        cmbVolume.MouseDown += cmbReplace_MouseDown;
+        cmbVolume.MouseUp += cmbReplace_MouseUp;
+        cmbLanguage.LostFocus += CmbReplace_LostFocus;
+        cmbLanguage.MouseDown += cmbReplace_MouseDown;
+        cmbLanguage.MouseUp += cmbReplace_MouseUp;
+
+        // Changing case
+        itmChangeCaseNoChange.Click += (sender, e) => ChangeCaseMenuItem(sender);
+        itmChangeCaseUppercase.Click += (sender, e) => ChangeCaseMenuItem(sender);
+        itmChangeCaseLowercase.Click += (sender, e) => ChangeCaseMenuItem(sender);
+        itmChangeCaseTitlecase.Click += (sender, e) => ChangeCaseMenuItem(sender);
+        itmChangeCaseCleanName.Click += (sender, e) => ChangeCaseMenuItem(sender);
+        mnuChangeCase.MouseDown += mnuChangeCase_MouseDown;
 
         this.FormClosing += Form_Closing;
+
+        regExCtxMenu = new RegExContextMenuProvider(components);
+
     }
 
     public EditMetadataForm(string activePath, string searchPattern, string title, string action)
@@ -77,21 +106,68 @@ public partial class EditMetadataForm : Form
 
     private void Form_Closing(object sender, FormClosingEventArgs e)
     {
-        if (_preventCancel && e.CloseReason == CloseReason.UserClosing)
+        if (!EnableUpdates && e.CloseReason == CloseReason.UserClosing)
         {
             MessageBox.Show("Operation in progress. Please wait until it completes.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             e.Cancel = true;
         }
     }
 
-    private void CmbReplace_LostFocus(object sender, EventArgs e)
+    // prevent setting to true if rename operation in progress
+    private bool _enableUpdates = true;
+
+    private bool EnableUpdates
     {
-        ComboBox cmbTemp = (ComboBox)sender;
-        if (!string.IsNullOrWhiteSpace(cmbTemp.Text) && string.IsNullOrWhiteSpace(cmbMatch.Text))
+        get
         {
-            cmbMatch.Text = "(.+)";
+            return _enableUpdates;
         }
-        UpdatePreview();
+        set
+        {
+            _enableUpdates = value;
+            if (_enableUpdates)
+            {
+                this.Cursor = Cursors.Default;
+                cmbAuthor.Enabled = true;
+                cmbMatch.Enabled = true;
+                cmbSeries.Enabled = true;
+                cmbTitle.Enabled = true;
+                cmbVolume.Enabled = true;
+                cmbLanguage.Enabled = true;
+                mnuChangeCase.Enabled = true;
+                mnuNumbering.Enabled = true;
+
+                chkApplyRecursively.Enabled = true;
+                chkClearUseAltMethod.Enabled = true;
+                chkIgnoreError.Enabled = true;
+                chkShowExisting.Enabled = true;
+
+                cbModifierG.Enabled = true;
+                cbModifierI.Enabled = true;
+                cbModifierX.Enabled = true;
+            }
+            else
+            {
+                this.Cursor = Cursors.AppStarting;
+                cmbAuthor.Enabled = false;
+                cmbMatch.Enabled = false;
+                cmbSeries.Enabled = false;
+                cmbTitle.Enabled = false;
+                cmbVolume.Enabled = false;
+                cmbLanguage.Enabled = false;
+                mnuChangeCase.Enabled = false;
+                mnuNumbering.Enabled = false;
+
+                chkApplyRecursively.Enabled = false;
+                chkClearUseAltMethod.Enabled = false;
+                chkIgnoreError.Enabled = false;
+                chkShowExisting.Enabled = false;
+
+                cbModifierG.Enabled = false;
+                cbModifierI.Enabled = false;
+                cbModifierX.Enabled = false;
+            }
+        }
     }
 
     private void MetaDataForm_Load(object sender, EventArgs e)
@@ -118,7 +194,6 @@ public partial class EditMetadataForm : Form
         await PerformAction(_action);
     }
 
-    private bool _preventCancel = false;
 
     private async Task PerformAction(string action)
     {
@@ -135,7 +210,7 @@ public partial class EditMetadataForm : Form
                 this.Close();
                 break;
             case "Clear":
-                _preventCancel = true;
+                EnableUpdates = false;
                 try
                 {
                     // Apply changes without closing
@@ -163,11 +238,12 @@ public partial class EditMetadataForm : Form
                         Application.DoEvents();
                         try
                         {
+                            //await Task.Delay(500); // to allow UI to update
                             await EBookHelper.ClearMetadata(file.Item1.FullName, UserConfig.Inst.MetadatWriteUseAltMethodForPDF);
                         }
                         catch (Exception ex)
                         {
-                            if(!UserConfig.Inst.IgnoreError)
+                            if (!UserConfig.Inst.IgnoreError)
                                 ErrorLog.Inst.ShowError($"Failed to write metadata for {file.Item1.Name}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
@@ -178,13 +254,13 @@ public partial class EditMetadataForm : Form
                 }
                 finally
                 {
-                    _preventCancel = false;
+                    EnableUpdates = true;
                 }
                 this.DialogResult = DialogResult.OK;
                 this.Close();
                 break;
             case "Apply":
-                _preventCancel = true;
+                EnableUpdates = false;
                 try
                 {
                     // Apply changes without closing
@@ -195,7 +271,6 @@ public partial class EditMetadataForm : Form
                     {
                         break;
                     }
-
 
                     pbMetadataWrite.Value = 0;
                     pbMetadataWrite.Maximum = _activeFiles.Count;
@@ -213,7 +288,8 @@ public partial class EditMetadataForm : Form
                         Application.DoEvents();
                         try
                         {
-                            await EBookHelper.WriteMetadata(file.Item1.FullName, file.Item2);
+                            await Task.Delay(500); // to allow UI to update
+                            //await EBookHelper.WriteMetadata(file.Item1.FullName, file.Item2);
                         }
                         catch (Exception ex)
                         {
@@ -228,7 +304,7 @@ public partial class EditMetadataForm : Form
                 }
                 finally
                 {
-                    _preventCancel = false;
+                    EnableUpdates = true;
                 }
 
                 if (MessageBox.Show("Changes applied. Do you want to close the dialog?", "Info", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
@@ -247,24 +323,15 @@ public partial class EditMetadataForm : Form
         var tag = (string)((Button)sender).Tag;
         await PerformAction(tag);
     }
+    
 
-    #region DataGridView Events
-
-
-
-    #endregion
-
-    #region ComboBox Events
+    #region Match pattern ComboBox methods
 
     private void cmbMatch_MouseDown(object sender, MouseEventArgs e)
     {
         if (e.Button == MouseButtons.Right && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
         {
-            lastControlRightClicked = cmbMatch;
-            cmbMatch.ContextMenuStrip = cmsBlank;  // prevent default cms from being displayed
-            if (!cmbMatch.Focused)  // prevent combobox from selecting all if already focused
-                cmbMatch.Focus();
-            cmRegexMatch.Show(cmbMatch, e.Location);
+            regExCtxMenu.ShowMatchMenu(cmbMatch, e.Location);
         }
     }
     private void cmbMatch_MouseUp(object sender, MouseEventArgs e)
@@ -275,98 +342,110 @@ public partial class EditMetadataForm : Form
 
     #endregion
 
-    #region Autonumbering Methods
-
-    private Control lastControlRightClicked;
-    private void InsertRegexFragment(object sender, EventArgs e)
+    #region Replace pattern combo boxes
+    private void CmbReplace_LostFocus(object sender, EventArgs e)
     {
-        InsertArgs ia = (InsertArgs)((ToolStripMenuItem)sender).Tag;
-        TextBox textBox = null;
-        ComboBox comboBox = null;
-
-        int selectionStart, selectionLength;
-        string text;
-
-        if (lastControlRightClicked.GetType().Name == "TextBox")
+        ComboBox cmbTemp = (ComboBox)sender;
+        if (!string.IsNullOrWhiteSpace(cmbTemp.Text) && string.IsNullOrWhiteSpace(cmbMatch.Text))
         {
-            textBox = (TextBox)lastControlRightClicked;
-            selectionStart = textBox.SelectionStart;
-            selectionLength = textBox.SelectionLength;
-            text = textBox.Text;
+            cmbMatch.Text = "(.+)";
         }
-        else
-        {
-            comboBox = (ComboBox)lastControlRightClicked;
-            selectionStart = comboBox.SelectionStart;
-            selectionLength = comboBox.SelectionLength;
-            text = comboBox.Text;
-        }
-
-        if (ia.InsertBefore == "" && selectionLength == 0)
-        {
-            ia.InsertBefore = ia.InsertAfter;
-            ia.InsertAfter = "";
-        }
-
-        if (ia.WrapIfSelection && selectionLength > 0)
-            if (ia.InsertAfter == "")
-                ia.InsertAfter = ia.InsertBefore;
-            else
-                ia.InsertBefore = ia.InsertAfter;
-
-        int group = 0;
-        if (ia.GroupSelection && selectionLength > 0)
-        {
-            text = text.Insert(selectionStart, "(");
-            selectionStart += 1;
-            text = text.Insert(selectionStart + selectionLength, ")");
-            group = 1;
-        }
-
-        if (selectionLength > 0 && (ia.InsertBefore == "" || ia.InsertAfter == "") && !ia.GroupSelection)
-        {
-            text = text.Remove(selectionStart, selectionLength);
-            selectionLength = 0;
-        }
-
-        if (ia.InsertBefore != "")
-        {
-            text = text.Insert(selectionStart - group, ia.InsertBefore);
-            selectionStart += ia.InsertBefore.Length;
-        }
-        if (ia.InsertAfter != "")
-        {
-            text = text.Insert(selectionStart + selectionLength + group, ia.InsertAfter);
-        }
-        if (ia.SelectionStartOffset > 0)
-        {
-            selectionStart = selectionStart - group - ia.InsertBefore.Length + ia.SelectionStartOffset;
-        }
-        if (ia.SelectionStartOffset < 0)
-        {
-            selectionStart = selectionStart + selectionLength + group + ia.InsertAfter.Length + ia.SelectionStartOffset;
-        }
-        if (ia.SelectionLength != -1)
-            selectionLength = ia.SelectionLength;
-
-        if (textBox != null)
-        {
-            textBox.SelectAll(); textBox.Paste(text);  // allow undo
-            textBox.SelectionStart = selectionStart;
-            textBox.SelectionLength = selectionLength;
-        }
-        else
-        {
-            comboBox.SelectAll(); comboBox.SelectedText = text;  // allow undo
-            comboBox.SelectionStart = selectionStart;
-            comboBox.SelectionLength = selectionLength;
-        }
+        
+        UpdatePreview();
     }
 
-    private bool validNumber = true;      // numbering menu options are all valid
-                                          // numbering
+
+    private void cmbReplace_MouseDown(object sender, MouseEventArgs e)
+    {
+        ComboBox cmbReplace = (ComboBox)sender;
+        if (e.Button == MouseButtons.Right && (Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+        {
+            regExCtxMenu.ShowReplaceMenu(cmbReplace, e.Location);
+        }
+    }
+    private void cmbReplace_MouseUp(object sender, MouseEventArgs e)
+    {
+        ComboBox cmbReplace = (ComboBox)sender;
+        if (cmbReplace.ContextMenuStrip != null)
+            cmbReplace.ContextMenuStrip = null;  // restore default cms
+    }
+
+    #endregion
+
+    #region Change Case Methods
+
+    //change case
+    private void ChangeCaseMenuItem(object sender)
+    {
+        if (!EnableUpdates) return;
+
+        ToolStripMenuItem checkedMenuItem = (ToolStripMenuItem)sender;
+        if (checkedMenuItem.Checked) return;  // already checked
+
+
+        // update checked marks
+        for (int i = 0; i < mnuChangeCase.DropDownItems.Count; i++)
+        {
+            if (i == 1) continue;  // seperator
+
+            if (mnuChangeCase.DropDownItems[i] == checkedMenuItem)
+                ((ToolStripMenuItem)mnuChangeCase.DropDownItems[i]).Checked = true;
+            else
+                ((ToolStripMenuItem)mnuChangeCase.DropDownItems[i]).Checked = false;
+        }
+
+
+        // set default match/replace values (if empty)
+        if (checkedMenuItem != itmChangeCaseNoChange)
+        {
+            if (cmbMatch.Text == "")
+            {
+                cmbMatch.Text = "(.*)";
+            }
+        }
+
+        // set button text to bold if an option selected
+        if (itmChangeCaseNoChange.Checked)
+        {
+            mnuChangeCase.Font = new Font("Tahoma", 8.25F);
+            mnuChangeCase.Padding = new Padding(0, 0, 8, 0);
+        }
+        else
+        {
+            mnuChangeCase.Font = new Font("Tahoma", 8.25F, FontStyle.Bold);
+            mnuChangeCase.Padding = new Padding(0, 0, 0, 0);
+        }
+
+        // update preview
+        this.Update();
+        UpdatePreview();
+    }
+
+    private void mnuChangeCase_MouseDown(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Right && !itmChangeCaseNoChange.Checked)  // set default
+            itmChangeCaseNoChange.PerformClick();
+    }
+
+    private ChangeCaseOption GetChangeCaseInfo()
+    {
+        if (itmChangeCaseNoChange.Checked) return ChangeCaseOption.NoChange;
+        else if (itmChangeCaseUppercase.Checked) return ChangeCaseOption.Uppercase;
+        else if (itmChangeCaseLowercase.Checked) return ChangeCaseOption.Lowercase;
+        else if (itmChangeCaseTitlecase.Checked) return ChangeCaseOption.Titlecase;
+        else if (itmChangeCaseCleanName.Checked) return ChangeCaseOption.CleanName;
+        else return ChangeCaseOption.NoChange;
+    }
+    #endregion
+
+    #region Autonumbering Methods
+
+    private bool _validNumber = true;      // numbering menu options are all valid
+                                           // numbering
     private void NumberingMenuItem(object sender)
     {
+        if (!EnableUpdates) return;
+
         ToolStripTextBox textBox = (ToolStripTextBox)sender;
         bool error = false;
         int num;
@@ -376,9 +455,7 @@ public partial class EditMetadataForm : Form
             textBox.Text = "0";  // default: no padding
         }
 
-
         // parse int, check valid range
-
         if (!Int32.TryParse(textBox.Text, out num))
             error = true;
         else if (textBox == txtNumberingStart && num < 0)
@@ -392,7 +469,6 @@ public partial class EditMetadataForm : Form
 
 
         // or, check for letter(s)
-
         if (textBox == txtNumberingStart)
         {
             if (Regex.IsMatch(textBox.Text, @"^([a-z]+|[A-Z]+)$"))
@@ -406,9 +482,7 @@ public partial class EditMetadataForm : Form
             }
         }
 
-
         // set bg colour
-
         if (error)
             textBox.BackColor = Color.MistyRose;
         else
@@ -416,14 +490,13 @@ public partial class EditMetadataForm : Form
 
 
         // if all valid, update preview
-
         textBox.Tag = !error;
-        validNumber = (bool)mnuNumbering.DropDownItems[0].Tag
+        _validNumber = (bool)mnuNumbering.DropDownItems[0].Tag
                     && (bool)mnuNumbering.DropDownItems[1].Tag
                     && (bool)mnuNumbering.DropDownItems[2].Tag
                     && (bool)mnuNumbering.DropDownItems[3].Tag;
 
-        if (validNumber)
+        if (_validNumber)
             UpdatePreview();
     }
     private void txtNumberingStart_TextChanged(object sender, EventArgs e)
@@ -443,34 +516,10 @@ public partial class EditMetadataForm : Form
         NumberingMenuItem(sender);
     }
 
-    private static string SequenceNumberToLetter(int i)
-    {
-        int dividend = i;
-        string columnName = String.Empty;
-
-        while (dividend > 0)
-        {
-            int modulo = (dividend - 1) % 26;
-            columnName = Convert.ToChar(97 + modulo) + columnName;  // note: A-Z = 65-90, a-z = 97-122
-            dividend = (dividend - modulo) / 26;
-        }
-
-        return columnName;
-    }
-    private static int SequenceLetterToNumber(string letter)
-    {
-        int number = 0;
-        int pow = 1;
-        for (int i = letter.Length - 1; i >= 0; i--)
-        {
-            number += (letter[i] - 'a' + 1) * pow;
-            pow *= 26;
-        }
-
-        return number;
-    }
     private void mnuNumbering_MouseDown(object sender, MouseEventArgs e)
     {
+        if(!EnableUpdates) return;
+
         if (e.Button == MouseButtons.Right)  // set defaults
         {
             if (txtNumberingStart.Text != "1") txtNumberingStart.Text = "1";
@@ -481,262 +530,75 @@ public partial class EditMetadataForm : Form
             UpdatePreview();
         }
     }
-
-    private string MatchEvalChangeCase(Match match)
-    {
-        TextInfo ti = new CultureInfo("en").TextInfo;
-
-        if (itmChangeCaseUppercase.Checked) return ti.ToUpper(match.Groups[1].Value);
-        else if (itmChangeCaseLowercase.Checked) return ti.ToLower(match.Groups[1].Value);
-        else if (itmChangeCaseTitlecase.Checked) return ti.ToTitleCase(match.Groups[1].Value.ToLower());
-        else if (itmChangeCaseCleanName.Checked) return match.Groups[1].Value.ToCleanFileName();
-        else return match.Groups[1].Value;
-    }
-
     #endregion
 
     #region Update Methods
 
     private void UpdatePreview()
     {
-        UpdatePreviewInternal(cmbSeries, 1);
-        UpdatePreviewInternal(cmbVolume, 4);
-        UpdatePreviewInternal(cmbTitle, 2);
-        UpdatePreviewInternal(cmbAuthor, 3);
-        UpdatePreviewInternal(cmbLanguage, 5);
+        if (!EnableUpdates) return;
+
+        EnableUpdates = false;
+
+        AutoNumberingInfo numInfo = new AutoNumberingInfo()
+        {
+            ValidNumber = _validNumber,
+            NumberingStart = txtNumberingStart.Text,
+            NumberingIncStep = txtNumberingInc.Text,
+            NumberingReset = txtNumberingReset.Text,
+            NumberingPad = txtNumberingPad.Text
+        };
+
+        ChangeCaseOption changeCaseOption = GetChangeCaseInfo();
+
+        RegexModifierInfo modifierInfo = new RegexModifierInfo()
+        {
+            IgnoreCase = cbModifierI.Checked,
+            ReplaceEveryMatch = cbModifierG.Checked,
+            IgnorePatternWhitespace = cbModifierX.Checked
+        };
+
+
+        _activeFiles.BuildMetadataPreview(MetadataType.Series, cmbMatch.Text, cmbSeries.Text, numInfo, changeCaseOption, modifierInfo);
+        _activeFiles.BuildMetadataPreview(MetadataType.Volume, cmbMatch.Text, cmbVolume.Text, numInfo, changeCaseOption, modifierInfo);
+        _activeFiles.BuildMetadataPreview(MetadataType.Title, cmbMatch.Text, cmbTitle.Text, numInfo, changeCaseOption, modifierInfo);
+        _activeFiles.BuildMetadataPreview(MetadataType.Writer, cmbMatch.Text, cmbAuthor.Text, numInfo, changeCaseOption, modifierInfo);
+        _activeFiles.BuildMetadataPreview(MetadataType.Language, cmbMatch.Text, cmbLanguage.Text, numInfo, changeCaseOption, modifierInfo);
         UpdateDataToGrid();
+
+        EnableUpdates = true;
     }
-    private int UpdatePreviewInternal(ComboBox cmbReplace, int colType)
-    {
-        int retVal = 0;
-        this.Cursor = Cursors.AppStarting;
 
-        const string rxDoller = @"(?<=(?:^|[^$])(?:\$\$)*)\$";  // regex for an actual (non-escaped) doller sign
-
-        // generate preview
-        if (!string.IsNullOrWhiteSpace(cmbMatch.Text) && !string.IsNullOrWhiteSpace(cmbReplace.Text))
-        {
-            // compile regex
-            RegexOptions options = RegexOptions.None | RegexOptions.Compiled;
-            //Global Modifier
-            int count = -1;
-            if (cbModifierI.Checked) { options |= RegexOptions.IgnoreCase; }
-            if (cbModifierX.Checked) { options |= RegexOptions.IgnorePatternWhitespace; }
-            //main regex
-            Regex regex = new Regex(cmbMatch.Text, options);
-
-            // auto numbering
-            int numCurrent = 0, numInc = 0, numStart = 0, numReset = 0;
-            string numFormatted = "";
-            bool doingAutoNum = false;
-            bool doingAutoNumLetter = false;  // number sequence is actually a-z letter sequence
-            bool doingAutoNumLetterUpper = false;  // letter sequence is uppercase
-
-            if (this.validNumber && Regex.IsMatch(cmbReplace.Text, rxDoller + "#"))
-                doingAutoNum = true;
-
-            Match match = Regex.Match(this.txtNumberingStart.Text, @"^(([a-z]+)|([A-Z]+))$");
-            doingAutoNumLetter = match.Success;
-            doingAutoNumLetterUpper = match.Success && match.Groups[3].Length > 0;
-
-            if (doingAutoNum)
-            {
-                if (doingAutoNumLetter)
-                {
-                    numStart = SequenceLetterToNumber(txtNumberingStart.Text.ToLower());
-                }
-                else
-                {
-                    numStart = Int32.Parse(txtNumberingStart.Text);
-                }
-
-                numInc = Int32.Parse(txtNumberingInc.Text);
-                numReset = Int32.Parse(txtNumberingReset.Text);
-            }
-            numCurrent = numStart - numInc;  // back up one
-
-            // regex each filename
-            string userReplacePattern = cmbReplace.Text;
-            if (doingAutoNum)
-            {
-                userReplacePattern = Regex.Replace(userReplacePattern, rxDoller + @"(\d+)" + rxDoller + "#", "$${$1}$$#");
-            }
-
-            for (int afi = 0; afi < _activeFiles.Count; afi++)
-            {
-                string replacePattern;
-
-                if (doingAutoNum)
-                {
-                    numCurrent += numInc;
-
-                    if (numReset != 0 && (numCurrent - numStart) % numReset == 0)
-                        numCurrent = numStart;
-
-                    if (numFormatted != "$#")  // basic int overflow & negative number detection
-                    {
-                        if (!doingAutoNumLetter)  // number sequence
-                        {
-                            if (numCurrent < 0)
-                                numFormatted = "$#";
-                            else
-                                numFormatted = numCurrent.ToString(txtNumberingPad.Text);
-                        }
-                        else  // letter sequence
-                        {
-                            if (numCurrent < 1)
-                                numFormatted = "$#";
-                            else if (doingAutoNumLetterUpper)
-                                numFormatted = SequenceNumberToLetter(numCurrent).ToUpper();
-                            else
-                                numFormatted = SequenceNumberToLetter(numCurrent);
-                        }
-                    }
-
-                    replacePattern = Regex.Replace(userReplacePattern, rxDoller + "#", numFormatted);
-                }
-                else
-                {
-                    replacePattern = userReplacePattern;
-                }
-
-                if (!itmChangeCaseNoChange.Checked)
-                    replacePattern = "\n" + replacePattern + "\n";  // delimit change-case boundaries
-
-                switch (colType)
-                {
-                    case 1:
-                        _activeFiles[afi].Item2.Series = regex.Replace(_activeFiles[afi].Item1.Name, replacePattern, count);
-                        if (!itmChangeCaseNoChange.Checked)
-                            _activeFiles[afi].Item2.Series = Regex.Replace(_activeFiles[afi].Item2.Series, @"\n([^\n]*)\n", new MatchEvaluator(MatchEvalChangeCase));
-                        if (_activeFiles[afi].Item2.Series.Length == 0)
-                            _activeFiles[afi].Item2.Series = _activeFiles[afi].Item1.Name;
-                        retVal = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.Series) ? 0 : 1;
-                        break;
-                    case 2:
-                        _activeFiles[afi].Item2.Title = regex.Replace(_activeFiles[afi].Item1.Name, replacePattern, count);
-                        if (!itmChangeCaseNoChange.Checked)
-                            _activeFiles[afi].Item2.Title = Regex.Replace(_activeFiles[afi].Item2.Title, @"\n([^\n]*)\n", new MatchEvaluator(MatchEvalChangeCase));
-                        if (_activeFiles[afi].Item2.Title.Length == 0)
-                            _activeFiles[afi].Item2.Title = _activeFiles[afi].Item1.Name;
-                        retVal = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.Title) ? 0 : 1;
-                        break;
-                    case 3:
-                        _activeFiles[afi].Item2.Writer = regex.Replace(_activeFiles[afi].Item1.Name, replacePattern, count);
-                        if (!itmChangeCaseNoChange.Checked)
-                            _activeFiles[afi].Item2.Writer = Regex.Replace(_activeFiles[afi].Item2.Writer, @"\n([^\n]*)\n", new MatchEvaluator(MatchEvalChangeCase));
-                        if (_activeFiles[afi].Item2.Writer.Length == 0)
-                            _activeFiles[afi].Item2.Writer = _activeFiles[afi].Item1.Name;
-                        retVal = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.Writer) ? 0 : 1;
-                        break;
-                    case 4:
-                        _activeFiles[afi].Item2.Volume = regex.Replace(_activeFiles[afi].Item1.Name, replacePattern, count);
-                        if (!itmChangeCaseNoChange.Checked)
-                            _activeFiles[afi].Item2.Volume = Regex.Replace(_activeFiles[afi].Item2.Volume, @"\n([^\n]*)\n", new MatchEvaluator(MatchEvalChangeCase));
-                        if (_activeFiles[afi].Item2.Volume.Length == 0)
-                            _activeFiles[afi].Item2.Volume = _activeFiles[afi].Item1.Name;
-                        retVal = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.Volume) ? 0 : 1;
-                        break;
-                    case 5:
-                        _activeFiles[afi].Item2.LanguageISO = regex.Replace(_activeFiles[afi].Item1.Name, replacePattern, count);
-                        if (!itmChangeCaseNoChange.Checked)
-                            _activeFiles[afi].Item2.LanguageISO = Regex.Replace(_activeFiles[afi].Item2.LanguageISO, @"\n([^\n]*)\n", new MatchEvaluator(MatchEvalChangeCase));
-                        if (_activeFiles[afi].Item2.LanguageISO.Length == 0)
-                            _activeFiles[afi].Item2.LanguageISO = _activeFiles[afi].Item1.Name;
-                        retVal = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.LanguageISO) ? 0 : 1;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        else
-        {
-            retVal = 1;
-            // clear preview
-            for (int afi = 0; afi < _activeFiles.Count; afi++)
-            {
-                switch (colType)
-                {
-                    case 1:
-                        _activeFiles[afi].Item2.Series = "";
-                        break;
-                    case 2:
-                        _activeFiles[afi].Item2.Title  = "";
-                        break;
-                    case 3:
-                        _activeFiles[afi].Item2.Writer = "";
-                        break;
-                    case 4:
-                        _activeFiles[afi].Item2.Volume = "";
-                        break;
-                     case 5:
-                        _activeFiles[afi].Item2.LanguageISO = "";
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        return retVal;
-    }
 
     private void UpdateDataToGrid()
     {
-        var colStyle = new ColumnHeaderAutoResizeStyle[]
-        {
-            ColumnHeaderAutoResizeStyle.ColumnContent,
-            ColumnHeaderAutoResizeStyle.HeaderSize,
-            ColumnHeaderAutoResizeStyle.HeaderSize,
-            ColumnHeaderAutoResizeStyle.HeaderSize,
-            ColumnHeaderAutoResizeStyle.HeaderSize,
-            ColumnHeaderAutoResizeStyle.HeaderSize
-        };
-
         // update file list
         fileListView.BeginUpdate();
-        //fileListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
         for (int dfi = 0; dfi < fileListView.Items.Count; dfi++)
         {
             int afi = (int)fileListView.Items[dfi].Tag;
-            if(!string.IsNullOrEmpty(_activeFiles[afi].Item2.Title))
+            if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.Title))
                 fileListView.Items[dfi].SubItems[1].Text = _activeFiles[afi].Item2.Title;
-            //colStyle[1] = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.Title) ? ColumnHeaderAutoResizeStyle.HeaderSize : ColumnHeaderAutoResizeStyle.ColumnContent;
             if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.Series))
                 fileListView.Items[dfi].SubItems[2].Text = _activeFiles[afi].Item2.Series;
-            //colStyle[2] = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.Series) ? ColumnHeaderAutoResizeStyle.HeaderSize : ColumnHeaderAutoResizeStyle.ColumnContent;
             if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.Volume))
                 fileListView.Items[dfi].SubItems[3].Text = _activeFiles[afi].Item2.Volume;
-            //colStyle[3] = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.Volume) ? ColumnHeaderAutoResizeStyle.HeaderSize : ColumnHeaderAutoResizeStyle.ColumnContent;
             if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.Writer))
                 fileListView.Items[dfi].SubItems[4].Text = _activeFiles[afi].Item2.Writer;
-            //colStyle[4] = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.Writer) ? ColumnHeaderAutoResizeStyle.HeaderSize : ColumnHeaderAutoResizeStyle.ColumnContent;
             if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.LanguageISO))
                 fileListView.Items[dfi].SubItems[5].Text = _activeFiles[afi].Item2.LanguageISO;
-            //colStyle[5] = string.IsNullOrWhiteSpace(_activeFiles[afi].Item2.LanguageISO) ? ColumnHeaderAutoResizeStyle.HeaderSize : ColumnHeaderAutoResizeStyle.ColumnContent;
-
         }
 
         fileListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-
-
-        //for (int idx = 0; idx < colStyle.Length; idx++)
-        //{
-        //    fileListView.AutoResizeColumn(idx, colStyle[idx]);
-        //}
         fileListView.EndUpdate();
-        this.Cursor = Cursors.Default;
     }
 
     private void UpdateFileList()
     {
-        this.Cursor = Cursors.AppStarting;
-
         if (chkApplyRecursively.Enabled)
         {
             _activeFiles.Clear();
-            _activeFiles = _activePath.GetFileInfo(_searchPattern,chkApplyRecursively.Checked);
+            _activeFiles = _activePath.GetFileInfo(_searchPattern, chkApplyRecursively.Checked);
         }
 
         // create datagridview items w/ filename
@@ -754,7 +616,5 @@ public partial class EditMetadataForm : Form
         }
         UpdatePreview();
     }
-
-    
+    #endregion
 }
-#endregion

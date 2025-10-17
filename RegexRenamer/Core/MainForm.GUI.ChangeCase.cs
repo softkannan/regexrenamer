@@ -14,7 +14,6 @@ namespace RegexRenamer
     public partial class MainForm
     {
         // regex match evaluator for changing case
-
         private void InitializeChangeCase()
         {
             itmChangeCaseNoChange.Click += (sender,e) => ChangeCaseMenuItem(sender); 
@@ -24,8 +23,6 @@ namespace RegexRenamer
             itmChangeCaseCleanName.Click += (sender, e) => ChangeCaseMenuItem(sender);
             mnuChangeCase.MouseDown += mnuChangeCase_MouseDown;
         }
-
-       
 
         // UPPER MENUS
 
@@ -39,7 +36,6 @@ namespace RegexRenamer
 
 
             // update checked marks
-
             for (int i = 0; i < mnuChangeCase.DropDownItems.Count; i++)
             {
                 if (i == 1) continue;  // seperator
@@ -52,7 +48,6 @@ namespace RegexRenamer
 
 
             // set default match/replace values (if empty)
-
             if (checkedMenuItem != itmChangeCaseNoChange)
             {
                 if (cmbMatch.Text == "")
@@ -71,7 +66,6 @@ namespace RegexRenamer
 
 
             // set button text to bold if an option selected
-
             if (itmChangeCaseNoChange.Checked)
             {
                 mnuChangeCase.Font = new Font("Tahoma", 8.25F);
@@ -85,11 +79,9 @@ namespace RegexRenamer
 
 
             // update preview
-
             this.Update();
             UpdatePreview();
         }
-
         
         private void mnuChangeCase_MouseDown(object sender, MouseEventArgs e)
         {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
-using RegexRenamer.FindReplace;
+using RegexRenamer.Rename;
+using RegexRenamer.Tools.FindReplace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -27,16 +28,16 @@ namespace RegexRenamer
             {
                 if (key != null)
                 {
-                    if (ActivePath == null)
-                        ActivePath = (string)key.GetValue("LastPath", "");
+                    if (_activePath == null)
+                        _activePath = (string)key.GetValue("LastPath", "");
                     fbdMoveCopy.SelectedPath = (string)key.GetValue("MoveCopyPath", "");
                     //RenameFolders = (string)key.GetValue("RenameFolders") == "True";
 
                     try
                     {
                         int maxFilesOverride = (int)key.GetValue("MaxFileLimit", 1000);
-                        if (maxFilesOverride > MAX_FILES)
-                            MAX_FILES = maxFilesOverride;
+                        if (maxFilesOverride > FilesStore.MAX_FILES)
+                            FilesStore.MAX_FILES = maxFilesOverride;
 
                         int maxViewFilesOverride = (int)key.GetValue("MaxViewFileLimit", 200);
                         if (maxViewFilesOverride > MAX_VIEW_PAGE_SIZE)
@@ -189,7 +190,7 @@ namespace RegexRenamer
             {
                 if (key != null)
                 {
-                    key.SetValue("LastPath", ActivePath);
+                    key.SetValue("LastPath", _activePath);
                     key.SetValue("MoveCopyPath", fbdMoveCopy.SelectedPath);
                     key.SetValue("RenameFolders", RenameFolders);
                     key.Close();
