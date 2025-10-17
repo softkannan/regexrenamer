@@ -229,6 +229,7 @@ namespace RegexRenamer
             lblStats.MouseEnter += lblStats_MouseEnter;
             lblStats.MouseLeave += lblStats_MouseLeave;
 
+            dgvFiles.DoubleBuffered(true);
 
             //_dm = new DarkModeForms.DarkModeCS(this)
             //{

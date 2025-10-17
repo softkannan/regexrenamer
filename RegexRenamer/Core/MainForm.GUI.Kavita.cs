@@ -75,12 +75,16 @@ namespace RegexRenamer
                 mnuKavitaCheck.Font = new Font("Tahoma", 8.25F);
                 mnuKavitaCheck.Padding = new Padding(0, 0, 8, 0);
                 SetKavithaColVisibility(false);
+                colFilename.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                colPreview.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
             else
             {
                 SetKavithaColVisibility(true);
                 mnuKavitaCheck.Font = new Font("Tahoma", 8.25F, FontStyle.Bold);
                 mnuKavitaCheck.Padding = new Padding(0, 0, 0, 0);
+                colFilename.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                colPreview.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
 
                 _kavitaPreviewLibType = LibraryType.Comic;
 
@@ -100,8 +104,8 @@ namespace RegexRenamer
 
 
             // update preview
-            this.Update();
             UpdatePreview();
+            this.Update();
         }
 
         private void SetKavithaColVisibility(bool isKavithaColVisibile)

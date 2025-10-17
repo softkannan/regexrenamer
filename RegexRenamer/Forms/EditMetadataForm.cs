@@ -288,8 +288,8 @@ public partial class EditMetadataForm : Form
                         Application.DoEvents();
                         try
                         {
-                            await Task.Delay(500); // to allow UI to update
-                            //await EBookHelper.WriteMetadata(file.Item1.FullName, file.Item2);
+                            //await Task.Delay(500); // to allow UI to update
+                            await EBookHelper.WriteMetadata(file.Item1.FullName, file.Item2);
                         }
                         catch (Exception ex)
                         {
