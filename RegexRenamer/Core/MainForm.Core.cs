@@ -97,7 +97,7 @@ public partial class MainForm
     }
     catch  // default: no image
     {
-      dgvFiles.Rows[i].Cells[0].Value = new Bitmap( 1, 1 );
+      dgvFiles.Rows[idx].Cells[0].Value = new Bitmap( 1, 1 );
     }
 #endif
         }
