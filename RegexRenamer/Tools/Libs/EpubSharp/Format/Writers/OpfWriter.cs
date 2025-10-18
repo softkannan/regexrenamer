@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Linq;
+using System.Windows.Controls;
 using System.Xml.Linq;
 
 namespace EpubSharp.Format.Writers
 {
     internal class OpfWriter
     {
+        private const string DCTerms = "http://purl.org/dc/terms";
+
         public static string Format(OpfDocument opf)
         {
             var root = new XElement(OpfElements.Package);
-            root.Add(new XAttribute("xmlns", Constants.OpfNamespace));
-            root.Add(new XAttribute(XNamespace.Xmlns + "dc", Constants.OpfMetadataNamespace));
+            //root.Add(new XAttribute(XNamespace.Xmlns + "dc", Constants.OpfMetadataNamespace));
 
             // This attribute is required, but some books don't have it. So we leave it as it is.
             if (!string.IsNullOrWhiteSpace(opf.UniqueIdentifier))
@@ -32,7 +34,9 @@ namespace EpubSharp.Format.Writers
             }
             root.Add(new XAttribute(OpfDocument.Attributes.Version, versionString));
 
-            root.Add(WriteMetadata(opf.Metadata, opf.EpubVersion));
+            var metadataElem = WriteMetadata(opf.Metadata, opf.EpubVersion);
+            
+            root.Add(metadataElem);
             root.Add(WriteManifest(opf.Manifest));
             root.Add(WriteSpine(opf.Spine));
 
@@ -41,13 +45,30 @@ namespace EpubSharp.Format.Writers
                 root.Add(WriteGuide(opf.Guide));
             }
 
+            //foreach (var element in root.Descendants())
+            //{
+            //    var duplicateAttributes = element.Attributes()
+            //        .Where(a => a.IsNamespaceDeclaration)
+            //        .GroupBy(a => a.Value)
+            //        .SelectMany(g => g.Skip(1)) // Keep only the first occurrence
+            //        .ToList();
+
+            //    foreach (var attr in duplicateAttributes)
+            //    {
+            //        attr.Remove();
+            //    }
+            //}
+
             //var xml = Constants.XmlDeclaration + "\n" + root;
-            return root.ToString();
+            return root.ToString(SaveOptions.OmitDuplicateNamespaces);
         }
 
         private static XElement WriteMetadata(OpfMetadata metadata, EpubVersion version)
         {
             var root = new XElement(OpfElements.Metadata);
+            root.SetAttributeValue(XNamespace.Xmlns + "dc", Constants.OpfMetadataNamespace);
+            root.SetAttributeValue(XNamespace.Xmlns + "opf", Constants.OpfNamespace);
+            root.SetAttributeValue(XNamespace.Xmlns + "dcterms", DCTerms);
 
             foreach (var contributor in metadata.Contributors)
             {
@@ -103,6 +124,7 @@ namespace EpubSharp.Format.Writers
             {
                 root.Add(new XElement(OpfElements.Subject, subject));
             }
+
             foreach (var meta in metadata.Metas)
             {
                 var element = new XElement(OpfElements.Meta);
@@ -240,7 +262,7 @@ namespace EpubSharp.Format.Writers
 
         private static XElement WriteSpine(OpfSpine spine)
         {
-            var root = new XElement(OpfElements.Spine);
+            var root = new XElement( OpfElements.Spine);
 
             if (spine.Toc != null)
             {

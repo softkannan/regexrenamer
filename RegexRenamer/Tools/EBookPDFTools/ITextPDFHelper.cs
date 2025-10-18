@@ -4,20 +4,185 @@ using iText.Forms.Form.Element;
 using iText.IO.Source;
 using iText.Kernel.Pdf;
 using iText.Kernel.XMP;
+using iText.Kernel.XMP.Options;
 using RegexRenamer.Tools.Kavita;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
 
 namespace RegexRenamer.Tools.EBookPDFTools
 {
+    /*
+        info.Summary   = MaybeGetMetadata(metadata, "Summary") ?? string.Empty;
+        info.Publisher = MaybeGetMetadata(metadata, "Publisher") ?? string.Empty;
+        info.Writer    = MaybeGetMetadata(metadata, "Author") ?? string.Empty;
+        info.Title     = MaybeGetMetadata(metadata, "Title") ?? string.Empty;
+        info.TitleSort  = MaybeGetMetadata(metadata, "TitleSort") ?? string.Empty;
+        info.Genre     = MaybeGetMetadata(metadata, "Subject") ?? string.Empty;
+        info.LanguageISO = MaybeGetMetadata(metadata, "Language") ?? string.Empty;
+        info.Isbn      = MaybeGetMetadata(metadata, "ISBN") ?? string.Empty;
+
+        info.UserRating = GetFloatFromText(MaybeGetMetadata(metadata, "UserRating")) ?? 0.0f;
+        info.Series     = MaybeGetMetadata(metadata, "Series") ?? info.Title;
+        info.SeriesSort = info.Series;
+        info.Volume     = MaybeGetMetadata(metadata, "Volume") ?? string.Empty;
+
+     */
     public static class ITextPDFHelper
     {
+        public static bool ClearPDFMetadata(string filePath)
+        {
+            string tempFilePath = $"{Path.GetTempPath()}\\{Path.GetFileName(filePath)}"; 
+            using (PdfDocument pdfDoc = new PdfDocument(new PdfReader(filePath), new PdfWriter(tempFilePath)))
+            {
+                var info = pdfDoc.GetDocumentInfo();
+                if (info != null)
+                {
+                    info.SetAuthor("");
+                    info.SetTitle("");
+                    info.SetMoreInfo("TitleSort", "");
+                    info.SetMoreInfo("Series", "");
+                    info.SetMoreInfo("Volume", "");
+                }
+
+                // cleat series metadata if exists
+                var xmpMeta = pdfDoc.GetXmpMetadata();
+                if (xmpMeta != null)
+                {
+                    var dcNS = "http://purl.org/dc/elements/1.1/";
+                    var calibreNS = "http://calibre-ebook.com/xmp-namespace";
+                    var calibreSINS = "http://calibre-ebook.com/xmp-namespace-series-index";
+                    XMPMetaFactory.GetSchemaRegistry().RegisterNamespace(dcNS,"dc");
+                    XMPMetaFactory.GetSchemaRegistry().RegisterNamespace(calibreNS, "calibre");
+                    XMPMetaFactory.GetSchemaRegistry().RegisterNamespace(calibreSINS, "calibreSI");
+
+                    xmpMeta.SetProperty(dcNS, "dc:title", "");
+                    xmpMeta.SetProperty(calibreNS, "calibre:series", "");
+                    xmpMeta.SetProperty(calibreSINS, "calibreSI:series_index", "");
+                    pdfDoc.SetXmpMetadata(xmpMeta);
+                }
+            }
+
+            File.Move(tempFilePath, filePath, true);
+
+            return true;
+        }
+
+        public static bool WritePDFMetadata(string filePath, ComicInfo metadata)
+        {
+            string tempFilePath = $"{Path.GetTempPath()}\\{Path.GetFileName(filePath)}";
+            int writeCount = 0;
+            int xmpWriteCount = 0;
+
+            using (PdfDocument pdfDoc = new PdfDocument(new PdfReader(filePath), new PdfWriter(tempFilePath)))
+            {
+                var dcNS = "http://purl.org/dc/elements/1.1/";
+                var calibreNS = "http://calibre-ebook.com/xmp-namespace";
+                var calibreSINS = "http://calibre-ebook.com/xmp-namespace-series-index";
+                var dcNSPrefix = XMPMetaFactory.GetSchemaRegistry().RegisterNamespace(dcNS, "dc");
+                var calibreNSPrefix = XMPMetaFactory.GetSchemaRegistry().RegisterNamespace(calibreNS, "calibre");
+                var calibreSINSPrefix = XMPMetaFactory.GetSchemaRegistry().RegisterNamespace(calibreSINS, "calibreSI");
+
+                // cleat series metadata if exists
+                var xmpMeta = pdfDoc.GetXmpMetadata(true);
+                if (xmpMeta != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(metadata.Series))
+                    {
+                        xmpWriteCount++;
+                        xmpMeta.SetProperty(calibreNS, $"{calibreNSPrefix}series", metadata.Series);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(metadata.Volume))
+                    {
+                        xmpWriteCount++;
+                        xmpMeta.SetProperty(calibreSINS, $"{calibreSINSPrefix}series_index", metadata.Volume);
+                    }
+                }
+
+                var info = pdfDoc.GetDocumentInfo();
+                if (info != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(metadata.Writer))
+                    {
+                        writeCount++;
+                        info.SetAuthor(metadata.Writer);
+                        info.SetCreator(metadata.Writer);
+                        info.SetProducer(metadata.Writer);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(metadata.Title))
+                    {
+                        writeCount++;
+                        info.SetTitle(metadata.Title);
+                        info.SetMoreInfo("TitleSort", metadata.Title);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(metadata.Series))
+                    {
+                        writeCount++;
+                        info.SetMoreInfo("Series", metadata.Series);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(metadata.Volume))
+                    {
+                        writeCount++;
+                        info.SetMoreInfo("Volume", metadata.Volume);
+                    }
+
+                }
+
+                if(!string.IsNullOrWhiteSpace(metadata.LanguageISO))
+                {
+                    writeCount++;
+                    pdfDoc.GetCatalog().SetLang(new PdfString(metadata.LanguageISO.ToUpper()));
+                }
+
+                //if (xmpWriteCount > 0)
+                //{
+                //    pdfDoc.SetXmpMetadata(xmpMeta);
+                //}
+            }
+
+            writeCount += xmpWriteCount;
+
+            if (writeCount > 0)
+            {
+                File.Move(tempFilePath, filePath, true);
+            }
+            return true;
+        }
+
+        public static bool RemoveOwnerPassword(string filePath)
+        {
+            string folderPath = Path.GetDirectoryName(filePath);
+            string fileExt = Path.GetExtension(filePath);
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            string srcPath = Path.Combine(folderPath, $"{fileName}.Backup{fileExt}");
+            try
+            {
+                File.Move(filePath, srcPath, true);
+            } catch { }
+
+
+            using (PdfReader reader = new PdfReader(srcPath))
+            {
+                reader.SetUnethicalReading(true);
+                using (PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(filePath)))
+                {
+                    pdfDoc.Close();
+                }
+                reader.Close();
+            }
+            return true;
+        }
+
         public static void RemoveSign(string filePath, string password)
         {
             try
@@ -118,91 +283,5 @@ namespace RegexRenamer.Tools.EBookPDFTools
             }
         }
 
-        public static bool CleariTextMetadata(string filePath)
-        {
-            using (PdfReader reader = new PdfReader("HelloWorldNoMetadata.pdf"))
-            using (PdfDocument stamper = new PdfDocument(reader, new PdfWriter("HelloWorldStampedMetadata.pdf")))
-            {
-                //var info = stamper.GetDocumentInfo();
-                //info.SetAuthor("Bruno Lowagie");
-                //info.SetTitle("Hello World stamped");
-                //XMPMeta meta = XMPMetaFactory.Create();
-                //stamper.SetXmpMetadata(meta);
-            }
-            return true;
-        }
-
-        public static bool WriteiTextMetadata(string filePath, ComicInfo metadata)
-        {
-            //String dest = "custom_xmp_metadata.pdf";
-            //PdfWriter writer = new PdfWriter(dest);
-            //PdfDocument pdfDoc = new PdfDocument(writer);
-
-            //// 1. Create a new XMPMeta object
-            //XMPMeta xmpMeta = XMPMetaFactory.create();
-
-            //// 2. Register your custom namespace
-            //String customNs = "http://www.yourdomain.com/custom-ns/1.0/";
-            //String customPrefix = "yourprefix";
-            //XMPMetaFactory.getQNameRegistry().registerNamespace(customNs, customPrefix);
-
-            //try
-            //{
-            //    // 3. Add the custom property
-            //    xmpMeta.setProperty(customNs, "myProperty", "myValue");
-
-            //    // 4. Serialize the XMPMeta object to a byte array
-            //    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            //    XMPMetaFactory.serialize(xmpMeta, baos);
-            //    byte[] xmpBytes = baos.toByteArray();
-
-            //    // 5. Embed the XMP metadata in the PDF
-            //    pdfDoc.setXmpMetadata(xmpBytes);
-
-            //}
-            //catch (XMPException e)
-            //{
-            //    e.printStackTrace();
-            //}
-
-            //// Close the document
-            //pdfDoc.close();
-            //System.out.println("PDF created successfully with custom XMP metadata.");
-
-            //PdfReader reader = new PdfReader("HelloWorldNoMetadata.pdf");
-            //PdfDocument stamper = new PdfDocument(reader,
-            // new PdfWriter("HelloWorldStampedMetadata.pdf"));
-            //var info = stamper.GetDocumentInfo();
-            //info.SetAuthor("Bruno Lowagie");
-            //info.SetTitle("Hello World stamped");
-            //XMPMeta meta = XMPMetaFactory.Create();
-            //stamper.SetXmpMetadata(meta);
-            return true;
-        }
-
-        public static bool RemoveOwnerPassword(string filePath)
-        {
-            string folderPath = Path.GetDirectoryName(filePath);
-            string fileExt = Path.GetExtension(filePath);
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string srcPath = Path.Combine(folderPath, $"{fileName}.Backup{fileExt}");
-            try
-            {
-                File.Move(filePath, srcPath, true);
-            } catch { }
-
-
-            using (PdfReader reader = new PdfReader(srcPath))
-            {
-                reader.SetUnethicalReading(true);
-                using (PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(filePath)))
-                {
-                    pdfDoc.Close();
-                }
-                reader.Close();
-            }
-            return true;
-        }
-        
     }
 }

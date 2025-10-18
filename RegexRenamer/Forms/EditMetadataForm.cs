@@ -78,6 +78,14 @@ public partial class EditMetadataForm : Form
         itmChangeCaseCleanName.Click += (sender, e) => ChangeCaseMenuItem(sender);
         mnuChangeCase.MouseDown += mnuChangeCase_MouseDown;
 
+
+        cmbPDFToolsList.Items.AddRange(Enum.GetNames(typeof(PDFToolsList)));
+        cmbPDFToolsList.SelectedItem = UserConfig.Inst.PreferredPDFTool;
+
+        cmbEPUBToolsList.Items.AddRange(Enum.GetNames(typeof(EBookToolsList)));
+        cmbEPUBToolsList.SelectedItem = UserConfig.Inst.PreferredEBookTool;
+
+
         this.FormClosing += Form_Closing;
 
         regExCtxMenu = new RegExContextMenuProvider(components);
@@ -128,46 +136,34 @@ public partial class EditMetadataForm : Form
             if (_enableUpdates)
             {
                 this.Cursor = Cursors.Default;
-                cmbAuthor.Enabled = true;
-                cmbMatch.Enabled = true;
-                cmbSeries.Enabled = true;
-                cmbTitle.Enabled = true;
-                cmbVolume.Enabled = true;
-                cmbLanguage.Enabled = true;
-                mnuChangeCase.Enabled = true;
-                mnuNumbering.Enabled = true;
-
-                chkApplyRecursively.Enabled = true;
-                chkClearUseAltMethod.Enabled = true;
-                chkIgnoreError.Enabled = true;
-                chkShowExisting.Enabled = true;
-
-                cbModifierG.Enabled = true;
-                cbModifierI.Enabled = true;
-                cbModifierX.Enabled = true;
             }
             else
             {
                 this.Cursor = Cursors.AppStarting;
-                cmbAuthor.Enabled = false;
-                cmbMatch.Enabled = false;
-                cmbSeries.Enabled = false;
-                cmbTitle.Enabled = false;
-                cmbVolume.Enabled = false;
-                cmbLanguage.Enabled = false;
-                mnuChangeCase.Enabled = false;
-                mnuNumbering.Enabled = false;
-
-                chkApplyRecursively.Enabled = false;
-                chkClearUseAltMethod.Enabled = false;
-                chkIgnoreError.Enabled = false;
-                chkShowExisting.Enabled = false;
-
-                cbModifierG.Enabled = false;
-                cbModifierI.Enabled = false;
-                cbModifierX.Enabled = false;
             }
         }
+    }
+
+    private void EnableFormControls(bool enable)
+    {
+        cmbAuthor.Enabled = enable;
+        cmbMatch.Enabled = enable;
+        cmbSeries.Enabled = enable;
+        cmbTitle.Enabled = enable;
+        cmbVolume.Enabled = enable;
+        cmbLanguage.Enabled = enable;
+        mnuChangeCase.Enabled = enable;
+        mnuNumbering.Enabled = enable;
+        chkApplyRecursively.Enabled = enable;
+        
+        cmbEPUBToolsList.Enabled = enable;
+        cmbPDFToolsList.Enabled = enable;
+
+        chkIgnoreError.Enabled = enable;
+        chkShowExisting.Enabled = enable;
+        cbModifierG.Enabled = enable;
+        cbModifierI.Enabled = enable;
+        cbModifierX.Enabled = enable;
     }
 
     private void MetaDataForm_Load(object sender, EventArgs e)
@@ -185,7 +181,6 @@ public partial class EditMetadataForm : Form
         UpdateFileList();
 
         chkIgnoreError.Checked = UserConfig.Inst.IgnoreError;
-        chkClearUseAltMethod.Checked = UserConfig.Inst.MetadatWriteUseAltMethodForPDF;
         chkApplyRecursively.Checked = UserConfig.Inst.ApplyRecursively;
     }
 
@@ -211,6 +206,7 @@ public partial class EditMetadataForm : Form
                 break;
             case "Clear":
                 EnableUpdates = false;
+                EnableFormControls(false);
                 try
                 {
                     // Apply changes without closing
@@ -233,13 +229,24 @@ public partial class EditMetadataForm : Form
                         fileListView.SelectedItems.Clear();
                         fileListView.Items[index].Selected = true;
                         UserConfig.Inst.IgnoreError = chkIgnoreError.Checked;
-                        UserConfig.Inst.MetadatWriteUseAltMethodForPDF = chkClearUseAltMethod.Checked;
+                        UserConfig.Inst.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
+                        UserConfig.Inst.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
                         UserConfig.Inst.ApplyRecursively = chkApplyRecursively.Checked;
+
+                        var fileExt = file.Item1.Extension.ToLowerInvariant();
+                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.PreferredPDFTool : UserConfig.Inst.PreferredEBookTool;
+
+                        if (fileExt != ".pdf" && fileExt != ".epub" && fileExt != ".kepub" && fileExt != ".azw")
+                        {
+                            // unsupported file type
+                            continue;
+                        }
+
                         Application.DoEvents();
                         try
                         {
                             //await Task.Delay(500); // to allow UI to update
-                            await EBookHelper.ClearMetadata(file.Item1.FullName, UserConfig.Inst.MetadatWriteUseAltMethodForPDF);
+                            await EBookHelper.ClearMetadata(file.Item1.FullName, toolName);
                         }
                         catch (Exception ex)
                         {
@@ -255,12 +262,14 @@ public partial class EditMetadataForm : Form
                 finally
                 {
                     EnableUpdates = true;
+                    EnableFormControls(true);
                 }
                 this.DialogResult = DialogResult.OK;
                 this.Close();
                 break;
             case "Apply":
                 EnableUpdates = false;
+                EnableFormControls(false);
                 try
                 {
                     // Apply changes without closing
@@ -283,13 +292,24 @@ public partial class EditMetadataForm : Form
                         fileListView.SelectedItems.Clear();
                         fileListView.Items[index].Selected = true;
                         UserConfig.Inst.IgnoreError = chkIgnoreError.Checked;
-                        UserConfig.Inst.MetadatWriteUseAltMethodForPDF = chkClearUseAltMethod.Checked;
+                        UserConfig.Inst.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
+                        UserConfig.Inst.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
                         UserConfig.Inst.ApplyRecursively = chkApplyRecursively.Checked;
+
+                        var fileExt = file.Item1.Extension.ToLowerInvariant();
+                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.PreferredPDFTool : UserConfig.Inst.PreferredEBookTool;
+
+                        if (fileExt != ".pdf" && fileExt != ".epub" && fileExt != ".kepub" && fileExt != ".azw")
+                        {
+                            // unsupported file type
+                            continue;
+                        }
+
                         Application.DoEvents();
                         try
                         {
                             //await Task.Delay(500); // to allow UI to update
-                            await EBookHelper.WriteMetadata(file.Item1.FullName, file.Item2);
+                            await EBookHelper.WriteMetadata(file.Item1.FullName, file.Item2, toolName);
                         }
                         catch (Exception ex)
                         {
@@ -305,6 +325,7 @@ public partial class EditMetadataForm : Form
                 finally
                 {
                     EnableUpdates = true;
+                    EnableFormControls(true);
                 }
 
                 if (MessageBox.Show("Changes applied. Do you want to close the dialog?", "Info", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
@@ -350,7 +371,6 @@ public partial class EditMetadataForm : Form
         {
             cmbMatch.Text = "(.+)";
         }
-        
         UpdatePreview();
     }
 

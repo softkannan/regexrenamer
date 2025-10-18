@@ -38,10 +38,10 @@ namespace RegexRenamer.Forms
             label4 = new System.Windows.Forms.Label();
             bttnApply = new System.Windows.Forms.Button();
             toolTip = new System.Windows.Forms.ToolTip(components);
-            cmbMatch = new RegexRenamer.Controls.MyComboBox();
-            cmbSeries = new RegexRenamer.Controls.MyComboBox();
-            cmbTitle = new RegexRenamer.Controls.MyComboBox();
-            cmbAuthor = new RegexRenamer.Controls.MyComboBox();
+            cmbMatch = new System.Windows.Forms.ComboBox();
+            cmbSeries = new System.Windows.Forms.ComboBox();
+            cmbTitle = new System.Windows.Forms.ComboBox();
+            cmbAuthor = new System.Windows.Forms.ComboBox();
             cmsBlank = new System.Windows.Forms.ContextMenuStrip(components);
             cmRegexMatch = new System.Windows.Forms.ContextMenuStrip(components);
             cbModifierI = new System.Windows.Forms.CheckBox();
@@ -66,7 +66,6 @@ namespace RegexRenamer.Forms
             cmbVolume = new RegexRenamer.Controls.MyComboBox();
             label5 = new System.Windows.Forms.Label();
             chkIgnoreError = new System.Windows.Forms.CheckBox();
-            chkClearUseAltMethod = new System.Windows.Forms.CheckBox();
             chkApplyRecursively = new System.Windows.Forms.CheckBox();
             fileListView = new ListViewEx();
             colFileName = new System.Windows.Forms.ColumnHeader();
@@ -79,6 +78,10 @@ namespace RegexRenamer.Forms
             label6 = new System.Windows.Forms.Label();
             chkShowExisting = new System.Windows.Forms.CheckBox();
             cbModifierG = new System.Windows.Forms.CheckBox();
+            cmbPDFToolsList = new System.Windows.Forms.ComboBox();
+            cmbEPUBToolsList = new System.Windows.Forms.ComboBox();
+            label7 = new System.Windows.Forms.Label();
+            label8 = new System.Windows.Forms.Label();
             tsMenu.SuspendLayout();
             cmFileList.SuspendLayout();
             SuspendLayout();
@@ -90,7 +93,7 @@ namespace RegexRenamer.Forms
             bttnClear.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             bttnClear.Name = "bttnClear";
             bttnClear.Size = new System.Drawing.Size(107, 38);
-            bttnClear.TabIndex = 7;
+            bttnClear.TabIndex = 15;
             bttnClear.Text = "Clear";
             bttnClear.UseVisualStyleBackColor = true;
             // 
@@ -99,7 +102,7 @@ namespace RegexRenamer.Forms
             label1.Location = new System.Drawing.Point(15, 10);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(107, 22);
-            label1.TabIndex = 100;
+            label1.TabIndex = 16;
             label1.Text = "File Name:";
             label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
@@ -137,7 +140,7 @@ namespace RegexRenamer.Forms
             bttnApply.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             bttnApply.Name = "bttnApply";
             bttnApply.Size = new System.Drawing.Size(110, 38);
-            bttnApply.TabIndex = 6;
+            bttnApply.TabIndex = 0;
             bttnApply.Text = "Apply";
             bttnApply.UseVisualStyleBackColor = true;
             // 
@@ -204,7 +207,7 @@ namespace RegexRenamer.Forms
             cbModifierI.Margin = new System.Windows.Forms.Padding(4);
             cbModifierI.Name = "cbModifierI";
             cbModifierI.Size = new System.Drawing.Size(34, 19);
-            cbModifierI.TabIndex = 8;
+            cbModifierI.TabIndex = 7;
             cbModifierI.Tag = false;
             cbModifierI.Text = "/i";
             // 
@@ -232,7 +235,7 @@ namespace RegexRenamer.Forms
             tsMenu.Location = new System.Drawing.Point(1162, 9);
             tsMenu.Name = "tsMenu";
             tsMenu.Size = new System.Drawing.Size(113, 42);
-            tsMenu.TabIndex = 18;
+            tsMenu.TabIndex = 14;
             tsMenu.TabStop = true;
             // 
             // mnuChangeCase
@@ -390,33 +393,22 @@ namespace RegexRenamer.Forms
             // 
             chkIgnoreError.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkIgnoreError.AutoSize = true;
-            chkIgnoreError.Location = new System.Drawing.Point(1112, 83);
+            chkIgnoreError.Location = new System.Drawing.Point(1162, 54);
             chkIgnoreError.Name = "chkIgnoreError";
             chkIgnoreError.Size = new System.Drawing.Size(88, 19);
-            chkIgnoreError.TabIndex = 105;
+            chkIgnoreError.TabIndex = 10;
             chkIgnoreError.Text = "Ignore Error";
             chkIgnoreError.UseVisualStyleBackColor = true;
-            // 
-            // chkClearUseAltMethod
-            // 
-            chkClearUseAltMethod.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            chkClearUseAltMethod.AutoSize = true;
-            chkClearUseAltMethod.Location = new System.Drawing.Point(1112, 106);
-            chkClearUseAltMethod.Name = "chkClearUseAltMethod";
-            chkClearUseAltMethod.Size = new System.Drawing.Size(92, 19);
-            chkClearUseAltMethod.TabIndex = 106;
-            chkClearUseAltMethod.Text = "Clear use Alt";
-            chkClearUseAltMethod.UseVisualStyleBackColor = true;
             // 
             // chkApplyRecursively
             // 
             chkApplyRecursively.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkApplyRecursively.AutoSize = true;
-            chkApplyRecursively.Location = new System.Drawing.Point(1112, 129);
+            chkApplyRecursively.Location = new System.Drawing.Point(1112, 86);
             chkApplyRecursively.Name = "chkApplyRecursively";
-            chkApplyRecursively.Size = new System.Drawing.Size(119, 19);
-            chkApplyRecursively.TabIndex = 107;
-            chkApplyRecursively.Text = "Apply Recursively";
+            chkApplyRecursively.Size = new System.Drawing.Size(35, 19);
+            chkApplyRecursively.TabIndex = 12;
+            chkApplyRecursively.Text = "/r";
             chkApplyRecursively.UseVisualStyleBackColor = true;
             // 
             // fileListView
@@ -429,7 +421,8 @@ namespace RegexRenamer.Forms
             fileListView.MultiSelect = false;
             fileListView.Name = "fileListView";
             fileListView.Size = new System.Drawing.Size(1257, 498);
-            fileListView.TabIndex = 108;
+            fileListView.TabIndex = 200;
+            fileListView.TabStop = false;
             fileListView.UseCompatibleStateImageBehavior = false;
             fileListView.View = System.Windows.Forms.View.Details;
             // 
@@ -470,7 +463,7 @@ namespace RegexRenamer.Forms
             cmbLanguage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             cmbLanguage.Name = "cmbLanguage";
             cmbLanguage.Size = new System.Drawing.Size(973, 23);
-            cmbLanguage.TabIndex = 109;
+            cmbLanguage.TabIndex = 6;
             // 
             // label6
             // 
@@ -485,10 +478,10 @@ namespace RegexRenamer.Forms
             // 
             chkShowExisting.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             chkShowExisting.AutoSize = true;
-            chkShowExisting.Location = new System.Drawing.Point(1112, 152);
+            chkShowExisting.Location = new System.Drawing.Point(1162, 79);
             chkShowExisting.Name = "chkShowExisting";
             chkShowExisting.Size = new System.Drawing.Size(99, 19);
-            chkShowExisting.TabIndex = 111;
+            chkShowExisting.TabIndex = 13;
             chkShowExisting.Text = "Show Existing";
             chkShowExisting.UseVisualStyleBackColor = true;
             // 
@@ -500,22 +493,65 @@ namespace RegexRenamer.Forms
             cbModifierG.Margin = new System.Windows.Forms.Padding(4);
             cbModifierG.Name = "cbModifierG";
             cbModifierG.Size = new System.Drawing.Size(38, 19);
-            cbModifierG.TabIndex = 112;
+            cbModifierG.TabIndex = 8;
             cbModifierG.Tag = false;
             cbModifierG.Text = "/g";
+            // 
+            // cmbPDFToolsList
+            // 
+            cmbPDFToolsList.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            cmbPDFToolsList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cmbPDFToolsList.FormattingEnabled = true;
+            cmbPDFToolsList.Location = new System.Drawing.Point(1151, 148);
+            cmbPDFToolsList.Name = "cmbPDFToolsList";
+            cmbPDFToolsList.Size = new System.Drawing.Size(121, 23);
+            cmbPDFToolsList.TabIndex = 201;
+            // 
+            // cmbEPUBToolsList
+            // 
+            cmbEPUBToolsList.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            cmbEPUBToolsList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cmbEPUBToolsList.FormattingEnabled = true;
+            cmbEPUBToolsList.Location = new System.Drawing.Point(1151, 119);
+            cmbEPUBToolsList.Name = "cmbEPUBToolsList";
+            cmbEPUBToolsList.Size = new System.Drawing.Size(121, 23);
+            cmbEPUBToolsList.TabIndex = 202;
+            // 
+            // label7
+            // 
+            label7.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            label7.Location = new System.Drawing.Point(1107, 120);
+            label7.Name = "label7";
+            label7.Size = new System.Drawing.Size(38, 22);
+            label7.TabIndex = 203;
+            label7.Text = "EPUB:";
+            label7.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label8
+            // 
+            label8.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            label8.Location = new System.Drawing.Point(1109, 149);
+            label8.Name = "label8";
+            label8.Size = new System.Drawing.Size(38, 22);
+            label8.TabIndex = 204;
+            label8.Text = "PDF:";
+            label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // EditMetadataForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1284, 742);
+            Controls.Add(label8);
+            Controls.Add(label7);
+            Controls.Add(cmbEPUBToolsList);
+            Controls.Add(cmbPDFToolsList);
             Controls.Add(cbModifierG);
             Controls.Add(chkShowExisting);
             Controls.Add(cmbLanguage);
             Controls.Add(label6);
             Controls.Add(fileListView);
             Controls.Add(chkApplyRecursively);
-            Controls.Add(chkClearUseAltMethod);
             Controls.Add(chkIgnoreError);
             Controls.Add(cmbVolume);
             Controls.Add(label5);
@@ -555,10 +591,10 @@ namespace RegexRenamer.Forms
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button bttnApply;
         private System.Windows.Forms.ToolTip toolTip;
-        private Controls.MyComboBox cmbMatch;
-        private Controls.MyComboBox cmbSeries;
-        private Controls.MyComboBox cmbTitle;
-        private Controls.MyComboBox cmbAuthor;
+        private System.Windows.Forms.ComboBox cmbMatch;
+        private System.Windows.Forms.ComboBox cmbSeries;
+        private System.Windows.Forms.ComboBox cmbTitle;
+        private System.Windows.Forms.ComboBox cmbAuthor;
         private System.Windows.Forms.ContextMenuStrip cmsBlank;
         private System.Windows.Forms.ContextMenuStrip cmRegexMatch;
         private System.Windows.Forms.CheckBox cbModifierI;
@@ -583,7 +619,6 @@ namespace RegexRenamer.Forms
         private System.Windows.Forms.ContextMenuStrip cmFileList;
         private System.Windows.Forms.ToolStripMenuItem readMetadataToolStripMenuItem;
         private System.Windows.Forms.CheckBox chkIgnoreError;
-        private System.Windows.Forms.CheckBox chkClearUseAltMethod;
         private System.Windows.Forms.CheckBox chkApplyRecursively;
         private ListViewEx fileListView;
         private System.Windows.Forms.ColumnHeader colFileName;
@@ -596,5 +631,9 @@ namespace RegexRenamer.Forms
         private System.Windows.Forms.ColumnHeader colLanguage;
         private System.Windows.Forms.CheckBox chkShowExisting;
         private System.Windows.Forms.CheckBox cbModifierG;
+        private System.Windows.Forms.ComboBox cmbPDFToolsList;
+        private System.Windows.Forms.ComboBox cmbEPUBToolsList;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
     }
 }

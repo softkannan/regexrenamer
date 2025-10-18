@@ -19,6 +19,21 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace RegexRenamer.Tools.EBookPDFTools;
 
+
+public enum PDFToolsList
+{
+    Calibre,
+    SharpPDF,
+    iTextSharp
+}
+
+public enum EBookToolsList
+{
+    Calibre,
+    EpubMeta,
+    EpubSharp
+}
+
 /// <summary>
 /// Helper class for common ebook operations such as clearing/writing metadata,
 /// polishing, launching, and editing ebooks. Supports EPUB and PDF formats,
@@ -44,25 +59,44 @@ public static class EBookHelper
     /// Otherwise, uses a PDF-specific helper for PDFs.
     /// </summary>
     /// <param name="filePath">Path to the ebook file.</param>
-    /// <param name="altMethod">If true, forces use of the PDF-specific method for PDFs.</param>
+    /// <param name="toolName">If true, forces use of the PDF-specific method for PDFs.</param>
     /// <returns>True if operation succeeded.</returns>
-    public static async Task<bool> ClearMetadata(string filePath, bool altMethod)
+    public static async Task<bool> ClearMetadata(string filePath, string toolNameStr)
     {
         if (Parser.IsEpub(filePath))
         {
-            await CalibreHelper.ClearCalibreMetadata(filePath);
+            var toolName = Enum.Parse<EBookToolsList>(toolNameStr);
+            switch(toolName)
+            {
+                case EBookToolsList.EpubMeta:
+                    EpubMetaHelper.ClearEpubMetadata(filePath);
+                    break;
+                case EBookToolsList.EpubSharp:
+                    EpubSharpHelper.ClearEpubMetadata(filePath);
+                    break;
+                case EBookToolsList.Calibre:
+                default:
+                    await CalibreHelper.ClearMetadata(filePath);
+                    break;
+            }
 
         }
         else if (Parser.IsPdf(filePath))
         {
-            if (UserConfig.Inst.UseCalibreForAll && altMethod == false)
+            var toolName = Enum.Parse<PDFToolsList>(toolNameStr);
+            switch (toolName)
             {
-                await CalibreHelper.ClearCalibreMetadata(filePath);
-                return true;
-            }
-            else
-            {
-                SharpPDFHelper.ClearShapPDFMetadata(filePath);
+                case PDFToolsList.SharpPDF:
+                    SharpPDFHelper.ClearPDFMetadata(filePath);
+                    break;
+                case PDFToolsList.iTextSharp:
+                    ITextPDFHelper.ClearPDFMetadata(filePath);
+                    break;
+                case PDFToolsList.Calibre:
+
+                default:
+                    await CalibreHelper.ClearMetadata(filePath);
+                    break;
             }
         }
         return true;
@@ -76,28 +110,50 @@ public static class EBookHelper
     /// <param name="filePath">Path to the ebook file.</param>
     /// <param name="metadata">ComicInfo metadata to write.</param>
     /// <returns>True if operation succeeded.</returns>
-    public static async Task<bool> WriteMetadata(string filePath, ComicInfo metadata)
+    public static async Task<bool> WriteMetadata(string filePath, ComicInfo metadata, string toolNameStr)
     {
         if (Parser.IsEpub(filePath))
         {
-            // Ensure volume is set if series is present (Calibre expects a value)
-            if (!string.IsNullOrEmpty(metadata.Series) && string.IsNullOrEmpty(metadata.Volume))
+            var toolName = Enum.Parse<EBookToolsList>(toolNameStr);
+            switch(toolName)
             {
-                metadata.Volume = "0";
+                case EBookToolsList.EpubMeta:
+                    EpubMetaHelper.WriteEpubMetadata(filePath, metadata);
+                    break;
+                case EBookToolsList.EpubSharp:
+                    EpubSharpHelper.WriteEpubMetadata(filePath, metadata);
+                    break;
+                case EBookToolsList.Calibre:
+                default:
+                    // Ensure volume is set if series is present (Calibre expects a value)
+                    if (!string.IsNullOrEmpty(metadata.Series) && string.IsNullOrEmpty(metadata.Volume))
+                    {
+                        metadata.Volume = "0";
+                    }
+                    await CalibreHelper.WriteMetadata(filePath, metadata);
+                    break;
             }
-            await CalibreHelper.WriteCalibreMetadata(filePath, metadata);
         }
         else if (Parser.IsPdf(filePath))
         {
-            if (UserConfig.Inst.UseCalibreForAll)
+            var toolName = Enum.Parse<PDFToolsList>(toolNameStr);
+            switch(toolName)
             {
-                await CalibreHelper.WriteCalibreMetadata(filePath, metadata);
-                return true;
-
-            }
-            else
-            {
-                SharpPDFHelper.WriteSharpPDFMetadata(filePath, metadata);
+                case PDFToolsList.SharpPDF:
+                    SharpPDFHelper.WritePDFMetadata(filePath, metadata);
+                    break;
+                case PDFToolsList.iTextSharp:
+                    ITextPDFHelper.WritePDFMetadata(filePath, metadata);
+                    break;
+                case PDFToolsList.Calibre:
+                default:
+                    // Ensure volume is set if series is present (Calibre expects a value)
+                    if (!string.IsNullOrEmpty(metadata.Series) && string.IsNullOrEmpty(metadata.Volume))
+                    {
+                        metadata.Volume = "0";
+                    }
+                    await CalibreHelper.WriteMetadata(filePath, metadata);
+                    break;
             }
         }
         return true;
@@ -119,7 +175,7 @@ public static class EBookHelper
         }
         if (Parser.IsEpub(filePath))
         {
-            return await CalibreHelper.PolishCalibreEbook(filePath);
+            return await CalibreHelper.PolishEbook(filePath);
         }
         return false;
     }

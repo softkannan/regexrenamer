@@ -11,7 +11,7 @@ namespace RegexRenamer.Tools.EBookPDFTools;
 
 public static class SharpPDFHelper
 {
-    public static bool ClearShapPDFMetadata(string filePath)
+    public static bool ClearPDFMetadata(string filePath)
     {
         using (var book = PdfSharp.Pdf.IO.PdfReader.Open(filePath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
         {
@@ -31,16 +31,41 @@ public static class SharpPDFHelper
         return true;
     }
 
-    public static bool WriteSharpPDFMetadata(string filePath, ComicInfo metadata)
+    public static bool WritePDFMetadata(string filePath, ComicInfo metadata)
     {
+        int writCount = 0;
         using (var book = PdfSharp.Pdf.IO.PdfReader.Open(filePath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
         {
-            SetPDFMetadata(book, "Title", metadata.Title);
-            SetPDFMetadata(book, "TitleSort", string.Empty);
-            SetPDFMetadata(book, "Author", metadata.Writer);
-            SetPDFMetadata(book, "Series", metadata.Series);
-            SetPDFMetadata(book, "Volume", string.Empty);
-            book.Save(filePath);
+            if (!string.IsNullOrWhiteSpace(metadata.Title))
+            {
+                writCount++;
+                SetPDFMetadata(book, "Title", metadata.Title);
+                SetPDFMetadata(book, "TitleSort", string.Empty);
+            }
+            if (!string.IsNullOrWhiteSpace(metadata.Writer))
+            {
+                writCount++;
+                SetPDFMetadata(book, "Author", metadata.Writer);
+            }
+            if (!string.IsNullOrWhiteSpace(metadata.Series))
+            {
+                writCount++;
+                SetPDFMetadata(book, "Series", metadata.Series);
+            }
+            if (!string.IsNullOrWhiteSpace(metadata.Volume))
+            {
+                writCount++;
+                SetPDFMetadata(book, "Volume", metadata.Volume);
+            }
+            if(!string.IsNullOrWhiteSpace(metadata.LanguageISO))
+            {
+                writCount++;
+                SetPDFMetadata(book, "Language", metadata.LanguageISO);
+            }
+            if(writCount > 0)
+            {
+                book.Save(filePath);
+            }
             book.Close();
         }
         return true;

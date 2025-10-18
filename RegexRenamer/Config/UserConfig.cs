@@ -44,9 +44,11 @@ public class UserConfig
     public string DefaultOutputPath { get; set; }
 
     public bool IgnoreError {  get; set; } = false;
-    public bool MetadatWriteUseAltMethodForPDF { get; set; } = false;
 
     public bool ApplyRecursively { get; set; } = false ;
+
+    public string PreferredPDFTool { get; set; } = "Calibre";
+    public string PreferredEBookTool { get; set; } = "Calibre";
 
     #endregion
 

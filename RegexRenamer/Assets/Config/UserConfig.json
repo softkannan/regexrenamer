@@ -307,8 +307,11 @@ Auto Environment variables
   "RunasAdmin": false,
   "UseCalibreForAll": true,
   "IgnoreError": false,
-  "MetadatWriteUseAltMethodForPDF": false,
   "ApplyRecursively": false,
+  // Default PDF tool, options: Calibre, SharpPDF, iTextSharp
+  "PreferredPDFTool": "SharpPDF",
+  // Default EBook tool, options: Calibre, EpubMeta, EpubSharp
+  "PreferredEBookTool": "EpubMeta",
   // Default working dir
   "DefaultWorkspace": "%userprofile%\\Documents",
   "DefaultOutputPath": "%userprofile%\\Downloads"

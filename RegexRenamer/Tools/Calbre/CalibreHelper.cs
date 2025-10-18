@@ -12,7 +12,7 @@ namespace RegexRenamer.Tools.Calbre;
 
 public class CalibreHelper
 {
-    public static async Task<bool> PolishCalibreEbook(string filePath)
+    public static async Task<bool> PolishEbook(string filePath)
     {
         // Supports {srcfilepath} {destfilepath} variables
         var cmdName = "PolishEPUB";
@@ -45,9 +45,18 @@ public class CalibreHelper
 
             throw new ApplicationException($"Failed to polish file : {filePath}\r\n{sb.ToString()}");
         }
+
+        try
+        {
+            File.Move(destfilepath, filePath, true);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"Failed to replace original file with polished file : {filePath}\r\n{ex.Message}");
+        }
         return true;
     }
-    public static async Task<bool> ClearCalibreMetadata(string srcFilePath)
+    public static async Task<bool> ClearMetadata(string srcFilePath)
     {
         // Supports {srcfilepath} {destfilepath} variables
         var cmdName = "ClearEbookMetaData";
@@ -78,7 +87,7 @@ public class CalibreHelper
     }
 
 
-    public static async Task<bool> WriteCalibreMetadata(string filePath, ComicInfo metadata)
+    public static async Task<bool> WriteMetadata(string filePath, ComicInfo metadata)
     {
         // Supports {author} {series} {title} {volume} {filepath} variables
         var cmdName = "WriteEbookMetaData";

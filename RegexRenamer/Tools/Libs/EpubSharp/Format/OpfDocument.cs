@@ -7,36 +7,77 @@ namespace EpubSharp.Format
 {
     internal static class OpfElements
     {
-        public static string Package =  "package";
+        /*
+        <?xml version="1.0" encoding="UTF-8"?>
+        <package xmlns="http://www.idpf.org/2007/opf" xmlns:opf="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="BookID">
+          <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+           <dc:identifier id="BookID" opf:scheme="isbn">978-3-86680-192-9</dc:identifier>
+           <dc:identifier>3b622266-b838-4003-bcb8-b126ee6ae1a2</dc:identifier>
+           <dc:title>The title</dc:title>
+           <dc:language>fr</dc:language>
+           <dc:publisher>The publisher</dc:publisher>
+           <dc:creator>The author</dc:creator>
+           <dc:contributor>A contributor</dc:contributor>
+           <dc:description>A description</dc:description>
+           <dc:subject>A subject of the publication</dc:subject>
+           <dc:subject>Another subject of the publication</dc:subject>
+           <dc:rights>© copyright notice</dc:rights>
+           <meta property="dcterms:modified">2020-01-01T01:01:01Z</meta>
+           <meta name="calibre:series" content="Test"/>
+           <meta name="calibre:series_index" content = "12.0" />
+           <meta property="belongs-to-collection" id="id-2">Test</meta>
+           <meta property="collection-type">series</meta>
+           <meta property="group-position">12</meta>
+          </metadata>
+          <manifest>
+           <item id="coverimage" href="Images/cover.jpg" media-type="image/jpeg" properties="cover-image"/>
+           <item id="cover" href="Text/cover.xhtml" media-type="application/xhtml+xml"/>
+           <item id="toc" href="toc.html" media-type="application/xhtml+xml" properties="nav"/>
+           <item id="chapter-1" href="Text/chapter-1.xhtml" media-type="application/xhtml+xml"/>
+           <item id="chapter-2" href="Text/chapter-2.xhtml" media-type="application/xhtml+xml"/>
+           <item id="css" href="Styles/publication.css" media-type="text/css"/>
+           <item id="font1" href="Fonts/Andada-Italic.otf" media-type="application/vnd.ms-opentype"/>
+           <item id="font2" href="Fonts/Andada-Regular.otf" media-type="application/vnd.ms-opentype"/>
+           <item id="glyph" href="Images/glyph.png" media-type="image/png"/>
+          </manifest>
+          <spine>
+           <itemref idref="cover"/>
+           <itemref idref="toc"/>
+           <itemref idref="chapter-1"/>
+           <itemref idref="chapter-2"/>
+          </spine>
+        </package>
+        */
+
+        public static readonly XName Package = XNamespace.Xmlns + "package";
+        public static readonly XName Metadata = XNamespace.Xmlns + "metadata";
+        public static readonly XName Meta = XNamespace.Xmlns + "meta";
+
+        public static readonly XName Contributor = Constants.OpfMetadataNamespace +  "contributor";
+        public static readonly XName Creator = Constants.OpfMetadataNamespace + "creator";
+        public static readonly XName Description = Constants.OpfMetadataNamespace + "description";
+        public static readonly XName Identifier = Constants.OpfMetadataNamespace + "identifier";
+        public static readonly XName Language = Constants.OpfMetadataNamespace + "language";
+        public static readonly XName Publisher = Constants.OpfMetadataNamespace + "publisher";
+        public static readonly XName Rights = Constants.OpfMetadataNamespace + "rights";
+        public static readonly XName Subject = Constants.OpfMetadataNamespace + "subject";
+        public static readonly XName Title = Constants.OpfMetadataNamespace + "title";
         
-        public static string Metadata =  "metadata";
-        public static string Contributor =  "contributor";
-        public static string Coverages =  "coverages";
-        public static string Creator =  "creator";
-        public static string Date =  "date";
-        public static string Description =  "description";
-        public static string Format =  "format";
-        public static string Identifier =  "identifier";
-        public static string Language =  "language";
-        public static string Meta =  "meta";
-        public static string Publisher =  "publisher";
-        public static string Relation =  "relation";
-        public static string Rights =  "rights";
-        public static string Source =  "source";
-        public static string Subject =  "subject";
-        public static string Title =  "title";
-        public static string Type =  "type";
-        public static string Series =  "calibre:series";
-        public static string Volume =  "calibre:series_index";
+        public static readonly XName Coverages = XNamespace.Xmlns + "coverages";
+        public static readonly XName Date = XNamespace.Xmlns + "date";
+        public static readonly XName Format = XNamespace.Xmlns + "format";
+        public static readonly XName Relation = XNamespace.Xmlns + "relation";
+        public static readonly XName Source = XNamespace.Xmlns + "source";
+        public static readonly XName Type = XNamespace.Xmlns + "type";
+              
+        public static readonly XName Guide =  XNamespace.Xmlns + "guide";
+        public static readonly XName Reference = XNamespace.Xmlns + "reference";
                       
-        public static string Guide =  "guide";
-        public static string Reference =  "reference";
+        public static readonly XName Manifest = XNamespace.Xmlns + "manifest";
+        public static readonly XName Item = XNamespace.Xmlns + "item";
                       
-        public static string Manifest =  "manifest";
-        public static string Item =  "item";
-                      
-        public static string Spine =  "spine";
-        public static string ItemRef =  "itemref";
+        public static readonly XName Spine = XNamespace.Xmlns + "spine";
+        public static readonly XName ItemRef = XNamespace.Xmlns + "itemref";
     }
 
     public enum EpubVersion
@@ -210,6 +251,9 @@ namespace EpubSharp.Format
             public static readonly XName Scheme = "scheme";
             public static readonly XName Property = "property";
             public static readonly XName Content = "content";
+
+            public static readonly XName Series = "calibre:series";
+            public static readonly XName Volume = "calibre:series_index";
         }
 
         public string Name { get; internal set; }
@@ -219,6 +263,9 @@ namespace EpubSharp.Format
         public string Scheme { get; internal set; }
         public string Text { get; internal set; }
         public string Content { get; internal set; }
+
+        public string Series { get; internal set; }
+        public string Volume { get; internal set; }
     }
 
     public class OpfManifest

@@ -223,21 +223,28 @@ public static class CommanHandlerExtensions
         });
 
         // Wait for 250ms, if task is completed before that don't show progress form
-        var result = resetEvent.WaitOne(250);
-        if (!result)
+        int countShow = 30;
+        int countIdx = 0;
+        do
         {
-            using (var form = new ProgressForm())
+            var result = resetEvent.WaitOne(100);
+            if (countIdx > countShow && !result)
             {
-                string commandname = Path.GetFileName(command);
-                form.Initialize($"Executing Command: {commandname}", $"Running command: {command} {arguments}");
-                form.Show(); // Show the form immediately
-                return await execCmdTask; // Wait for the task to complete
+                using (var form = new ProgressForm())
+                {
+                    string commandname = Path.GetFileName(command);
+                    form.Initialize($"Executing Command: {commandname}", $"Running command: {command} {arguments}");
+                    form.Show(); // Show the form immediately
+                    return await execCmdTask; // Wait for the task to complete
+                }
             }
-        }
-        else
-        {
-            return await execCmdTask; // Wait for the task to complete without showing the form
-        }
+            else if(result)
+            {
+                return await execCmdTask; // Wait for the task to complete without showing the form
+            }
+            countIdx++;
+        } while (true);
+        
     }
     // Execute a command and call the callback with the output line by line
     private static async Task<int> ExecCmdCaptureAsync(this string command, string arguments, string curretFolder, Action<string> outputCallback)
