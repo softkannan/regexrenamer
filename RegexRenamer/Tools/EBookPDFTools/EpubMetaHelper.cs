@@ -146,7 +146,17 @@ public static class EpubMetaHelper
 
                     // Save changes to a new memory stream
                     ms.SetLength(0);
-                    xmlDoc.Save(ms);
+                    using (var writer = XmlWriter.Create(ms, new XmlWriterSettings { 
+                        CloseOutput = false,
+                        Indent = true,
+                        IndentChars = "  ",
+                        NewLineOnAttributes = false,
+                        Encoding = Encoding.UTF8 
+                    }))
+                    {
+                        xmlDoc.Save(writer);
+                        writer.Flush();
+                    }
                     ms.Seek(0, SeekOrigin.Begin);
                     // Replace the entry in the archive
                     archive.RemoveEntry(opfEntry);
@@ -310,7 +320,18 @@ public static class EpubMetaHelper
 
                     // Save changes to a new memory stream
                     ms.SetLength(0);
-                    xmlDoc.Save(ms);
+                    using (var writer = XmlWriter.Create(ms, new XmlWriterSettings
+                    {
+                        CloseOutput = false,
+                        Indent = true,
+                        IndentChars = "  ",
+                        NewLineOnAttributes = false,
+                        Encoding = Encoding.UTF8
+                    }))
+                    {
+                        xmlDoc.Save(writer);
+                        writer.Flush();
+                    }
                     ms.Seek(0, SeekOrigin.Begin);
                     // Replace the entry in the archive
                     archive.RemoveEntry(opfEntry);

@@ -243,7 +243,8 @@ namespace RegexRenamer
         private void editFolderViewMetadataFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var selectedFiles = dgvFiles.GetAllFileInfo(_fileStore.Files);
-            using (EditMetadataForm editMetaForm = new EditMetadataForm(_activePath, _activeFilter, "Modify Metadata", "Edit"))
+            using (EditMetadataForm editMetaForm = new EditMetadataForm(_activePath, 
+                _activeFilter, "Modify Metadata", "Edit", itmOptionsPreserveExt.Checked))
             {
                 editMetaForm.ShowDialog();
             }

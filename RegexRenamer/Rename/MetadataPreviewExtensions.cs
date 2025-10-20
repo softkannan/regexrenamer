@@ -99,7 +99,7 @@ namespace RegexRenamer.Rename
             }
         }
 
-        public static int BuildMetadataPreview(this List<Tuple<FileInfo, ComicInfo>> pThis,MetadataType colType, string matchingPattern, string replacePattern,  
+        public static int BuildMetadataPreview(this List<Tuple<RenameItemInfo, ComicInfo>> pThis,MetadataType colType, string matchingPattern, string replacePattern,  
             AutoNumberingInfo numInfo, ChangeCaseOption changeCaseInfo, RegexModifierInfo modifierInfo)
         {
             int retVal = 0;

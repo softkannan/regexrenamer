@@ -40,7 +40,6 @@ public class UserConfig
     public List<NamedCmd> KnownCmds { get; set; }
 
     public string DefaultWorkspace { get; set; }
-    public bool UseCalibreForAll { get; set; }
     public string DefaultOutputPath { get; set; }
 
     public bool IgnoreError {  get; set; } = false;

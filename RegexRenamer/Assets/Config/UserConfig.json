@@ -164,7 +164,8 @@ Auto Environment variables
       "Args": [
         // Supports {filepath} {author} {series} {title} {volume} {filepath} variables
         //"-a \"{author}\" -s \"{series}\" -t \"{title}\" -i \"{volume}\" \"{filepath}\""
-        "--authors= --comments= --identifier= --index=-1 --publisher= --series= --tags= --title= --category= \"{filepath}\""
+        //"-p \" \" -a \" \" -t \" \" -c \" \" -s \" \" -i \"-1\" \"{filepath}\""
+		"--authors= --comments= --identifier= --index=-1 --publisher= --series= --tags= --title= --category= \"{filepath}\""
       ]
     },
     {
@@ -305,7 +306,6 @@ Auto Environment variables
 
   // To run always as admin then enable this value
   "RunasAdmin": false,
-  "UseCalibreForAll": true,
   "IgnoreError": false,
   "ApplyRecursively": false,
   // Default PDF tool, options: Calibre, SharpPDF, iTextSharp

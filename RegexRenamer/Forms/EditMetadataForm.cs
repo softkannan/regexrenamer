@@ -26,10 +26,11 @@ namespace RegexRenamer.Forms;
 
 public partial class EditMetadataForm : Form
 {
-    private List<Tuple<FileInfo, ComicInfo>> _activeFiles;
+    private List<Tuple<RenameItemInfo, ComicInfo>> _activeFiles;
     private readonly string _action;
     private readonly string _activePath;
     private readonly string _searchPattern;
+    private readonly bool _preserveExtension;
 
     private RegExContextMenuProvider regExCtxMenu;
 
@@ -92,22 +93,24 @@ public partial class EditMetadataForm : Form
 
     }
 
-    public EditMetadataForm(string activePath, string searchPattern, string title, string action)
+    public EditMetadataForm(string activePath, string searchPattern, string title, string action, bool preservExt)
     {
-        this._activeFiles = new List<Tuple<FileInfo, ComicInfo>>();
+        this._activeFiles = new List<Tuple<RenameItemInfo, ComicInfo>>();
         this._action = action;
         this._activePath = activePath;
         this._searchPattern = searchPattern;
+        this._preserveExtension = preservExt;
         InitilaizeForm(title);
         chkApplyRecursively.Checked = UserConfig.Inst.ApplyRecursively;
         chkApplyRecursively.CheckStateChanged += (sender, e) => UpdateFileList();
     }
-    public EditMetadataForm(List<FileInfo> files, string title, string action)
+    public EditMetadataForm(List<FileInfo> files, string title, string action, bool preservExt)
     {
-        this._activeFiles = files.Select(t => new Tuple<FileInfo, ComicInfo>(t, new ComicInfo())).ToList();
+        this._activeFiles = files.Select(t => new Tuple<RenameItemInfo, ComicInfo>(new RenameItemInfo(t, false, preservExt), new ComicInfo())).ToList();
         this._action = action;
         this._activePath = string.Empty;
         this._searchPattern = string.Empty;
+        this._preserveExtension = preservExt;
         InitilaizeForm(title);
         chkApplyRecursively.Enabled = false;
     }
@@ -246,7 +249,7 @@ public partial class EditMetadataForm : Form
                         try
                         {
                             //await Task.Delay(500); // to allow UI to update
-                            await EBookHelper.ClearMetadata(file.Item1.FullName, toolName);
+                            await EBookHelper.ClearMetadata(file.Item1.Fullpath, toolName);
                         }
                         catch (Exception ex)
                         {
@@ -309,7 +312,7 @@ public partial class EditMetadataForm : Form
                         try
                         {
                             //await Task.Delay(500); // to allow UI to update
-                            await EBookHelper.WriteMetadata(file.Item1.FullName, file.Item2, toolName);
+                            await EBookHelper.WriteMetadata(file.Item1.Fullpath, file.Item2, toolName);
                         }
                         catch (Exception ex)
                         {
@@ -618,7 +621,7 @@ public partial class EditMetadataForm : Form
         if (chkApplyRecursively.Enabled)
         {
             _activeFiles.Clear();
-            _activeFiles = _activePath.GetFileInfo(_searchPattern, chkApplyRecursively.Checked);
+            _activeFiles = _activePath.GetFileInfo(_preserveExtension, _searchPattern, chkApplyRecursively.Checked);
         }
 
         // create datagridview items w/ filename

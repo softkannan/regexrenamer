@@ -23,4 +23,17 @@ public static class FilesHelper
         return selectedFiles;
     }
 
+    public static List<Tuple<RenameItemInfo, ComicInfo>> GetFileInfo(this string pThis, bool preserveExt, string searchPattern = "*.*",  bool recursiveLookup = false)
+    {
+        List<Tuple<RenameItemInfo, ComicInfo>> selectedFiles = new List<Tuple<RenameItemInfo, ComicInfo>>();
+        foreach (var fileItem in Directory.GetFiles(pThis, searchPattern, recursiveLookup ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+        {
+            var fileInfo = new FileInfo(fileItem);
+            var comicInfo = fileInfo.GetMetadata() ?? new ComicInfo();
+            selectedFiles.Add(Tuple.Create(new RenameItemInfo(fileInfo,false,preserveExt), comicInfo));
+        }
+
+        return selectedFiles;
+    }
+
 }

@@ -165,11 +165,8 @@ namespace RegexRenamer.Tools.EBookPDFTools
             string fileExt = Path.GetExtension(filePath);
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             string srcPath = Path.Combine(folderPath, $"{fileName}.Backup{fileExt}");
-            try
-            {
-                File.Move(filePath, srcPath, true);
-            } catch { }
 
+            File.Move(filePath, srcPath, true);
 
             using (PdfReader reader = new PdfReader(srcPath))
             {
@@ -185,18 +182,110 @@ namespace RegexRenamer.Tools.EBookPDFTools
 
         public static void RemoveSign(string filePath, string password)
         {
-            try
-            {
-                string destFilePath = filePath;
-                if (string.IsNullOrWhiteSpace(password))
-                {
-                    using (var pdfDocument = new PdfDocument(new PdfReader(filePath), new PdfWriter(destFilePath)))
-                    {
-                        var form = PdfFormCreator.GetAcroForm(pdfDocument, true);
+            string folderPath = Path.GetDirectoryName(filePath);
+            string fileExt = Path.GetExtension(filePath);
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            string srcPath = Path.Combine(folderPath, $"{fileName}.Backup{fileExt}");
 
+            File.Move(filePath, srcPath, true);
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                using (PdfReader reader = new PdfReader(srcPath))
+                {
+                    reader.SetUnethicalReading(true);
+                    using (var pdfDoc = new PdfDocument(reader, new PdfWriter(filePath)))
+                    {
+                        var form = PdfFormCreator.GetAcroForm(pdfDoc, true);
                         // If no fields have been explicitly included, then all fields are flattened.
                         // Otherwise only the included fields are flattened.
                         form.FlattenFields();
+                        pdfDoc.Close();
+                    }
+                    reader.Close();
+                }
+            }
+            else
+            {
+                // Convert the string into a byte array.
+                byte[] unicodeBytes = Encoding.Unicode.GetBytes(password);
+
+                // Perform the conversion from one encoding to the other.
+                byte[] asciiBytes = Encoding.Convert(Encoding.Unicode, Encoding.ASCII, unicodeBytes);
+                var readerProperties = new ReaderProperties();
+                readerProperties.SetPassword(asciiBytes);
+
+                using (var pdfDocument = new PdfDocument(new PdfReader(srcPath, readerProperties), new PdfWriter(filePath)))
+                {
+                    var form = PdfFormCreator.GetAcroForm(pdfDocument, true);
+
+                    // If no fields have been explicitly included, then all fields are flattened.
+                    // Otherwise only the included fields are flattened.
+                    form.FlattenFields();
+                }
+            }
+        }
+
+        public static bool ExtractText(string filePath, string extractedFilePath)
+        {
+            string PageBreakChar = "\f";
+            string extractedText = string.Empty;
+            using (PdfDocument pdfDoc = new PdfDocument(new PdfReader(filePath)))
+            {
+                StringBuilder text = new StringBuilder();
+                int noOfPages = pdfDoc.GetNumberOfPages();
+                for (int pageNum = 1; pageNum <= noOfPages; pageNum++)
+                {
+                    var page = pdfDoc.GetPage(pageNum);
+                    var strategy = new iText.Kernel.Pdf.Canvas.Parser.Listener.SimpleTextExtractionStrategy();
+                    var pageContent = iText.Kernel.Pdf.Canvas.Parser.PdfTextExtractor.GetTextFromPage(page, strategy);
+                    text.AppendLine(pageContent);
+                    text.AppendLine();
+                    //Append a page break character
+                    text.AppendLine(PageBreakChar);
+                }
+                extractedText = text.ToString();
+            }
+
+            // Delete existing target file if any
+            if (File.Exists(extractedFilePath))
+            {
+                try
+                {
+                    File.Delete(extractedFilePath);
+                }
+                catch
+                {
+                }
+            }
+
+            // Write extracted text to file
+            File.WriteAllText(extractedFilePath, extractedText, Encoding.UTF8);
+
+            return true;
+        }
+
+        public static void RemovePassword(string filePath, string password)
+        {
+            string destFilePath = filePath;
+            using (var pdfDocument = new PdfDocument(new PdfWriter(destFilePath)))
+            {
+                if (string.IsNullOrWhiteSpace(password))
+                {
+                    using (var inputPdf = new PdfDocument(new PdfReader(filePath)))
+                    {
+
+                        int noOfPages = inputPdf.GetNumberOfPages();
+                        for (int pageNum = 1; pageNum <= noOfPages; pageNum++)
+                        {
+                            //var pageSize = inputPdf.GetPageSize(pageNum);
+                            //pdfDocument.SetPageSize(pageSize);
+                            //var page = pdfDocument.GetImportedPage(inputPdf, pageNum);
+                            //pdfDocument.SetPageSize(new iTextSharp.text.Rectangle(page.Width, page.Height));
+                            //pdfDocument.NewPage();
+                            //pdfContentBytes.AddTemplate(page, 0, 0);
+                        }
+                        pdfDocument.Close();
                     }
                 }
                 else
@@ -208,78 +297,22 @@ namespace RegexRenamer.Tools.EBookPDFTools
                     byte[] asciiBytes = Encoding.Convert(Encoding.Unicode, Encoding.ASCII, unicodeBytes);
                     var readerProperties = new ReaderProperties();
                     readerProperties.SetPassword(asciiBytes);
-
-                    using (var pdfDocument = new PdfDocument(new PdfReader(filePath, readerProperties), new PdfWriter(destFilePath)))
+                    using (var inputPdf = new PdfDocument(new PdfReader(filePath, readerProperties)))
                     {
-                        var form = PdfFormCreator.GetAcroForm(pdfDocument, true);
 
-                        // If no fields have been explicitly included, then all fields are flattened.
-                        // Otherwise only the included fields are flattened.
-                        form.FlattenFields();
+                        int noOfPages = inputPdf.GetNumberOfPages();
+                        for (int pageNum = 1; pageNum <= noOfPages; pageNum++)
+                        {
+                            //var pageSize = inputPdf.GetPageSize(pageNum);
+                            //pdfDocument.SetPageSize(pageSize);
+                            //var page = writer.GetImportedPage(inputPdf, pageNum);
+                            //pdfDocument.SetPageSize(new iTextSharp.text.Rectangle(page.Width, page.Height));
+                            //pdfDocument.NewPage();
+                            //pdfContentBytes.AddTemplate(page, 0, 0);
+                        }
+                        pdfDocument.Close();
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                //item.Status = string.Format("Error: {0}", ex.Message);
-            }
-        }
-
-        public static void RemovePassword(string filePath, string password)
-        {
-            try
-            {
-                string destFilePath = filePath;
-                using (var pdfDocument = new PdfDocument(new PdfWriter(destFilePath)))
-                {
-                    if (string.IsNullOrWhiteSpace(password))
-                    {
-                        using (var inputPdf = new PdfDocument(new PdfReader(filePath)))
-                        {
-
-                            int noOfPages = inputPdf.GetNumberOfPages();
-                            for (int pageNum = 1; pageNum <= noOfPages; pageNum++)
-                            {
-                                //var pageSize = inputPdf.GetPageSize(pageNum);
-                                //pdfDocument.SetPageSize(pageSize);
-                                //var page = pdfDocument.GetImportedPage(inputPdf, pageNum);
-                                //pdfDocument.SetPageSize(new iTextSharp.text.Rectangle(page.Width, page.Height));
-                                //pdfDocument.NewPage();
-                                //pdfContentBytes.AddTemplate(page, 0, 0);
-                            }
-                            pdfDocument.Close();
-                        }
-                    }
-                    else
-                    {
-                        // Convert the string into a byte array.
-                        byte[] unicodeBytes = Encoding.Unicode.GetBytes(password);
-
-                        // Perform the conversion from one encoding to the other.
-                        byte[] asciiBytes = Encoding.Convert(Encoding.Unicode, Encoding.ASCII, unicodeBytes);
-                        var readerProperties = new ReaderProperties();
-                        readerProperties.SetPassword(asciiBytes);
-                        using (var inputPdf = new PdfDocument(new PdfReader(filePath, readerProperties)))
-                        {
-
-                            int noOfPages = inputPdf.GetNumberOfPages();
-                            for (int pageNum = 1; pageNum <= noOfPages; pageNum++)
-                            {
-                                //var pageSize = inputPdf.GetPageSize(pageNum);
-                                //pdfDocument.SetPageSize(pageSize);
-                                //var page = writer.GetImportedPage(inputPdf, pageNum);
-                                //pdfDocument.SetPageSize(new iTextSharp.text.Rectangle(page.Width, page.Height));
-                                //pdfDocument.NewPage();
-                                //pdfContentBytes.AddTemplate(page, 0, 0);
-                            }
-                            pdfDocument.Close();
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ///item.Status = string.Format("Error: {0}", ex.Message);
             }
         }
 

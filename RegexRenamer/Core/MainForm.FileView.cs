@@ -429,7 +429,8 @@ namespace RegexRenamer
         private void editMetadataFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files);
-            using (EditMetadataForm metaEditForm = new EditMetadataForm(selectedFiles,"Modify Metadata", "Edit" ))
+            using (EditMetadataForm metaEditForm = new EditMetadataForm(selectedFiles,"Modify Metadata", "Edit",
+                itmOptionsPreserveExt.Checked))
             {
                 metaEditForm.ShowDialog();
             }
