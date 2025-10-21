@@ -76,12 +76,12 @@ namespace RegexRenamer.Forms
             colLanguage = new System.Windows.Forms.ColumnHeader();
             cmbLanguage = new RegexRenamer.Controls.MyComboBox();
             label6 = new System.Windows.Forms.Label();
-            chkShowExisting = new System.Windows.Forms.CheckBox();
             cbModifierG = new System.Windows.Forms.CheckBox();
             cmbPDFToolsList = new System.Windows.Forms.ComboBox();
             cmbEPUBToolsList = new System.Windows.Forms.ComboBox();
             label7 = new System.Windows.Forms.Label();
             label8 = new System.Windows.Forms.Label();
+            cmbViewMode = new System.Windows.Forms.ComboBox();
             tsMenu.SuspendLayout();
             cmFileList.SuspendLayout();
             SuspendLayout();
@@ -474,17 +474,6 @@ namespace RegexRenamer.Forms
             label6.Text = "Language:";
             label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // chkShowExisting
-            // 
-            chkShowExisting.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            chkShowExisting.AutoSize = true;
-            chkShowExisting.Location = new System.Drawing.Point(1162, 79);
-            chkShowExisting.Name = "chkShowExisting";
-            chkShowExisting.Size = new System.Drawing.Size(99, 19);
-            chkShowExisting.TabIndex = 13;
-            chkShowExisting.Text = "Show Existing";
-            chkShowExisting.UseVisualStyleBackColor = true;
-            // 
             // cbModifierG
             // 
             cbModifierG.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
@@ -537,17 +526,27 @@ namespace RegexRenamer.Forms
             label8.Text = "PDF:";
             label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // cmbViewMode
+            // 
+            cmbViewMode.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            cmbViewMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cmbViewMode.FormattingEnabled = true;
+            cmbViewMode.Location = new System.Drawing.Point(1151, 82);
+            cmbViewMode.Name = "cmbViewMode";
+            cmbViewMode.Size = new System.Drawing.Size(121, 23);
+            cmbViewMode.TabIndex = 205;
+            // 
             // EditMetadataForm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1284, 742);
+            Controls.Add(cmbViewMode);
             Controls.Add(label8);
             Controls.Add(label7);
             Controls.Add(cmbEPUBToolsList);
             Controls.Add(cmbPDFToolsList);
             Controls.Add(cbModifierG);
-            Controls.Add(chkShowExisting);
             Controls.Add(cmbLanguage);
             Controls.Add(label6);
             Controls.Add(fileListView);
@@ -629,11 +628,11 @@ namespace RegexRenamer.Forms
         private Controls.MyComboBox cmbLanguage;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ColumnHeader colLanguage;
-        private System.Windows.Forms.CheckBox chkShowExisting;
         private System.Windows.Forms.CheckBox cbModifierG;
         private System.Windows.Forms.ComboBox cmbPDFToolsList;
         private System.Windows.Forms.ComboBox cmbEPUBToolsList;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ComboBox cmbViewMode;
     }
 }

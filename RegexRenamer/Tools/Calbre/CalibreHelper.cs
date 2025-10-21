@@ -1,12 +1,14 @@
 ﻿using LogEx;
+using RegexRenamer.Tools.EBookPDFTools;
+using RegexRenamer.Tools.Kavita;
 using RegexRenamer.Utility;
+using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RegexRenamer.Tools.Kavita;
 
 namespace RegexRenamer.Tools.Calbre;
 
@@ -17,12 +19,12 @@ public class CalibreHelper
         // Supports {srcfilepath} {destfilepath} variables
         var cmdName = "PolishEPUB";
 
-        var destfilepath = Path.Combine(Path.GetDirectoryName(filePath) ?? string.Empty, Path.GetFileNameWithoutExtension(filePath) + "_polished" + Path.GetExtension(filePath));
+        string tempFilePath = filePath.GetInFolderTempFilePath();
 
         var (exitcode, output, error) = await cmdName.ExecNamedCmdCaptureAsync(null, new List<Tuple<string, string>>(){
-       new Tuple<string, string>("{srcfilepath}", filePath),
-       new Tuple<string, string>("{destfilepath}", destfilepath)
-    });
+           new Tuple<string, string>("{srcfilepath}", filePath),
+           new Tuple<string, string>("{destfilepath}", tempFilePath)
+        });
 
         //create unique list of files from output
         if (output.Count == 0 || exitcode != 0 || error.Count > 0)
@@ -46,14 +48,11 @@ public class CalibreHelper
             throw new ApplicationException($"Failed to polish file : {filePath}\r\n{sb.ToString()}");
         }
 
-        try
-        {
-            File.Move(destfilepath, filePath, true);
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException($"Failed to replace original file with polished file : {filePath}\r\n{ex.Message}");
-        }
+        // if success then make backup of original file
+        filePath.MakeBackup();
+
+        // if success move temp file to original file
+        File.Move(tempFilePath, filePath, true);
         return true;
     }
     public static async Task<bool> ClearMetadata(string srcFilePath)
@@ -149,9 +148,6 @@ public class CalibreHelper
         }
         return true;
     }
-
-
-
 
     public static async Task<bool> ConvertCalibre(string srcFilePath, string destFilePath)
     {

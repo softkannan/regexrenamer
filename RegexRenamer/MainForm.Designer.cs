@@ -146,6 +146,7 @@ namespace RegexRenamer
             groupBoxTop = new System.Windows.Forms.GroupBox();
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
+            chkOrderByReverse = new System.Windows.Forms.CheckBox();
             cmsRename.SuspendLayout();
             gbFilter.SuspendLayout();
             pnlStats.SuspendLayout();
@@ -296,10 +297,10 @@ namespace RegexRenamer
             // 
             rbFilterRegex.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             rbFilterRegex.AutoSize = true;
-            rbFilterRegex.Location = new System.Drawing.Point(95, 43);
+            rbFilterRegex.Location = new System.Drawing.Point(94, 43);
             rbFilterRegex.Margin = new System.Windows.Forms.Padding(4);
             rbFilterRegex.Name = "rbFilterRegex";
-            rbFilterRegex.Size = new System.Drawing.Size(56, 19);
+            rbFilterRegex.Size = new System.Drawing.Size(57, 19);
             rbFilterRegex.TabIndex = 3;
             rbFilterRegex.Text = "Regex";
             // 
@@ -416,10 +417,10 @@ namespace RegexRenamer
             // 
             cbModifierX.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             cbModifierX.AutoSize = true;
-            cbModifierX.Location = new System.Drawing.Point(872, 61);
+            cbModifierX.Location = new System.Drawing.Point(871, 61);
             cbModifierX.Margin = new System.Windows.Forms.Padding(4);
             cbModifierX.Name = "cbModifierX";
-            cbModifierX.Size = new System.Drawing.Size(36, 19);
+            cbModifierX.Size = new System.Drawing.Size(37, 19);
             cbModifierX.TabIndex = 5;
             cbModifierX.Tag = false;
             cbModifierX.Text = "/x";
@@ -945,48 +946,48 @@ namespace RegexRenamer
             // 
             itmHelpContents.Name = "itmHelpContents";
             itmHelpContents.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            itmHelpContents.Size = new System.Drawing.Size(211, 22);
+            itmHelpContents.Size = new System.Drawing.Size(212, 22);
             itmHelpContents.Text = "Contents";
             // 
             // itmHelpRegexReference
             // 
             itmHelpRegexReference.Name = "itmHelpRegexReference";
             itmHelpRegexReference.ShortcutKeys = System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F1;
-            itmHelpRegexReference.Size = new System.Drawing.Size(211, 22);
+            itmHelpRegexReference.Size = new System.Drawing.Size(212, 22);
             itmHelpRegexReference.Text = "Regex Reference";
             // 
             // itmHelpSep1
             // 
             itmHelpSep1.Name = "itmHelpSep1";
-            itmHelpSep1.Size = new System.Drawing.Size(208, 6);
+            itmHelpSep1.Size = new System.Drawing.Size(209, 6);
             // 
             // itmHelpEmailAuthor
             // 
             itmHelpEmailAuthor.Name = "itmHelpEmailAuthor";
-            itmHelpEmailAuthor.Size = new System.Drawing.Size(211, 22);
+            itmHelpEmailAuthor.Size = new System.Drawing.Size(212, 22);
             itmHelpEmailAuthor.Text = "Email the author";
             // 
             // itmHelpReportBug
             // 
             itmHelpReportBug.Name = "itmHelpReportBug";
-            itmHelpReportBug.Size = new System.Drawing.Size(211, 22);
+            itmHelpReportBug.Size = new System.Drawing.Size(212, 22);
             itmHelpReportBug.Text = "Report a bug";
             // 
             // itmHelpHomepage
             // 
             itmHelpHomepage.Name = "itmHelpHomepage";
-            itmHelpHomepage.Size = new System.Drawing.Size(211, 22);
+            itmHelpHomepage.Size = new System.Drawing.Size(212, 22);
             itmHelpHomepage.Text = "Homepage";
             // 
             // itmHelpSep2
             // 
             itmHelpSep2.Name = "itmHelpSep2";
-            itmHelpSep2.Size = new System.Drawing.Size(208, 6);
+            itmHelpSep2.Size = new System.Drawing.Size(209, 6);
             // 
             // itmHelpAbout
             // 
             itmHelpAbout.Name = "itmHelpAbout";
-            itmHelpAbout.Size = new System.Drawing.Size(211, 22);
+            itmHelpAbout.Size = new System.Drawing.Size(212, 22);
             itmHelpAbout.Text = "About RegexRenamer";
             // 
             // progressBar
@@ -1018,6 +1019,7 @@ namespace RegexRenamer
             // groupBoxTop
             // 
             groupBoxTop.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxTop.Controls.Add(chkOrderByReverse);
             groupBoxTop.Controls.Add(chkShowInfo);
             groupBoxTop.Controls.Add(lblMatch);
             groupBoxTop.Controls.Add(cmbReplace);
@@ -1064,6 +1066,19 @@ namespace RegexRenamer
             groupBoxFileView.Size = new System.Drawing.Size(1048, 732);
             groupBoxFileView.TabIndex = 9;
             groupBoxFileView.TabStop = false;
+            // 
+            // chkOrderByReverse
+            // 
+            chkOrderByReverse.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            chkOrderByReverse.AutoSize = true;
+            chkOrderByReverse.Location = new System.Drawing.Point(913, 41);
+            chkOrderByReverse.Margin = new System.Windows.Forms.Padding(4);
+            chkOrderByReverse.Name = "chkOrderByReverse";
+            chkOrderByReverse.Size = new System.Drawing.Size(115, 19);
+            chkOrderByReverse.TabIndex = 8;
+            chkOrderByReverse.Tag = false;
+            chkOrderByReverse.Text = "Order By Reverse";
+            toolTip.SetToolTip(chkOrderByReverse, "Extended regex (ignore unescaped spaces)");
             // 
             // MainForm
             // 
@@ -1196,6 +1211,7 @@ namespace RegexRenamer
         private System.Windows.Forms.DataGridViewTextBoxColumn colChapter;
         private System.Windows.Forms.DataGridViewTextBoxColumn colEdition;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSpecial;
+        private System.Windows.Forms.CheckBox chkOrderByReverse;
     }
 }
 

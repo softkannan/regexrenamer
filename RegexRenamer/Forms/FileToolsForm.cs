@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using RegexRenamer.Tools.Calbre;
 using RegexRenamer.Tools.EBookPDFTools;
+using DarkModeForms;
 
 namespace RegexRenamer.Forms;
 
@@ -44,6 +45,7 @@ public partial class FileToolsForm : Form
 
         cmMenuToolsPolishEPUBToolStripMenuItem.Click += async (s, e) => await PerformConversionAction("PolishEPUB");
         cmMenuToolsRemovePDFOwnerPassToolStripMenuItem.Click += async (s, e) => await PerformConversionAction("RemoveOwnerPassPDF");
+        cmMenuToolsRemovePDFSignatureToolStripMenuItem.Click += async (s, e) => await PerformConversionAction("RemoveSignaturePDF");
         cmMenuToolsReFormatTextFilesToolStripMenuItem.Click += async (s, e) => await PerformConversionAction("ReFormatTextFiles");
 
         bttnConvert.Click += async (s, e) => await PerformConversionAction("ConvertToEPUB");
@@ -148,6 +150,62 @@ public partial class FileToolsForm : Form
                     }
                 }
                 break;
+            case "RemoveSignaturePDF":
+                {
+                    _preventCancel = true;
+                    try
+                    {
+                        // Apply changes without closing
+                        // (Implementation of applying changes goes here)
+                        if (MessageBox.Show("Do you want to remove pdf signature for all the files now?", "PDF Remove signature", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        {
+                            this.DialogResult = DialogResult.OK;
+                            this.Close();
+                            break;
+                        }
+                        pbToolsForm.Value = 0;
+                        pbToolsForm.Maximum = _activeFiles.Count;
+
+                        List<KeyValue> fields = new List<KeyValue> {
+                           new KeyValue("Password","Password", KeyValue.ValueTypes.Password)
+                           };
+
+                        string password = string.Empty;
+                        if (Messenger.InputBox("Remove PDF Signature", "Enter pdf password if any:", ref fields,
+                            MsgIcon.Edit, MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        {
+                            password = fields[0].Value;
+                        }
+                        for (int index = 0; index < _activeFiles.Count; index++)
+                        {
+                            var file = _activeFiles[index];
+                            pbToolsForm.Value = index + 1;
+                            lblStatus.Text = $"Removing signature {file.Name} ({index + 1} of {_activeFiles.Count})";
+                            listViewFiles.SelectedItems.Clear();
+                            listViewFiles.Items[index].Selected = true;
+                            Application.DoEvents();
+                            try
+                            {
+                                ITextPDFHelper.RemoveSign(file.FullName, password);
+                            }
+                            catch (Exception ex)
+                            {
+                                ErrorLog.Inst.ShowError($"Failed to remove signature {file.Name}:\r\n {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ErrorLog.Inst.ShowError($"An error occurred while removing signature: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        _preventCancel = false;
+                    }
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                }
+                break;
             case "RemoveOwnerPassPDF":
                 {
                     _preventCancel = true;
@@ -177,13 +235,13 @@ public partial class FileToolsForm : Form
                             }
                             catch (Exception ex)
                             {
-                                ErrorLog.Inst.ShowError($"Failed to polish {file.Name}:\r\n {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                ErrorLog.Inst.ShowError($"Failed to remove owner password {file.Name}:\r\n {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        ErrorLog.Inst.ShowError($"An error occurred while polishing: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ErrorLog.Inst.ShowError($"An error occurred while removing owner password: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     finally
                     {

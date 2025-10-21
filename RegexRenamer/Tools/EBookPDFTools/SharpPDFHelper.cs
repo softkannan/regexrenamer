@@ -13,6 +13,7 @@ public static class SharpPDFHelper
 {
     public static bool ClearPDFMetadata(string filePath)
     {
+        // Open file for modification
         using (var book = PdfSharp.Pdf.IO.PdfReader.Open(filePath, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Modify))
         {
             SetPDFMetadata(book, "Summary", string.Empty);

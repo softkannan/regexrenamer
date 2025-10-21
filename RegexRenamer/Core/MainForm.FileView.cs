@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -126,9 +127,15 @@ namespace RegexRenamer
             dgvFiles.Leave += dgvFiles_Leave;
 
             dgvFiles.SortCompare += DgvFiles_SortCompare;
+            chkOrderByReverse.CheckedChanged += ChkOrderByReverse_CheckedChanged;
 
             colModified.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             colFileSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        }
+
+        private void ChkOrderByReverse_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdatePreview();
         }
 
         private void DgvFiles_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
@@ -154,6 +161,31 @@ namespace RegexRenamer
                     e.Handled = true; // Indicate that sorting is handled
                 }
             }
+            else if(chkOrderByReverse.Checked)
+            {
+                // reverse sort for other columns
+                var val1 = e.CellValue1?.ToString() ?? "";
+                var val2 = e.CellValue2?.ToString() ?? "";
+                val1 = ReverseTextElements(val1);
+                val2 = ReverseTextElements(val2);
+                e.SortResult = string.Compare(val1, val2);
+                e.Handled = true; // Indicate that sorting is handled
+            }
+        }
+
+        static string ReverseTextElements(string input)
+        {
+            StringInfo stringInfo = new StringInfo(input);
+            int length = stringInfo.LengthInTextElements;
+            string[] textElements = new string[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                textElements[i] = stringInfo.SubstringByTextElements(i, 1);
+            }
+
+            Array.Reverse(textElements);
+            return string.Concat(textElements);
         }
 
 
@@ -370,7 +402,7 @@ namespace RegexRenamer
         }
         #endregion
 
-        #region File View context menu
+        #region File View context menu handlers
         private async void launchEditorFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try

@@ -31,7 +31,8 @@ public enum EBookToolsList
 {
     Calibre,
     EpubMeta,
-    EpubSharp
+    // Epub sharp not fully working
+    //EpubSharp
 }
 
 /// <summary>
@@ -71,9 +72,9 @@ public static class EBookHelper
                 case EBookToolsList.EpubMeta:
                     EpubMetaHelper.ClearEpubMetadata(filePath);
                     break;
-                case EBookToolsList.EpubSharp:
-                    EpubSharpHelper.ClearEpubMetadata(filePath);
-                    break;
+                //case EBookToolsList.EpubSharp:
+                //    EpubSharpHelper.ClearEpubMetadata(filePath);
+                //    break;
                 case EBookToolsList.Calibre:
                 default:
                     await CalibreHelper.ClearMetadata(filePath);
@@ -120,9 +121,9 @@ public static class EBookHelper
                 case EBookToolsList.EpubMeta:
                     EpubMetaHelper.WriteEpubMetadata(filePath, metadata);
                     break;
-                case EBookToolsList.EpubSharp:
-                    EpubSharpHelper.WriteEpubMetadata(filePath, metadata);
-                    break;
+                //case EBookToolsList.EpubSharp:
+                //    EpubSharpHelper.WriteEpubMetadata(filePath, metadata);
+                //    break;
                 case EBookToolsList.Calibre:
                 default:
                     // Ensure volume is set if series is present (Calibre expects a value)
@@ -226,5 +227,32 @@ public static class EBookHelper
                         new Tuple<string, string>("{filepath}", filePath)
                     });
         return true;
+    }
+
+    public static string GetSysTempFilePath(this string originalFilePath)
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), "RegexRenamer");
+        if (!Directory.Exists(tempDir))
+        {
+            Directory.CreateDirectory(tempDir);
+        }
+        var tempFilePath = Path.Combine(tempDir, Path.GetFileName(originalFilePath));
+        return tempFilePath;
+    }
+
+    public static string GetInFolderTempFilePath(this string originalFilePath)
+    {
+        var tempFilePath = Path.Combine(Path.GetDirectoryName(originalFilePath), $"{Path.GetFileNameWithoutExtension(originalFilePath)}.Temp{Path.GetExtension(originalFilePath)}");
+
+        return tempFilePath;
+    }
+
+    public static string MakeBackup(this string originalFilePath)
+    {
+        var backupFile = Path.Combine(Path.GetDirectoryName(originalFilePath), $"{Path.GetFileNameWithoutExtension(originalFilePath)}.Backup{Path.GetExtension(originalFilePath)}");
+        
+        File.Move(originalFilePath, backupFile, true);
+
+        return backupFile;
     }
 }

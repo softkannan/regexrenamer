@@ -38,7 +38,7 @@ namespace RegexRenamer.Tools.EBookPDFTools
     {
         public static bool ClearPDFMetadata(string filePath)
         {
-            string tempFilePath = $"{Path.GetTempPath()}\\{Path.GetFileName(filePath)}"; 
+            string tempFilePath = filePath.GetInFolderTempFilePath(); 
             using (PdfDocument pdfDoc = new PdfDocument(new PdfReader(filePath), new PdfWriter(tempFilePath)))
             {
                 var info = pdfDoc.GetDocumentInfo();
@@ -69,6 +69,7 @@ namespace RegexRenamer.Tools.EBookPDFTools
                 }
             }
 
+            // if success move temp file to original file
             File.Move(tempFilePath, filePath, true);
 
             return true;
@@ -76,7 +77,7 @@ namespace RegexRenamer.Tools.EBookPDFTools
 
         public static bool WritePDFMetadata(string filePath, ComicInfo metadata)
         {
-            string tempFilePath = $"{Path.GetTempPath()}\\{Path.GetFileName(filePath)}";
+            string tempFilePath = filePath.GetInFolderTempFilePath();
             int writeCount = 0;
             int xmpWriteCount = 0;
 
@@ -152,49 +153,55 @@ namespace RegexRenamer.Tools.EBookPDFTools
 
             writeCount += xmpWriteCount;
 
+            // if success move temp file to original file
             if (writeCount > 0)
             {
                 File.Move(tempFilePath, filePath, true);
+            }
+            else
+            {
+                // delete the temp file as no changes were made
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
             }
             return true;
         }
 
         public static bool RemoveOwnerPassword(string filePath)
         {
-            string folderPath = Path.GetDirectoryName(filePath);
-            string fileExt = Path.GetExtension(filePath);
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string srcPath = Path.Combine(folderPath, $"{fileName}.Backup{fileExt}");
+            string tempFilePath = filePath.GetInFolderTempFilePath();
 
-            File.Move(filePath, srcPath, true);
-
-            using (PdfReader reader = new PdfReader(srcPath))
+            using (PdfReader reader = new PdfReader(filePath))
             {
                 reader.SetUnethicalReading(true);
-                using (PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(filePath)))
+                using (PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(tempFilePath)))
                 {
                     pdfDoc.Close();
                 }
                 reader.Close();
             }
+
+            // if success then make backup of original file
+            filePath.MakeBackup();
+
+            // if success move temp file to original file
+            File.Move(tempFilePath, filePath, true);
+
             return true;
         }
 
         public static void RemoveSign(string filePath, string password)
         {
-            string folderPath = Path.GetDirectoryName(filePath);
-            string fileExt = Path.GetExtension(filePath);
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string srcPath = Path.Combine(folderPath, $"{fileName}.Backup{fileExt}");
-
-            File.Move(filePath, srcPath, true);
+            string tempFilePath = filePath.GetInFolderTempFilePath();
 
             if (string.IsNullOrWhiteSpace(password))
             {
-                using (PdfReader reader = new PdfReader(srcPath))
+                using (PdfReader reader = new PdfReader(filePath))
                 {
                     reader.SetUnethicalReading(true);
-                    using (var pdfDoc = new PdfDocument(reader, new PdfWriter(filePath)))
+                    using (var pdfDoc = new PdfDocument(reader, new PdfWriter(tempFilePath)))
                     {
                         var form = PdfFormCreator.GetAcroForm(pdfDoc, true);
                         // If no fields have been explicitly included, then all fields are flattened.
@@ -215,7 +222,7 @@ namespace RegexRenamer.Tools.EBookPDFTools
                 var readerProperties = new ReaderProperties();
                 readerProperties.SetPassword(asciiBytes);
 
-                using (var pdfDocument = new PdfDocument(new PdfReader(srcPath, readerProperties), new PdfWriter(filePath)))
+                using (var pdfDocument = new PdfDocument(new PdfReader(filePath, readerProperties), new PdfWriter(tempFilePath)))
                 {
                     var form = PdfFormCreator.GetAcroForm(pdfDocument, true);
 
@@ -224,6 +231,12 @@ namespace RegexRenamer.Tools.EBookPDFTools
                     form.FlattenFields();
                 }
             }
+
+            // if success then make backup of original file
+            filePath.MakeBackup();
+
+            // if success move temp file to original file
+            File.Move(tempFilePath, filePath, true);
         }
 
         public static bool ExtractText(string filePath, string extractedFilePath)
@@ -267,8 +280,9 @@ namespace RegexRenamer.Tools.EBookPDFTools
 
         public static void RemovePassword(string filePath, string password)
         {
-            string destFilePath = filePath;
-            using (var pdfDocument = new PdfDocument(new PdfWriter(destFilePath)))
+            string tempFilePath = filePath.GetInFolderTempFilePath();
+
+            using (var pdfDocument = new PdfDocument(new PdfWriter(tempFilePath)))
             {
                 if (string.IsNullOrWhiteSpace(password))
                 {
@@ -313,6 +327,12 @@ namespace RegexRenamer.Tools.EBookPDFTools
                         pdfDocument.Close();
                     }
                 }
+
+                // if success then make backup of original file
+                filePath.MakeBackup();
+
+                // if success move temp file to original file
+                File.Move(tempFilePath, filePath, true);
             }
         }
 

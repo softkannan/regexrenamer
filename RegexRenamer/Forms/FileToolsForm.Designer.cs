@@ -44,9 +44,10 @@ partial class FileToolsForm
         cmMenuTools = new System.Windows.Forms.ContextMenuStrip(components);
         cmMenuToolsPolishEPUBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
         cmMenuToolsRemovePDFOwnerPassToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+        cmMenuToolsReFormatTextFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
         cmbLanguage = new MyComboBox();
         label6 = new System.Windows.Forms.Label();
-        cmMenuToolsReFormatTextFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+        cmMenuToolsRemovePDFSignatureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
         cmMenuConvert.SuspendLayout();
         cmMenuTools.SuspendLayout();
         SuspendLayout();
@@ -78,11 +79,11 @@ partial class FileToolsForm
         lblStatus.TabIndex = 23;
         lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
         // 
-        // pbMetadataWrite
+        // pbToolsForm
         // 
         pbToolsForm.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
         pbToolsForm.Location = new System.Drawing.Point(15, 725);
-        pbToolsForm.Name = "pbMetadataWrite";
+        pbToolsForm.Name = "pbToolsForm";
         pbToolsForm.Size = new System.Drawing.Size(271, 23);
         pbToolsForm.TabIndex = 22;
         // 
@@ -131,9 +132,9 @@ partial class FileToolsForm
         // 
         // cmMenuTools
         // 
-        cmMenuTools.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { cmMenuToolsPolishEPUBToolStripMenuItem, cmMenuToolsRemovePDFOwnerPassToolStripMenuItem, cmMenuToolsReFormatTextFilesToolStripMenuItem });
+        cmMenuTools.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { cmMenuToolsPolishEPUBToolStripMenuItem, cmMenuToolsRemovePDFSignatureToolStripMenuItem, cmMenuToolsRemovePDFOwnerPassToolStripMenuItem, cmMenuToolsReFormatTextFilesToolStripMenuItem });
         cmMenuTools.Name = "contextMenuStrip1";
-        cmMenuTools.Size = new System.Drawing.Size(206, 92);
+        cmMenuTools.Size = new System.Drawing.Size(206, 114);
         // 
         // cmMenuToolsPolishEPUBToolStripMenuItem
         // 
@@ -146,6 +147,12 @@ partial class FileToolsForm
         cmMenuToolsRemovePDFOwnerPassToolStripMenuItem.Name = "cmMenuToolsRemovePDFOwnerPassToolStripMenuItem";
         cmMenuToolsRemovePDFOwnerPassToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
         cmMenuToolsRemovePDFOwnerPassToolStripMenuItem.Text = "Remove PDF Owner Pass";
+        // 
+        // cmMenuToolsReFormatTextFilesToolStripMenuItem
+        // 
+        cmMenuToolsReFormatTextFilesToolStripMenuItem.Name = "cmMenuToolsReFormatTextFilesToolStripMenuItem";
+        cmMenuToolsReFormatTextFilesToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
+        cmMenuToolsReFormatTextFilesToolStripMenuItem.Text = "Re-Format Text Files";
         // 
         // cmbLanguage
         // 
@@ -168,11 +175,11 @@ partial class FileToolsForm
         label6.Text = "Language:";
         label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
         // 
-        // cmMenuToolsReFormatTextFilesToolStripMenuItem
+        // cmMenuToolsRemovePDFSignatureToolStripMenuItem
         // 
-        cmMenuToolsReFormatTextFilesToolStripMenuItem.Name = "cmMenuToolsReFormatTextFilesToolStripMenuItem";
-        cmMenuToolsReFormatTextFilesToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
-        cmMenuToolsReFormatTextFilesToolStripMenuItem.Text = "Re-Format Text Files";
+        cmMenuToolsRemovePDFSignatureToolStripMenuItem.Name = "cmMenuToolsRemovePDFSignatureToolStripMenuItem";
+        cmMenuToolsRemovePDFSignatureToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
+        cmMenuToolsRemovePDFSignatureToolStripMenuItem.Text = "Remove PDF Signature";
         // 
         // FileToolsForm
         // 
@@ -214,4 +221,5 @@ partial class FileToolsForm
     private MyComboBox cmbLanguage;
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.ToolStripMenuItem cmMenuToolsReFormatTextFilesToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem cmMenuToolsRemovePDFSignatureToolStripMenuItem;
 }

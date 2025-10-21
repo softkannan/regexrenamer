@@ -62,7 +62,7 @@ public static class EpubMetaHelper
     */
     public static bool ClearEpubMetadata(string filePath)
     {
-        string tempFilePath = $"{Path.GetTempPath()}\\{Path.GetFileName(filePath)}";
+        string tempFilePath = filePath.GetInFolderTempFilePath();
         // EPUB files are ZIP archives. Use SharpCompress to open and modify.
         using (var archive = ZipArchive.Open(filePath))
         {
@@ -166,6 +166,7 @@ public static class EpubMetaHelper
             }
         }
 
+        //After success overwrite original file
         File.Move(tempFilePath, filePath, true);
         return true;
     }
@@ -184,7 +185,7 @@ public static class EpubMetaHelper
 
     public static bool WriteEpubMetadata(string filePath, ComicInfo metadata)
     {
-        string tempFilePath = $"{Path.GetTempPath()}\\{Path.GetFileName(filePath)}";
+        string tempFilePath = filePath.GetInFolderTempFilePath();
         // EPUB files are ZIP archives. Use SharpCompress to open and modify.
         using (var archive = ZipArchive.Open(filePath))
         {
@@ -341,6 +342,7 @@ public static class EpubMetaHelper
             }
         }
 
+        //After success overwrite original file
         File.Move(tempFilePath, filePath, true);
         return true;
     }

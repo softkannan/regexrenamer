@@ -26,7 +26,7 @@ namespace RegexRenamer.Forms;
 
 public partial class EditMetadataForm : Form
 {
-    private List<Tuple<RenameItemInfo, ComicInfo>> _activeFiles;
+    private List<Tuple<RenameItemInfo, ComicInfo,ComicInfo>> _activeFiles;
     private readonly string _action;
     private readonly string _activePath;
     private readonly string _searchPattern;
@@ -80,11 +80,19 @@ public partial class EditMetadataForm : Form
         mnuChangeCase.MouseDown += mnuChangeCase_MouseDown;
 
 
+        cmbViewMode.Items.AddRange(Enum.GetNames(typeof(MetadataViewMode)));
+        cmbViewMode.SelectedItem = MetadataFormConfig.Inst.ViewMode;
+        cmbViewMode.SelectedIndexChanged += (s, e) =>
+        {
+            MetadataFormConfig.Inst.ViewMode = cmbViewMode.SelectedItem as string;
+            UpdatePreview();
+        };
+
         cmbPDFToolsList.Items.AddRange(Enum.GetNames(typeof(PDFToolsList)));
-        cmbPDFToolsList.SelectedItem = UserConfig.Inst.PreferredPDFTool;
+        cmbPDFToolsList.SelectedItem = MetadataFormConfig.Inst.PreferredPDFTool;
 
         cmbEPUBToolsList.Items.AddRange(Enum.GetNames(typeof(EBookToolsList)));
-        cmbEPUBToolsList.SelectedItem = UserConfig.Inst.PreferredEBookTool;
+        cmbEPUBToolsList.SelectedItem = MetadataFormConfig.Inst.PreferredEBookTool;
 
 
         this.FormClosing += Form_Closing;
@@ -95,18 +103,18 @@ public partial class EditMetadataForm : Form
 
     public EditMetadataForm(string activePath, string searchPattern, string title, string action, bool preservExt)
     {
-        this._activeFiles = new List<Tuple<RenameItemInfo, ComicInfo>>();
+        this._activeFiles = new List<Tuple<RenameItemInfo, ComicInfo, ComicInfo>>();
         this._action = action;
         this._activePath = activePath;
         this._searchPattern = searchPattern;
         this._preserveExtension = preservExt;
         InitilaizeForm(title);
-        chkApplyRecursively.Checked = UserConfig.Inst.ApplyRecursively;
+        chkApplyRecursively.Checked = MetadataFormConfig.Inst.UpdateRecursively;
         chkApplyRecursively.CheckStateChanged += (sender, e) => UpdateFileList();
     }
     public EditMetadataForm(List<FileInfo> files, string title, string action, bool preservExt)
     {
-        this._activeFiles = files.Select(t => new Tuple<RenameItemInfo, ComicInfo>(new RenameItemInfo(t, false, preservExt), new ComicInfo())).ToList();
+        this._activeFiles = files.Select(t => new Tuple<RenameItemInfo, ComicInfo, ComicInfo>(new RenameItemInfo(t, false, preservExt), new ComicInfo(), t.GetMetadata() ?? new ComicInfo())).ToList();
         this._action = action;
         this._activePath = string.Empty;
         this._searchPattern = string.Empty;
@@ -163,7 +171,7 @@ public partial class EditMetadataForm : Form
         cmbPDFToolsList.Enabled = enable;
 
         chkIgnoreError.Enabled = enable;
-        chkShowExisting.Enabled = enable;
+        cmbViewMode.Enabled = enable;
         cbModifierG.Enabled = enable;
         cbModifierI.Enabled = enable;
         cbModifierX.Enabled = enable;
@@ -183,8 +191,8 @@ public partial class EditMetadataForm : Form
 
         UpdateFileList();
 
-        chkIgnoreError.Checked = UserConfig.Inst.IgnoreError;
-        chkApplyRecursively.Checked = UserConfig.Inst.ApplyRecursively;
+        chkIgnoreError.Checked = MetadataFormConfig.Inst.IgnoreErrors;
+        chkApplyRecursively.Checked = MetadataFormConfig.Inst.UpdateRecursively;
     }
 
     private async void MetaDataForm_Shown(object sender, EventArgs e)
@@ -231,13 +239,13 @@ public partial class EditMetadataForm : Form
                         lblStatus.Text = $"Writing metadata for {file.Item1.Name} ({index + 1} of {_activeFiles.Count})";
                         fileListView.SelectedItems.Clear();
                         fileListView.Items[index].Selected = true;
-                        UserConfig.Inst.IgnoreError = chkIgnoreError.Checked;
+                        MetadataFormConfig.Inst.UpdateRecursively = chkIgnoreError.Checked;
                         UserConfig.Inst.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
-                        UserConfig.Inst.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
-                        UserConfig.Inst.ApplyRecursively = chkApplyRecursively.Checked;
+                        MetadataFormConfig.Inst.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
+                        MetadataFormConfig.Inst.UpdateRecursively = chkApplyRecursively.Checked;
 
                         var fileExt = file.Item1.Extension.ToLowerInvariant();
-                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.PreferredPDFTool : UserConfig.Inst.PreferredEBookTool;
+                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.PreferredPDFTool : MetadataFormConfig.Inst.PreferredEBookTool;
 
                         if (fileExt != ".pdf" && fileExt != ".epub" && fileExt != ".kepub" && fileExt != ".azw")
                         {
@@ -253,7 +261,7 @@ public partial class EditMetadataForm : Form
                         }
                         catch (Exception ex)
                         {
-                            if (!UserConfig.Inst.IgnoreError)
+                            if (!MetadataFormConfig.Inst.IgnoreErrors)
                                 ErrorLog.Inst.ShowError($"Failed to write metadata for {file.Item1.Name}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
@@ -294,13 +302,13 @@ public partial class EditMetadataForm : Form
                         lblStatus.Text = $"Writing metadata for {file.Item1.Name} ({index + 1} of {_activeFiles.Count})";
                         fileListView.SelectedItems.Clear();
                         fileListView.Items[index].Selected = true;
-                        UserConfig.Inst.IgnoreError = chkIgnoreError.Checked;
-                        UserConfig.Inst.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
-                        UserConfig.Inst.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
-                        UserConfig.Inst.ApplyRecursively = chkApplyRecursively.Checked;
+                        MetadataFormConfig.Inst.IgnoreErrors = chkIgnoreError.Checked;
+                        MetadataFormConfig.Inst.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
+                        MetadataFormConfig.Inst.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
+                        MetadataFormConfig.Inst.UpdateRecursively = chkApplyRecursively.Checked;
 
                         var fileExt = file.Item1.Extension.ToLowerInvariant();
-                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.PreferredPDFTool : UserConfig.Inst.PreferredEBookTool;
+                        var toolName = fileExt == ".pdf" ? MetadataFormConfig.Inst.PreferredPDFTool : MetadataFormConfig.Inst.PreferredEBookTool;
 
                         if (fileExt != ".pdf" && fileExt != ".epub" && fileExt != ".kepub" && fileExt != ".azw")
                         {
@@ -316,7 +324,7 @@ public partial class EditMetadataForm : Form
                         }
                         catch (Exception ex)
                         {
-                            if (!UserConfig.Inst.IgnoreError)
+                            if (!MetadataFormConfig.Inst.IgnoreErrors)
                                 ErrorLog.Inst.ShowError($"Failed to write metadata for {file.Item1.Name}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
@@ -595,21 +603,20 @@ public partial class EditMetadataForm : Form
 
     private void UpdateDataToGrid()
     {
+        Enum.TryParse<MetadataViewMode>(MetadataFormConfig.Inst.ViewMode,out MetadataViewMode viewMode);
         // update file list
         fileListView.BeginUpdate();
         for (int dfi = 0; dfi < fileListView.Items.Count; dfi++)
         {
             int afi = (int)fileListView.Items[dfi].Tag;
-            if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.Title))
-                fileListView.Items[dfi].SubItems[1].Text = _activeFiles[afi].Item2.Title;
-            if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.Series))
-                fileListView.Items[dfi].SubItems[2].Text = _activeFiles[afi].Item2.Series;
-            if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.Volume))
-                fileListView.Items[dfi].SubItems[3].Text = _activeFiles[afi].Item2.Volume;
-            if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.Writer))
-                fileListView.Items[dfi].SubItems[4].Text = _activeFiles[afi].Item2.Writer;
-            if (!string.IsNullOrEmpty(_activeFiles[afi].Item2.LanguageISO))
-                fileListView.Items[dfi].SubItems[5].Text = _activeFiles[afi].Item2.LanguageISO;
+            
+            var metaData = viewMode  == MetadataViewMode.ShowExitingMetadata ? _activeFiles[afi].Item3 : _activeFiles[afi].Item2;
+
+            fileListView.Items[dfi].SubItems[1].Text = metaData.Title;
+            fileListView.Items[dfi].SubItems[2].Text = metaData.Series;
+            fileListView.Items[dfi].SubItems[3].Text = metaData.Volume;
+            fileListView.Items[dfi].SubItems[4].Text = metaData.Writer;
+            fileListView.Items[dfi].SubItems[5].Text = metaData.LanguageISO;
         }
 
         fileListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);

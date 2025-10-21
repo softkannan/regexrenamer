@@ -72,14 +72,9 @@ public static class EpubSharpHelper
 
     public static bool ClearEpubMetadata(string filePath)
     {
-
         // SharpCompress open archive file for read write 
-
-
-
         EpubWriter writer = new EpubWriter();
         EpubBook book = WriteAndRead(filePath, new EpubWriter());
-
 
         /*
             <meta name="calibre:series" content="Test"/>
@@ -88,12 +83,6 @@ public static class EpubSharpHelper
             <meta refines="#id-2" property="collection-type">series</meta>
             <meta refines="#id-2" property="group-position">12</meta>
          */
-
-        //EpubWriter writer = new EpubWriter(book);
-
-        //var opf = book.Format.Opf;
-        //opf.Metadata.Titles.Clear();
-        //opf.Metadata.Creators.Clear();
 
         writer.ClearAuthors();
         writer.RemoveTitle();

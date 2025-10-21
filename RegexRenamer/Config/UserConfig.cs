@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using RegexRenamer.Tools.EBookPDFTools;
 
 namespace Config;
 
@@ -42,12 +43,8 @@ public class UserConfig
     public string DefaultWorkspace { get; set; }
     public string DefaultOutputPath { get; set; }
 
-    public bool IgnoreError {  get; set; } = false;
-
-    public bool ApplyRecursively { get; set; } = false ;
-
-    public string PreferredPDFTool { get; set; } = "Calibre";
-    public string PreferredEBookTool { get; set; } = "Calibre";
+    public string PreferredPDFTool { get; set; } = PDFToolsList.Calibre.ToString();
+    public string PreferredEBookTool { get; set; } = EBookToolsList.Calibre.ToString();
 
     #endregion
 

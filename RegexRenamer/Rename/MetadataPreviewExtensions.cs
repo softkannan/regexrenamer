@@ -1,4 +1,5 @@
 ﻿using J2N;
+using RegexRenamer.Forms;
 using RegexRenamer.Tools.Kavita;
 using System;
 using System.Collections.Generic;
@@ -99,7 +100,7 @@ namespace RegexRenamer.Rename
             }
         }
 
-        public static int BuildMetadataPreview(this List<Tuple<RenameItemInfo, ComicInfo>> pThis,MetadataType colType, string matchingPattern, string replacePattern,  
+        public static int BuildMetadataPreview(this List<Tuple<RenameItemInfo, ComicInfo, ComicInfo>> pThis,MetadataType colType, string matchingPattern, string replacePattern,  
             AutoNumberingInfo numInfo, ChangeCaseOption changeCaseInfo, RegexModifierInfo modifierInfo)
         {
             int retVal = 0;

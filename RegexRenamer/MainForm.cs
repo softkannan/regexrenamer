@@ -32,7 +32,8 @@ using System.Threading;
 using RegexRenamer.Native;
 using RegexRenamer.Forms;
 using RegexRenamer.Rename;
-using RegexRenamer.Tools.Kavita;        // FieldInfo
+using RegexRenamer.Tools.Kavita;
+using Config;        // FieldInfo
 
 
 namespace RegexRenamer
@@ -231,6 +232,10 @@ namespace RegexRenamer
 
             dgvFiles.DoubleBuffered(true);
 
+
+            MetadataFormConfig.Inst.PreferredEBookTool = UserConfig.Inst.PreferredEBookTool;
+            MetadataFormConfig.Inst.PreferredPDFTool = UserConfig.Inst.PreferredPDFTool;
+
             //_dm = new DarkModeForms.DarkModeCS(this)
             //{
             //    // Choose your preferred mode here:
@@ -238,6 +243,8 @@ namespace RegexRenamer
             //};
 
         }
+
+      
 
         #endregion
 
