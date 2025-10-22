@@ -66,19 +66,21 @@ namespace RegexRenamer.Rename
 
     public class RenameItemInfo
     {
-        public string Filename;   // [subdir\]filename.txt
-        public string Basename;   // [subdir\]filename
-        public string Foldername; // c:\..\[subdir\]
-        public string Extension;  // .txt
-        public string Fullpath;   // c:\..\[subdir\]filename.txt
+        public readonly string Filename;   // [subdir\]filename.txt
+        public readonly string Basename;   // [subdir\]filename
+        public readonly string Foldername; // c:\..\[subdir\]
+        public readonly string Extension;  // .txt
+        public readonly string Fullpath;   // c:\..\[subdir\]filename.txt
+        public readonly bool IsFolder;
+        public readonly bool Hidden;       // true if hidden file
+
         public string Preview;    // [subdir\]newfilename[.txt]
-        public bool Hidden;       // true if hidden file
         public bool Matched;      // true if matches current regex
         public bool PreserveExt;  // true if 'Preserve file extension' checked
         public bool Selected;     // true if row is currently selected
 
-        public FileModificationInfo FileModified;
-        public FileSizeInfo Size;
+        public readonly FileModificationInfo FileModified;
+        public readonly FileSizeInfo Size;
 
         public ComicInfo ComicInfo;
         public ParserInfo ParseInfo;
@@ -95,6 +97,7 @@ namespace RegexRenamer.Rename
             Matched = false;
             PreserveExt = preserveext;
             Selected = false;
+            IsFolder = false;
             var humanVal = fi.GetHumanReadableBytes();
             FileModified = new FileModificationInfo(fi);
             Size = new FileSizeInfo(fi);
@@ -111,9 +114,12 @@ namespace RegexRenamer.Rename
             Matched = false;
             PreserveExt = preserveext;
             Selected = false;
+            IsFolder = true;
             FileModified = new FileModificationInfo(di);
             Size = new FileSizeInfo(0);
         }
+
+       
 
         public string Name  // either filename or basename, depending on preserveext
         {

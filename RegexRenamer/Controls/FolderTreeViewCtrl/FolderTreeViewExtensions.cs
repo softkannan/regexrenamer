@@ -253,8 +253,8 @@ public static class FolderTreeViewExtensions
             var selectedIcon = FileIconAPI.GetIcon(path, true);
             if (normalIcon != null && selectedIcon != null)
             {
-                imageIndex = imageList.AddIcon(iconName, normalIcon); // normal icon
-                selectedImageIndex = imageIndex = imageList.AddIcon(iconName, selectedIcon,false); // selected icon
+                imageIndex = imageList.AddIcon(iconName, normalIcon, false); // normal icon
+                selectedImageIndex = imageIndex = imageList.AddIcon(iconName, selectedIcon,true); // selected icon
             }
         }
         tn.ImageIndex = imageIndex;

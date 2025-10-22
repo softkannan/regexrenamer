@@ -26,6 +26,10 @@ public class ExtractIconsAPI
     [DllImport("user32.dll")]
     internal static extern HWND CopyIcon(HWND hIcon);
 
+    // DestroyIcon
+    [DllImport("user32.dll", SetLastError = true)]
+    internal static extern bool DestroyIcon(HWND hIcon);
+
     internal enum Shell32Icons:int
     {
         Explorer                            = 0, 
@@ -331,7 +335,12 @@ public class ExtractIconsAPI
         nint[] handlesIconLarge = new nint[1];
         nint[] handlesIconSmall = new nint[1];
         ExtractIconEx(SHELL_DLL_PATH, iconNum, handlesIconLarge, handlesIconSmall, 1);
+        // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
         var retIcon = Icon.FromHandle(handlesIconSmall[0]);
+
+        if (handlesIconLarge[0] == 0)
+            DestroyIcon(handlesIconLarge[0]);
+
         return retIcon;
     }
 
@@ -340,7 +349,13 @@ public class ExtractIconsAPI
         HWND[] handlesIconLarge = new HWND[1];
         HWND[] handlesIconSmall = new HWND[1];
         ExtractIconEx(SHELL_DLL_PATH, (int) Shell32Icons.Explorer_Desktop, handlesIconLarge, handlesIconSmall, 1);
+        // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
         var desktopFolderIcon = Icon.FromHandle(handlesIconSmall[0]);
+
+        // Clean up large icon handle
+        if (handlesIconLarge[0] != HWND.Zero)
+            DestroyIcon(handlesIconLarge[0]);
+
         return desktopFolderIcon;
     }
 
@@ -361,10 +376,20 @@ public class ExtractIconsAPI
             {
                 if (x != HWND.Zero)
                 {
-                    ico = (Icon)Icon.FromHandle(x).Clone();
+                    // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
+                    ico = (Icon)Icon.FromHandle(x);
                     icons.Add(ico);
                 }
             }
+            // Clean up small icon handles, not used above
+            foreach (var x in small)
+            {
+                if (x != HWND.Zero)
+                {
+                    DestroyIcon(x);
+                }
+            }
+
         }
         return icons;
     }

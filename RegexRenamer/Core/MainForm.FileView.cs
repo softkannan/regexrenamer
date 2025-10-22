@@ -24,6 +24,7 @@ namespace RegexRenamer
     public partial class MainForm
     {
         private ContextMenuStrip cmFileView;
+        private DataGridIconCache _fileViewIconCache = new DataGridIconCache();
 
         private void CreateFileViewContextMenu()
         {
@@ -185,29 +186,12 @@ namespace RegexRenamer
                 // reverse sort for other columns
                 var val1 = e.CellValue1?.ToString() ?? "";
                 var val2 = e.CellValue2?.ToString() ?? "";
-                val1 = ReverseTextElements(val1);
-                val2 = ReverseTextElements(val2);
+                val1 = val1.ReverseTextElements();
+                val2 = val2.ReverseTextElements();
                 e.SortResult = string.Compare(val1, val2);
                 e.Handled = true; // Indicate that sorting is handled
             }
         }
-
-        static string ReverseTextElements(string input)
-        {
-            StringInfo stringInfo = new StringInfo(input);
-            int length = stringInfo.LengthInTextElements;
-            string[] textElements = new string[length];
-
-            for (int i = 0; i < length; i++)
-            {
-                textElements[i] = stringInfo.SubstringByTextElements(i, 1);
-            }
-
-            Array.Reverse(textElements);
-            return string.Concat(textElements);
-        }
-
-
 
         // FILE LIST
         // F5 = refresh
@@ -329,10 +313,10 @@ namespace RegexRenamer
             FileInfo fi = new FileInfo(newFullpath);
             if (!RenameFolders && fi.Extension != _fileStore.Files[afi].Extension)
             {
+                // update datagrid icon
                 try  // add image (keyed by extension)
                 {
-                    var icon = FileIconAPI.GetIcon(newFullpath, false);
-                    dgvFiles.Rows[e.RowIndex].Cells[0].Value = icon;
+                    dgvFiles.Rows[e.RowIndex].Cells[0].Value = _fileViewIconCache.GetIcon(fi);
                 }
                 catch  // default = no image
                 {

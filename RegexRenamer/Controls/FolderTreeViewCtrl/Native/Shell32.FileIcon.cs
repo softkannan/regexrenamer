@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 namespace RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 internal class FileIconAPI
 {
+    #region PInvoke Declarations
+
     // Constants that we need in the function call
     internal const uint FILE_ATTRIBUTE_DIRECTORY   = 0x00000010;
     internal const uint FILE_ATTRIBUTE_NORMAL      = 0x00000080;
@@ -26,6 +28,10 @@ internal class FileIconAPI
 
     internal const uint         ILD_TRANSPARENT    = 0x00000001;
     internal static readonly int MaxEntitiesCount   = 80;
+
+    #endregion
+
+    #region PInvoke structures
 
     internal enum SHGFI : int
     {
@@ -72,43 +78,6 @@ internal class FileIconAPI
             iImage = 0;
         }
 	}
-    
-    [DllImport("shell32")] 
-    internal static extern int SHGetNewLinkInfo(string pszLinkto, string pszDir, string pszName, ref int pfMustCopy, int uFlags);
-
-    [DllImport("shell32")]
-    internal static extern int SHBrowseForFolder(BROWSEINFO lpbi);
-
-	[DllImport("shell32")] 
-    internal static extern int SHGetPathFromIDList(int pidList, string lpBuffer);
-
-    [DllImport("Shell32.dll", EntryPoint = "#727")]
-    internal extern static int SHGetImageList(int iImageList, ref Guid riid, out IImageList ppv);
-
-    [DllImport("user32.dll")]
-    internal static extern HWND CopyIcon(HWND hIcon);
-
-    // The signature of SHGetFileInfo (located in Shell32.dll)
-    [DllImport("Shell32.dll", CharSet = CharSet.Auto)]
-    internal static extern HWND SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbfileInfo, SHGFI uFlags);
-
-    [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
-    internal static extern HWND SHGetFileInfo(HWND pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbFileInfo, SHGFI uFlags);
-
-    [DllImport("shell32.dll", EntryPoint = "SHGetFileInfo", CharSet = CharSet.Auto)]
-    internal static extern IImageList SHGetFileInfoAsImageList(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbFileInfo, SHGFI uFlags);
-
-    [DllImport("Shell32.dll", SetLastError = true)]
-    internal static extern int SHGetSpecialFolderLocation(HWND hwndOwner, int nFolder, ref HWND ppidl);
-
-    [DllImport("Shell32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    internal static extern nint SHILCreateFromPath([MarshalAs(UnmanagedType.LPWStr)] string pszPath, out HWND ppIdl, ref uint rgflnOut);
-    
-    [DllImport("User32.dll")]
-    internal static extern int DestroyIcon(HWND hIcon);
-
-    [DllImport("Kernel32.dll")]
-    internal static extern bool CloseHandle(HWND handle);
 
     [StructLayout(LayoutKind.Sequential)]
     internal struct IMAGEINFO
@@ -203,6 +172,94 @@ internal class FileIconAPI
         public int crEffect;
     }
 
+    internal struct SHFILEINFO
+    {
+
+        // Handle to the icon representing the file
+
+        public HWND hIcon;
+
+        // Index of the icon within the image list
+
+        public int iIcon;
+
+        // Various attributes of the file
+
+        public uint dwAttributes;
+
+        // Path to the file
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+
+        public string szDisplayName;
+
+        // File type
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
+
+        public string szTypeName;
+
+    }
+
+    internal enum IconSizeType
+    {
+        Medium = 0x0,
+        Small = 0x1,
+        Large = 0x2,
+        ExtraLarge = 0x4
+    }
+
+    internal struct IconPair
+    {
+        public Icon Icon { get; set; }
+        public HWND IconHandle { set; get; }
+    }
+
+    #endregion
+
+    #region PInvoke functions
+
+    [DllImport("shell32")] 
+    internal static extern int SHGetNewLinkInfo(string pszLinkto, string pszDir, string pszName, ref int pfMustCopy, int uFlags);
+
+    [DllImport("shell32")]
+    internal static extern int SHBrowseForFolder(BROWSEINFO lpbi);
+
+	[DllImport("shell32")] 
+    internal static extern int SHGetPathFromIDList(int pidList, string lpBuffer);
+
+    [DllImport("Shell32.dll", EntryPoint = "#727")]
+    internal extern static int SHGetImageList(int iImageList, ref Guid riid, out IImageList ppv);
+
+    [DllImport("user32.dll")]
+    internal static extern HWND CopyIcon(HWND hIcon);
+
+    // The signature of SHGetFileInfo (located in Shell32.dll)
+    [DllImport("Shell32.dll", CharSet = CharSet.Auto)]
+    internal static extern HWND SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbfileInfo, SHGFI uFlags);
+
+    [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
+    internal static extern HWND SHGetFileInfo(HWND pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbFileInfo, SHGFI uFlags);
+
+    [DllImport("shell32.dll", EntryPoint = "SHGetFileInfo", CharSet = CharSet.Auto)]
+    internal static extern IImageList SHGetFileInfoAsImageList(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbFileInfo, SHGFI uFlags);
+
+    [DllImport("Shell32.dll", SetLastError = true)]
+    internal static extern int SHGetSpecialFolderLocation(HWND hwndOwner, int nFolder, ref HWND ppidl);
+
+    [DllImport("Shell32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    internal static extern nint SHILCreateFromPath([MarshalAs(UnmanagedType.LPWStr)] string pszPath, out HWND ppIdl, ref uint rgflnOut);
+    
+    [DllImport("User32.dll")]
+    internal static extern int DestroyIcon(HWND hIcon);
+
+    [DllImport("Kernel32.dll")]
+    internal static extern bool CloseHandle(HWND handle);
+
+    #endregion
+
+    #region COM Interfaces
+
     [ComImport,
      Guid("46EB5926-582E-4017-9FDF-E8998DAA0950"),
      InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -268,48 +325,7 @@ internal class FileIconAPI
         int GetOverlayImage(int iOverlay, ref int piIndex);
     }
 
-    internal struct SHFILEINFO
-    {
-
-        // Handle to the icon representing the file
-
-        public HWND hIcon;
-
-        // Index of the icon within the image list
-
-        public int iIcon;
-
-        // Various attributes of the file
-
-        public uint dwAttributes;
-
-        // Path to the file
-
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
-
-        public string szDisplayName;
-
-        // File type
-
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
-
-        public string szTypeName;
-
-    }
-
-    internal enum IconSizeType
-    {
-        Medium = 0x0,
-        Small = 0x1,
-        Large = 0x2,
-        ExtraLarge = 0x4
-    }
-
-    internal struct IconPair
-    {
-        public Icon Icon { get; set; }
-        public HWND IconHandle { set; get; }
-    }
+    #endregion
 
     private static void GetDirectories(string path, List<Image> col, IconSizeType sizeType, Size itemSize)
     {
@@ -365,6 +381,7 @@ internal class FileIconAPI
         Icon icon = null;
         if (shinfo.hIcon != HWND.Zero)
         {
+            // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
             icon = Icon.FromHandle(shinfo.hIcon);
         }
         return icon;
@@ -401,6 +418,7 @@ internal class FileIconAPI
         }
         else
         {
+            // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
             retVal = Icon.FromHandle(info.hIcon);
         }
         return retVal;
@@ -422,8 +440,9 @@ internal class FileIconAPI
                         ref info,
                         (uint)Marshal.SizeOf(info),
                         flags);
-        var normalFolderIcon = Icon.FromHandle(info.hIcon);
-        return normalFolderIcon;
+        // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
+        var folderIcon = Icon.FromHandle(info.hIcon);
+        return folderIcon;
     }
 
     private static Icon GetStockFolderIcon(bool selected)
@@ -438,6 +457,7 @@ internal class FileIconAPI
                         FILE_ATTRIBUTE_DIRECTORY,
                         ref info,
                         (uint)Marshal.SizeOf(info), flags);
+        // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
         var folderIcon = Icon.FromHandle(info.hIcon);
         return folderIcon;
     }
@@ -456,6 +476,7 @@ internal class FileIconAPI
         Icon icon = null;
         if (hIcon != HWND.Zero)
         {
+            // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
             icon = Icon.FromHandle(hIcon).Clone() as Icon;
         }
         if(shinfo.hIcon != HWND.Zero)
@@ -483,6 +504,7 @@ internal class FileIconAPI
         Bitmap bitmap = null;
         if (hIcon != HWND.Zero)
         {
+            // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
             icon = Icon.FromHandle(hIcon);
             bitmap = new Bitmap(icon.Width, icon.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             using (Graphics gr = Graphics.FromImage(bitmap))
@@ -549,6 +571,7 @@ internal class FileIconAPI
         {
             throw new FileNotFoundException();
         }
+        // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
         var ico = Icon.FromHandle(shinfo.hIcon);
         var bs = ByteFromIcon(ico);
         ico.Dispose();
@@ -575,6 +598,7 @@ internal class FileIconAPI
         HWND hIcon = HWND.Zero;
         int ILD_TRANSPARENT = 1;
         hres = iml.GetIcon(iconIndex, ILD_TRANSPARENT, ref hIcon);
+        // From handle method will create a copy and we need to destroy the original handle when icon goes out of scope
         var ico = Icon.FromHandle(hIcon);
         var bs = ByteFromIcon(ico);
         ico.Dispose();

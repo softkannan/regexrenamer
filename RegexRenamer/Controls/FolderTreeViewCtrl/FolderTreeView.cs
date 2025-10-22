@@ -141,24 +141,8 @@ public class FolderTreeView : TreeView
     private void InitImageList()
     {
         // add the Desktop icon to the image list
-        try
-        {
-            iconImageList.AddIcon("DefaultDESKTOPDIRECTORY", ExtractIconsAPI.GetDesktopIcon());
-            iconImageList.AddIcon("DefaultFolder", FileIconAPI.GetDefaultFolderIcon(false), true);
-            iconImageList.AddIcon("DefaultFolder", FileIconAPI.GetDefaultFolderIcon(true), false);
-        }
-        catch
-        {
-            // Create a blank icon if the desktop icon fails for some reason
-            Bitmap bmp = new Bitmap(16, 16);
-            Image img = bmp;
-            Icon icon = Icon.FromHandle(((Bitmap)img).GetHicon());
-            iconImageList.AddIcon("DefaultDESKTOPDIRECTORY", icon);
-            iconImageList.AddIcon("DefaultFolder", icon,true);
-            iconImageList.AddIcon("DefaultFolder", icon,false);
-            bmp.Dispose();
-        }
         BeginUpdate();
+        iconImageList.CleanUp();
         ImageList = iconImageList.Icons;
         EndUpdate();
     }

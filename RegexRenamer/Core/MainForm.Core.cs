@@ -36,6 +36,7 @@ public partial class MainForm
 
         dgvFiles.Tag = 0;  // reset files ignored
         dgvFiles.Rows.Clear();
+        _fileViewIconCache.ClearDynamicIcons();
 
         // update txtPath
         txtPath.Text = _activePath;
@@ -75,24 +76,9 @@ public partial class MainForm
     try  
     {
 #endif
-            if (RenameFolders)
-            {
-                dgvFiles.Rows[idx].Cells[0].Value = FileIconAPI.GetDefaultFolderIcon(false);
-            }
-            else
-            {
-                string ext = _fileStore.Files[idx].Extension.ToLower();
-                if (ext == ".lnk")  // shortcut, don't key by extension as each may have different icon
-                {
-                    var icon = FileIconAPI.GetIcon(_fileStore.Files[idx].Fullpath, false);
-                    dgvFiles.Rows[idx].Cells[0].Value = icon;
-                }
-                else  // non-shortcut
-                {
-                    var icon = FileIconAPI.GetIcon(_fileStore.Files[idx].Fullpath, false);
-                    dgvFiles.Rows[idx].Cells[0].Value = icon;
-                }
-            }
+            // Update the icons, for folders, always use folder icon
+            dgvFiles.Rows[idx].Cells[0].Value = _fileViewIconCache.GetIcon(_fileStore.Files[idx]);
+
 #if !DEBUG
     }
     catch  // default: no image
