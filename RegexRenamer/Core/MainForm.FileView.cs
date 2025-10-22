@@ -420,6 +420,8 @@ namespace RegexRenamer
         #endregion
 
         #region File View context menu handlers
+
+
         private async void launchEditorFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try

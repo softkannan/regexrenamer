@@ -119,6 +119,7 @@ public static class EpubMetaHelper
                     Dictionary<string, string> metaNameSets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                     {
                         { "calibre:series", string.Empty },
+                        { "calibre:title_sort", string.Empty },
                         { "calibre:series_index", string.Empty },
                     };
 

@@ -79,6 +79,7 @@ namespace RegexRenamer
             lblNumMatched = new System.Windows.Forms.Label();
             lblNumConflict = new System.Windows.Forms.Label();
             chkShowInfo = new System.Windows.Forms.CheckBox();
+            chkOrderByReverse = new System.Windows.Forms.CheckBox();
             tsMenu = new System.Windows.Forms.ToolStrip();
             mnuChangeCase = new System.Windows.Forms.ToolStripDropDownButton();
             itmChangeCaseNoChange = new System.Windows.Forms.ToolStripMenuItem();
@@ -146,7 +147,7 @@ namespace RegexRenamer
             groupBoxTop = new System.Windows.Forms.GroupBox();
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
-            chkOrderByReverse = new System.Windows.Forms.CheckBox();
+            itmOptionsEditConfig = new System.Windows.Forms.ToolStripMenuItem();
             cmsRename.SuspendLayout();
             gbFilter.SuspendLayout();
             pnlStats.SuspendLayout();
@@ -297,10 +298,10 @@ namespace RegexRenamer
             // 
             rbFilterRegex.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
             rbFilterRegex.AutoSize = true;
-            rbFilterRegex.Location = new System.Drawing.Point(94, 43);
+            rbFilterRegex.Location = new System.Drawing.Point(95, 43);
             rbFilterRegex.Margin = new System.Windows.Forms.Padding(4);
             rbFilterRegex.Name = "rbFilterRegex";
-            rbFilterRegex.Size = new System.Drawing.Size(57, 19);
+            rbFilterRegex.Size = new System.Drawing.Size(56, 19);
             rbFilterRegex.TabIndex = 3;
             rbFilterRegex.Text = "Regex";
             // 
@@ -417,10 +418,10 @@ namespace RegexRenamer
             // 
             cbModifierX.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             cbModifierX.AutoSize = true;
-            cbModifierX.Location = new System.Drawing.Point(871, 61);
+            cbModifierX.Location = new System.Drawing.Point(872, 61);
             cbModifierX.Margin = new System.Windows.Forms.Padding(4);
             cbModifierX.Name = "cbModifierX";
-            cbModifierX.Size = new System.Drawing.Size(37, 19);
+            cbModifierX.Size = new System.Drawing.Size(36, 19);
             cbModifierX.TabIndex = 5;
             cbModifierX.Tag = false;
             cbModifierX.Text = "/x";
@@ -487,6 +488,19 @@ namespace RegexRenamer
             chkShowInfo.Tag = false;
             chkShowInfo.Text = "Show Info";
             toolTip.SetToolTip(chkShowInfo, "Extended regex (ignore unescaped spaces)");
+            // 
+            // chkOrderByReverse
+            // 
+            chkOrderByReverse.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            chkOrderByReverse.AutoSize = true;
+            chkOrderByReverse.Location = new System.Drawing.Point(913, 41);
+            chkOrderByReverse.Margin = new System.Windows.Forms.Padding(4);
+            chkOrderByReverse.Name = "chkOrderByReverse";
+            chkOrderByReverse.Size = new System.Drawing.Size(115, 19);
+            chkOrderByReverse.TabIndex = 8;
+            chkOrderByReverse.Tag = false;
+            chkOrderByReverse.Text = "Order By Reverse";
+            toolTip.SetToolTip(chkOrderByReverse, "Extended regex (ignore unescaped spaces)");
             // 
             // tsMenu
             // 
@@ -863,7 +877,7 @@ namespace RegexRenamer
             tsOptions.Location = new System.Drawing.Point(6, 700);
             tsOptions.Name = "tsOptions";
             tsOptions.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            tsOptions.Size = new System.Drawing.Size(118, 20);
+            tsOptions.Size = new System.Drawing.Size(149, 20);
             tsOptions.TabIndex = 2;
             tsOptions.TabStop = true;
             // 
@@ -871,7 +885,7 @@ namespace RegexRenamer
             // 
             mnuOptions.AutoToolTip = false;
             mnuOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            mnuOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmOptionsShowHidden, itmOptionsPreserveExt, itmOptionsRealtimePreview, itmOptionsAllowRenSub, itmOptionsRenameSelectedRows, itmOptionsRememberWinPos, itmOptionsAddContextMenu });
+            mnuOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmOptionsShowHidden, itmOptionsPreserveExt, itmOptionsRealtimePreview, itmOptionsAllowRenSub, itmOptionsRenameSelectedRows, itmOptionsRememberWinPos, itmOptionsAddContextMenu, itmOptionsEditConfig });
             mnuOptions.Margin = new System.Windows.Forms.Padding(0, 1, 10, 0);
             mnuOptions.Name = "mnuOptions";
             mnuOptions.Size = new System.Drawing.Size(62, 19);
@@ -946,57 +960,57 @@ namespace RegexRenamer
             // 
             itmHelpContents.Name = "itmHelpContents";
             itmHelpContents.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            itmHelpContents.Size = new System.Drawing.Size(212, 22);
+            itmHelpContents.Size = new System.Drawing.Size(211, 22);
             itmHelpContents.Text = "Contents";
             // 
             // itmHelpRegexReference
             // 
             itmHelpRegexReference.Name = "itmHelpRegexReference";
             itmHelpRegexReference.ShortcutKeys = System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F1;
-            itmHelpRegexReference.Size = new System.Drawing.Size(212, 22);
+            itmHelpRegexReference.Size = new System.Drawing.Size(211, 22);
             itmHelpRegexReference.Text = "Regex Reference";
             // 
             // itmHelpSep1
             // 
             itmHelpSep1.Name = "itmHelpSep1";
-            itmHelpSep1.Size = new System.Drawing.Size(209, 6);
+            itmHelpSep1.Size = new System.Drawing.Size(208, 6);
             // 
             // itmHelpEmailAuthor
             // 
             itmHelpEmailAuthor.Name = "itmHelpEmailAuthor";
-            itmHelpEmailAuthor.Size = new System.Drawing.Size(212, 22);
+            itmHelpEmailAuthor.Size = new System.Drawing.Size(211, 22);
             itmHelpEmailAuthor.Text = "Email the author";
             // 
             // itmHelpReportBug
             // 
             itmHelpReportBug.Name = "itmHelpReportBug";
-            itmHelpReportBug.Size = new System.Drawing.Size(212, 22);
+            itmHelpReportBug.Size = new System.Drawing.Size(211, 22);
             itmHelpReportBug.Text = "Report a bug";
             // 
             // itmHelpHomepage
             // 
             itmHelpHomepage.Name = "itmHelpHomepage";
-            itmHelpHomepage.Size = new System.Drawing.Size(212, 22);
+            itmHelpHomepage.Size = new System.Drawing.Size(211, 22);
             itmHelpHomepage.Text = "Homepage";
             // 
             // itmHelpSep2
             // 
             itmHelpSep2.Name = "itmHelpSep2";
-            itmHelpSep2.Size = new System.Drawing.Size(209, 6);
+            itmHelpSep2.Size = new System.Drawing.Size(208, 6);
             // 
             // itmHelpAbout
             // 
             itmHelpAbout.Name = "itmHelpAbout";
-            itmHelpAbout.Size = new System.Drawing.Size(212, 22);
+            itmHelpAbout.Size = new System.Drawing.Size(211, 22);
             itmHelpAbout.Text = "About RegexRenamer";
             // 
             // progressBar
             // 
             progressBar.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            progressBar.Location = new System.Drawing.Point(135, 698);
+            progressBar.Location = new System.Drawing.Point(163, 698);
             progressBar.Margin = new System.Windows.Forms.Padding(4);
             progressBar.Name = "progressBar";
-            progressBar.Size = new System.Drawing.Size(703, 26);
+            progressBar.Size = new System.Drawing.Size(675, 26);
             progressBar.TabIndex = 0;
             // 
             // btnCancel
@@ -1067,18 +1081,11 @@ namespace RegexRenamer
             groupBoxFileView.TabIndex = 9;
             groupBoxFileView.TabStop = false;
             // 
-            // chkOrderByReverse
+            // itmOptionsEditConfig
             // 
-            chkOrderByReverse.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            chkOrderByReverse.AutoSize = true;
-            chkOrderByReverse.Location = new System.Drawing.Point(913, 41);
-            chkOrderByReverse.Margin = new System.Windows.Forms.Padding(4);
-            chkOrderByReverse.Name = "chkOrderByReverse";
-            chkOrderByReverse.Size = new System.Drawing.Size(115, 19);
-            chkOrderByReverse.TabIndex = 8;
-            chkOrderByReverse.Tag = false;
-            chkOrderByReverse.Text = "Order By Reverse";
-            toolTip.SetToolTip(chkOrderByReverse, "Extended regex (ignore unescaped spaces)");
+            itmOptionsEditConfig.Name = "itmOptionsEditConfig";
+            itmOptionsEditConfig.Size = new System.Drawing.Size(223, 22);
+            itmOptionsEditConfig.Text = "Edit Config";
             // 
             // MainForm
             // 
@@ -1212,6 +1219,7 @@ namespace RegexRenamer
         private System.Windows.Forms.DataGridViewTextBoxColumn colEdition;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSpecial;
         private System.Windows.Forms.CheckBox chkOrderByReverse;
+        private System.Windows.Forms.ToolStripMenuItem itmOptionsEditConfig;
     }
 }
 

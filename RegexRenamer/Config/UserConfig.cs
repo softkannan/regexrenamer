@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using RegexRenamer.Tools.EBookPDFTools;
+using RegexRenamer.Forms;
 
 namespace Config;
 
@@ -43,8 +44,8 @@ public class UserConfig
     public string DefaultWorkspace { get; set; }
     public string DefaultOutputPath { get; set; }
 
-    public string PreferredPDFTool { get; set; } = PDFToolsList.Calibre.ToString();
-    public string PreferredEBookTool { get; set; } = EBookToolsList.Calibre.ToString();
+    public MetadataFormConfig Meta { get; set; } = new MetadataFormConfig();
+   
 
     #endregion
 

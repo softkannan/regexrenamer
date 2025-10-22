@@ -60,6 +60,8 @@ namespace RegexRenamer.Rename
                 parser = new ReadingItemService(new DirectoryService());
 
             var ci = parser.GetComicInfo(pThis.FullName, true);
+
+            // force release file handles using pinvoke
             return ci;
         }
 
@@ -205,7 +207,7 @@ namespace RegexRenamer.Rename
                         newValPreview = Regex.Replace(newValPreview, @"\n([^\n]*)\n", matchEval);
 
                     if(!string.IsNullOrWhiteSpace(newValPreview))
-                        pThis[idx].Item2.SetMetadataValue(colType, newValPreview);
+                        pThis[idx].Item2.SetMetadataValue(colType, newValPreview.Trim());
                     retVal = string.IsNullOrWhiteSpace(newValPreview) ? 0 : 1;
                 }
             }

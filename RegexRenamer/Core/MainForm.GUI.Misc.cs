@@ -1,4 +1,7 @@
-﻿using Microsoft.Win32;
+﻿using Config;
+using Microsoft.Win32;
+using PdfSharp.Pdf.Content.Objects;
+using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -17,6 +20,7 @@ namespace RegexRenamer
             itmOptionsShowHidden.Click += itmOptionsShowHidden_Click;
             itmOptionsPreserveExt.Click += itmOptionsPreserveExt_Click;
             itmOptionsAllowRenSub.Click += itmOptionsAllowRenSub_Click;
+            itmOptionsEditConfig.Click += itmOptionsEditConfig_Click;
             // Adds the context menu option to Windows Explorer (requires admin rights)
             itmOptionsAddContextMenu.Enabled = false; 
             itmOptionsAddContextMenu.Click += itmOptionsAddContextMenu_Click;
@@ -29,9 +33,10 @@ namespace RegexRenamer
             itmHelpAbout.Click += itmHelpAbout_Click;
 
             chkShowInfo.Click += ChkShowInfo_Click;
+
         }
 
-
+       
         private void SetShowInfoColumnVisibility(bool visible)
         {
             colModified.Visible = visible;
@@ -53,6 +58,18 @@ namespace RegexRenamer
         // OPTIONS/HELP
 
         // options
+        private async void itmOptionsEditConfig_Click(object sender, EventArgs e)
+        {
+            string configPath = UserConfig.ConfigFile;
+            // Launch notepad++ to edit config file
+            // Supports {options} {filepath} variables
+            var cmdName = "LaunchEditor";
+            await cmdName.ExecNamedCmdAsync(Path.GetDirectoryName(configPath), new List<Tuple<string, string>>() {
+                   new Tuple<string, string>("{options}", "-ljson5"),
+                   new Tuple<string, string>("{filepath}", configPath),
+                });
+        }
+
         private void itmOptionsShowHidden_Click(object sender, EventArgs e)
         {
             this.Update();

@@ -31,6 +31,7 @@ public partial class EditMetadataForm : Form
     private readonly string _activePath;
     private readonly string _searchPattern;
     private readonly bool _preserveExtension;
+    private readonly string _defaultMatchPattern = "(.+)\\s*-\\s*(.+)";
 
     private RegExContextMenuProvider regExCtxMenu;
 
@@ -41,6 +42,13 @@ public partial class EditMetadataForm : Form
 
         bttnClear.Click += async (s, e) => await PerformAction("Clear");
         bttnApply.Click += async (s, e) => await PerformAction("Apply");
+
+        BuildList(cmbMatch, UserConfig.Inst.Meta);
+        BuildList(cmbSeries, UserConfig.Inst.Meta);
+        BuildList(cmbVolume, UserConfig.Inst.Meta);
+        BuildList(cmbTitle, UserConfig.Inst.Meta);
+        BuildList(cmbAuthor, UserConfig.Inst.Meta);
+        BuildList(cmbLanguage, UserConfig.Inst.Meta);
 
         // Matching pattern combo box
         cmbMatch.MouseDown += cmbMatch_MouseDown;
@@ -56,18 +64,27 @@ public partial class EditMetadataForm : Form
 
         // Replace pattern combo boxes
         cmbAuthor.LostFocus += CmbReplace_LostFocus;
+        cmbAuthor.GotFocus += CmbReplace_GotFocus;
         cmbAuthor.MouseDown += cmbReplace_MouseDown;
         cmbAuthor.MouseUp += cmbReplace_MouseUp;
+
         cmbSeries.LostFocus += CmbReplace_LostFocus;
+        cmbSeries.GotFocus += CmbReplace_GotFocus;
         cmbSeries.MouseDown += cmbReplace_MouseDown;
         cmbSeries.MouseUp += cmbReplace_MouseUp;
-        cmbTitle.LostFocus += CmbReplace_LostFocus;
-        cmbTitle.MouseDown += cmbReplace_MouseDown;
-        cmbTitle.MouseUp += cmbReplace_MouseUp;
+
         cmbVolume.LostFocus += CmbReplace_LostFocus;
+        cmbVolume.GotFocus += CmbReplace_GotFocus;
         cmbVolume.MouseDown += cmbReplace_MouseDown;
         cmbVolume.MouseUp += cmbReplace_MouseUp;
+
+        cmbTitle.LostFocus += CmbReplace_LostFocus;
+        cmbTitle.GotFocus += CmbReplace_GotFocus;
+        cmbTitle.MouseDown += cmbReplace_MouseDown;
+        cmbTitle.MouseUp += cmbReplace_MouseUp;
+
         cmbLanguage.LostFocus += CmbReplace_LostFocus;
+        cmbLanguage.GotFocus += CmbReplace_GotFocus;
         cmbLanguage.MouseDown += cmbReplace_MouseDown;
         cmbLanguage.MouseUp += cmbReplace_MouseUp;
 
@@ -81,24 +98,83 @@ public partial class EditMetadataForm : Form
 
 
         cmbViewMode.Items.AddRange(Enum.GetNames(typeof(MetadataViewMode)));
-        cmbViewMode.SelectedItem = MetadataFormConfig.Inst.ViewMode;
+        cmbViewMode.SelectedItem = UserConfig.Inst.Meta.ViewMode;
         cmbViewMode.SelectedIndexChanged += (s, e) =>
         {
-            MetadataFormConfig.Inst.ViewMode = cmbViewMode.SelectedItem as string;
+            UserConfig.Inst.Meta.ViewMode = cmbViewMode.SelectedItem as string;
             UpdatePreview();
         };
 
         cmbPDFToolsList.Items.AddRange(Enum.GetNames(typeof(PDFToolsList)));
-        cmbPDFToolsList.SelectedItem = MetadataFormConfig.Inst.PreferredPDFTool;
+        cmbPDFToolsList.SelectedItem = UserConfig.Inst.Meta.PreferredPDFTool;
 
         cmbEPUBToolsList.Items.AddRange(Enum.GetNames(typeof(EBookToolsList)));
-        cmbEPUBToolsList.SelectedItem = MetadataFormConfig.Inst.PreferredEBookTool;
+        cmbEPUBToolsList.SelectedItem = UserConfig.Inst.Meta.PreferredEBookTool;
 
 
         this.FormClosing += Form_Closing;
 
         regExCtxMenu = new RegExContextMenuProvider(components);
 
+    }
+
+    private void BuildList(ComboBox cmbObj, MetadataFormConfig config)
+    {
+        cmbObj.Items.Clear();
+        switch (cmbObj.Name)
+        {
+            case nameof(cmbMatch):
+                cmbObj.Items.AddRange(config.PredefMatchPatterns.ToArray());
+                break;
+            case nameof(cmbSeries):
+                cmbObj.Items.AddRange(config.PredefSeriesPatterns.ToArray());
+                break;
+            case nameof(cmbVolume):
+                cmbObj.Items.AddRange(config.PredefVolumePatterns.ToArray());
+                break;
+            case nameof(cmbTitle):
+                cmbObj.Items.AddRange(config.PredefTitlePatterns.ToArray());
+                break;
+            case nameof(cmbAuthor):
+                cmbObj.Items.AddRange(config.PredefAuthorPatterns.ToArray());
+                break;
+            case nameof(cmbLanguage):
+                cmbObj.Items.AddRange(config.PredefLanguagePatterns.ToArray());
+                break;
+        }
+        cmbObj.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        cmbObj.AutoCompleteSource = AutoCompleteSource.ListItems;
+    }
+
+    private void SetDefaultSuggestion(ComboBox cmbObj, MetadataFormConfig config)
+    {
+        var defaultPattern = string.Empty;
+        switch (cmbObj.Name)
+        {
+            case nameof(cmbMatch):
+                defaultPattern = config.DefaultMatchPattern;
+                break;
+            case nameof(cmbSeries):
+                defaultPattern = config.DefaultSeriesPattern;
+                break;
+            case nameof(cmbVolume):
+                defaultPattern = config.DefaultVolumePattern;
+                break;
+            case nameof(cmbTitle):
+                defaultPattern = config.DefaultTitlePattern;
+                break;
+            case nameof(cmbAuthor):
+                defaultPattern = config.DefaultAuthorPattern;
+                break;
+            case nameof(cmbLanguage):
+                defaultPattern = config.DefaultLanguagePattern;
+                break;
+        }
+        if (string.IsNullOrEmpty(cmbObj.Text) && !string.IsNullOrWhiteSpace(defaultPattern))
+        {
+            cmbObj.Text = defaultPattern;
+            cmbObj.SelectAll();
+        }
     }
 
     public EditMetadataForm(string activePath, string searchPattern, string title, string action, bool preservExt)
@@ -109,7 +185,7 @@ public partial class EditMetadataForm : Form
         this._searchPattern = searchPattern;
         this._preserveExtension = preservExt;
         InitilaizeForm(title);
-        chkApplyRecursively.Checked = MetadataFormConfig.Inst.UpdateRecursively;
+        chkApplyRecursively.Checked = UserConfig.Inst.Meta.UpdateRecursively;
         chkApplyRecursively.CheckStateChanged += (sender, e) => UpdateFileList();
     }
     public EditMetadataForm(List<FileInfo> files, string title, string action, bool preservExt)
@@ -191,8 +267,8 @@ public partial class EditMetadataForm : Form
 
         UpdateFileList();
 
-        chkIgnoreError.Checked = MetadataFormConfig.Inst.IgnoreErrors;
-        chkApplyRecursively.Checked = MetadataFormConfig.Inst.UpdateRecursively;
+        chkIgnoreError.Checked = UserConfig.Inst.Meta.IgnoreErrors;
+        chkApplyRecursively.Checked = UserConfig.Inst.Meta.UpdateRecursively;
     }
 
     private async void MetaDataForm_Shown(object sender, EventArgs e)
@@ -239,13 +315,13 @@ public partial class EditMetadataForm : Form
                         lblStatus.Text = $"Writing metadata for {file.Item1.Name} ({index + 1} of {_activeFiles.Count})";
                         fileListView.SelectedItems.Clear();
                         fileListView.Items[index].Selected = true;
-                        MetadataFormConfig.Inst.UpdateRecursively = chkIgnoreError.Checked;
-                        UserConfig.Inst.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
-                        MetadataFormConfig.Inst.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
-                        MetadataFormConfig.Inst.UpdateRecursively = chkApplyRecursively.Checked;
+                        UserConfig.Inst.Meta.UpdateRecursively = chkIgnoreError.Checked;
+                        UserConfig.Inst.Meta.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
+                        UserConfig.Inst.Meta.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
+                        UserConfig.Inst.Meta.UpdateRecursively = chkApplyRecursively.Checked;
 
                         var fileExt = file.Item1.Extension.ToLowerInvariant();
-                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.PreferredPDFTool : MetadataFormConfig.Inst.PreferredEBookTool;
+                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.Meta.PreferredPDFTool : UserConfig.Inst.Meta.PreferredEBookTool;
 
                         if (fileExt != ".pdf" && fileExt != ".epub" && fileExt != ".kepub" && fileExt != ".azw")
                         {
@@ -261,7 +337,7 @@ public partial class EditMetadataForm : Form
                         }
                         catch (Exception ex)
                         {
-                            if (!MetadataFormConfig.Inst.IgnoreErrors)
+                            if (!UserConfig.Inst.Meta.IgnoreErrors)
                                 ErrorLog.Inst.ShowError($"Failed to write metadata for {file.Item1.Name}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
@@ -302,13 +378,13 @@ public partial class EditMetadataForm : Form
                         lblStatus.Text = $"Writing metadata for {file.Item1.Name} ({index + 1} of {_activeFiles.Count})";
                         fileListView.SelectedItems.Clear();
                         fileListView.Items[index].Selected = true;
-                        MetadataFormConfig.Inst.IgnoreErrors = chkIgnoreError.Checked;
-                        MetadataFormConfig.Inst.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
-                        MetadataFormConfig.Inst.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
-                        MetadataFormConfig.Inst.UpdateRecursively = chkApplyRecursively.Checked;
+                        UserConfig.Inst.Meta.IgnoreErrors = chkIgnoreError.Checked;
+                        UserConfig.Inst.Meta.PreferredEBookTool = cmbEPUBToolsList.SelectedItem as string;
+                        UserConfig.Inst.Meta.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
+                        UserConfig.Inst.Meta.UpdateRecursively = chkApplyRecursively.Checked;
 
                         var fileExt = file.Item1.Extension.ToLowerInvariant();
-                        var toolName = fileExt == ".pdf" ? MetadataFormConfig.Inst.PreferredPDFTool : MetadataFormConfig.Inst.PreferredEBookTool;
+                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.Meta.PreferredPDFTool : UserConfig.Inst.Meta.PreferredEBookTool;
 
                         if (fileExt != ".pdf" && fileExt != ".epub" && fileExt != ".kepub" && fileExt != ".azw")
                         {
@@ -324,7 +400,7 @@ public partial class EditMetadataForm : Form
                         }
                         catch (Exception ex)
                         {
-                            if (!MetadataFormConfig.Inst.IgnoreErrors)
+                            if (!UserConfig.Inst.Meta.IgnoreErrors)
                                 ErrorLog.Inst.ShowError($"Failed to write metadata for {file.Item1.Name}: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
@@ -375,16 +451,31 @@ public partial class EditMetadataForm : Form
     #endregion
 
     #region Replace pattern combo boxes
+
+    private void CmbReplace_GotFocus(object sender, EventArgs e)
+    {
+        ComboBox cmbTemp = (ComboBox)sender;
+
+        if (string.IsNullOrWhiteSpace(cmbMatch.Text))
+        {
+            cmbMatch.Text = UserConfig.Inst.Meta.DefaultMatchPattern;
+        }
+
+        if (string.IsNullOrWhiteSpace(cmbTemp.Text))
+        {
+            SetDefaultSuggestion(cmbTemp, UserConfig.Inst.Meta);
+        }
+    }
+
     private void CmbReplace_LostFocus(object sender, EventArgs e)
     {
         ComboBox cmbTemp = (ComboBox)sender;
         if (!string.IsNullOrWhiteSpace(cmbTemp.Text) && string.IsNullOrWhiteSpace(cmbMatch.Text))
         {
-            cmbMatch.Text = "(.+)";
+            cmbMatch.Text = UserConfig.Inst.Meta.DefaultMatchPattern;
         }
         UpdatePreview();
     }
-
 
     private void cmbReplace_MouseDown(object sender, MouseEventArgs e)
     {
@@ -603,7 +694,7 @@ public partial class EditMetadataForm : Form
 
     private void UpdateDataToGrid()
     {
-        Enum.TryParse<MetadataViewMode>(MetadataFormConfig.Inst.ViewMode,out MetadataViewMode viewMode);
+        Enum.TryParse<MetadataViewMode>(UserConfig.Inst.Meta.ViewMode,out MetadataViewMode viewMode);
         // update file list
         fileListView.BeginUpdate();
         for (int dfi = 0; dfi < fileListView.Items.Count; dfi++)

@@ -246,7 +246,15 @@ public partial class BookService
         // TODO: Refactor this to use the Async version
         try
         {
-            epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
+            // Read file into memory stream to avoid locking file on disk
+            MemoryStream ms;
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                ms = new MemoryStream();
+                fs.CopyTo(ms);
+                ms.Position = 0;
+            }
+            epubBook = EpubReader.OpenBook(ms, BookReaderOptions);
         }
         catch (Exception)
         {
@@ -254,9 +262,18 @@ public partial class BookService
         }
         finally
         {
-            epubBook ??= EpubReader.OpenBook(filePath, LenientBookReaderOptions);
+            if (epubBook == null)
+            {
+                MemoryStream ms;
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    ms = new MemoryStream();
+                    fs.CopyTo(ms);
+                    ms.Position = 0;
+                }
+                epubBook = EpubReader.OpenBook(ms, LenientBookReaderOptions);
+            }
         }
-
         return epubBook;
     }
 

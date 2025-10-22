@@ -233,9 +233,6 @@ namespace RegexRenamer
             dgvFiles.DoubleBuffered(true);
 
 
-            MetadataFormConfig.Inst.PreferredEBookTool = UserConfig.Inst.PreferredEBookTool;
-            MetadataFormConfig.Inst.PreferredPDFTool = UserConfig.Inst.PreferredPDFTool;
-
             //_dm = new DarkModeForms.DarkModeCS(this)
             //{
             //    // Choose your preferred mode here:
