@@ -133,8 +133,27 @@ namespace RegexRenamer
             colFileSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         }
 
+        private void UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment alignment)
+        {
+            if (_activePath == null) return;
+            
+            colFilename.DefaultCellStyle.Alignment = alignment;
+           // colPreview.DefaultCellStyle.Alignment = alignment;
+        }
+
         private void ChkOrderByReverse_CheckedChanged(object sender, EventArgs e)
         {
+            if(!EnableUpdates) return;
+
+            if(chkOrderByReverse.Checked)
+            {
+                UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment.MiddleRight);
+            }
+            else
+            {
+                UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment.MiddleLeft);
+            }
+
             UpdatePreview();
         }
 
@@ -219,6 +238,20 @@ namespace RegexRenamer
             {
                 _activePath.ClipboardPasteFiles();
                 UpdateFileList();
+            }
+            else if(e.KeyCode == Keys.Delete)
+            {
+                var selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files).Select(item => item.Fullpath).ToList();
+                var selectedIndex = dgvFiles.SelectedRows[0].Index;
+                PInvoke.FileOperationAPI.SendToRecycleBin(selectedFiles);
+                UpdateFileList();
+                if (dgvFiles.Rows.Count > selectedIndex)
+                {
+                    selectedIndex = selectedIndex == 0 ? 0 : selectedIndex - 1;
+                    dgvFiles.Rows[selectedIndex].Selected = true;
+                    //scroll into view
+                    dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
+                }
             }
         }
 
@@ -423,9 +456,19 @@ namespace RegexRenamer
         }
         private void deleteFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (dgvFiles.SelectedRows.Count == 0)
+                return;
+
             var selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files).Select( item => item.Fullpath).ToList();
+            var selectedIndex = dgvFiles.SelectedRows[0].Index;
             PInvoke.FileOperationAPI.SendToRecycleBin(selectedFiles);
             UpdateFileList();
+            if(dgvFiles.Rows.Count > selectedIndex)
+            {
+                selectedIndex = selectedIndex == 0 ? 0 : selectedIndex - 1;
+                dgvFiles.Rows[selectedIndex].Selected = true;
+                dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
+            }
         }
 
         private void pasteFileViewToolStripMenuItem_Click(object sender, EventArgs e)
