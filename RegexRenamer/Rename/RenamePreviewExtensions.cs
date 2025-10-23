@@ -166,6 +166,8 @@ public static class RenamePreviewExtensions
                     files[idx].Preview = files[idx].Name;
                     continue;
                 }
+                if (files[idx].Skip)
+                    continue;
 
                 // increment autonum and replace numbering pattern with current number
                 string replacePatternFinal;
@@ -232,9 +234,13 @@ public static class RenamePreviewExtensions
         {
             for (int idx = 0; idx < files.Count; idx++)
             {
-                files[idx].Preview = files[idx].Name;
                 files[idx].Matched = false;
-
+                if (files[idx].Skip)
+                {
+                    files[idx].Skip = false;
+                    continue;
+                }
+                files[idx].Preview = files[idx].Name;
                 // if kavita preview is selected, then get the kavita parse info and attach to the item
                 if (showKavitaPreview)
                 {

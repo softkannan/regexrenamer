@@ -1,9 +1,11 @@
-﻿using RegexRenamer.Controls.FolderTreeViewCtrl;
+﻿using Config;
+using RegexRenamer.Controls.FolderTreeViewCtrl;
 using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Forms;
 using RegexRenamer.Native;
 using RegexRenamer.Rename;
 using RegexRenamer.Tools.EBookPDFTools;
+using RegexRenamer.Tools.Translate;
 using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
@@ -31,20 +33,24 @@ namespace RegexRenamer
             cmFileView = new System.Windows.Forms.ContextMenuStrip(components);
             var editFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var launchEditorFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            var explorerFileViewContextMenuToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            var explorerFileViewContextMenuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var copyFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var cutFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var pasteFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var deleteFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var editMetadataFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var eBookOperationsFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            
+            var translateFileNameFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+
             // 
             // cmFileView
             // 
             cmFileView.ImageScalingSize = new System.Drawing.Size(20, 20);
-            cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { editFileViewToolStripMenuItem, launchEditorFileViewToolStripMenuItem, explorerFileViewContextMenuToolStripMenuItem1, copyFileViewToolStripMenuItem, cutFileViewToolStripMenuItem, pasteFileViewToolStripMenuItem, deleteFileViewToolStripMenuItem, editMetadataFileViewToolStripMenuItem, eBookOperationsFileViewToolStripMenuItem
-    });
+            cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { editFileViewToolStripMenuItem, 
+                launchEditorFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItem,
+                explorerFileViewContextMenuToolStripMenuItem, copyFileViewToolStripMenuItem, 
+                cutFileViewToolStripMenuItem, pasteFileViewToolStripMenuItem, deleteFileViewToolStripMenuItem, 
+                editMetadataFileViewToolStripMenuItem, eBookOperationsFileViewToolStripMenuItem });
             cmFileView.Name = "contextMenuStripFileView";
             cmFileView.Size = new System.Drawing.Size(195, 224);
             // 
@@ -62,12 +68,19 @@ namespace RegexRenamer
             launchEditorFileViewToolStripMenuItem.Text = "Launch Editor";
             launchEditorFileViewToolStripMenuItem.Click += launchEditorFileViewToolStripMenuItem_Click;
             // 
+            // translateFileNameFileViewToolStripMenuItem
+            // 
+            translateFileNameFileViewToolStripMenuItem.Name = "translateFileNameFileViewToolStripMenuItem";
+            translateFileNameFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            translateFileNameFileViewToolStripMenuItem.Text = "Translate";
+            translateFileNameFileViewToolStripMenuItem.Click += TranslateFileNameFileViewToolStripMenuItem_Click; ;
+            // 
             // explorerFileViewContextMenuToolStripMenuItem1
             // 
-            explorerFileViewContextMenuToolStripMenuItem1.Name = "explorerFileViewContextMenuToolStripMenuItem1";
-            explorerFileViewContextMenuToolStripMenuItem1.Size = new System.Drawing.Size(194, 22);
-            explorerFileViewContextMenuToolStripMenuItem1.Text = "Explorer Context Menu";
-            explorerFileViewContextMenuToolStripMenuItem1.Click += explorerFileViewContextMenuToolStripMenuItem_Click;
+            explorerFileViewContextMenuToolStripMenuItem.Name = "explorerFileViewContextMenuToolStripMenuItem1";
+            explorerFileViewContextMenuToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            explorerFileViewContextMenuToolStripMenuItem.Text = "Explorer Context Menu";
+            explorerFileViewContextMenuToolStripMenuItem.Click += explorerFileViewContextMenuToolStripMenuItem_Click;
             // 
             // copyFileViewToolStripMenuItem
             // 
@@ -110,7 +123,13 @@ namespace RegexRenamer
             eBookOperationsFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             eBookOperationsFileViewToolStripMenuItem.Text = "Tools";
             eBookOperationsFileViewToolStripMenuItem.Click += toolsFileViewToolStripMenuItem_Click;
+
+
+
+            
         }
+
+        
 
         private void InitializeFileListView()
         {
@@ -421,6 +440,49 @@ namespace RegexRenamer
 
         #region File View context menu handlers
 
+        private async void TranslateFileNameFileViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(cmbMatch.Text) || !string.IsNullOrEmpty(cmbReplace.Text))
+                {
+                    MessageBox.Show("Please clear the Match/Replace fields before translating.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var selectedItems = dgvFiles.GetSelectedFileItems(_fileStore.Files);
+                if (selectedItems == null)
+                    return;
+
+                foreach (var fileItem in selectedItems)
+                {
+                    fileItem.Skip = false;
+                    if (fileItem != null)
+                    {
+                        var filePath = fileItem.Name;
+                        var fromLang = UserConfig.Inst.Translator.From;
+                        var toLang = UserConfig.Inst.Translator.To;
+
+                        //var result = await filePath.TranslateWithTokenText(fromLang, toLang, true);
+                        //var result = await filePath.TranslateText(fromLang, toLang);
+                        var result = await filePath.TranslateTextScrape(fromLang, toLang);
+                        if (result == null || string.IsNullOrEmpty(result.MergedTranslation))
+                        {
+                            MessageBox.Show("Translation failed or returned empty result.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        fileItem.Preview = result.MergedTranslation;
+                        fileItem.Skip = true;
+                    }
+                }
+
+                UpdatePreview();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private async void launchEditorFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {

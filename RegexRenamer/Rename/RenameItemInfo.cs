@@ -76,6 +76,7 @@ namespace RegexRenamer.Rename
 
         public string Preview;    // [subdir\]newfilename[.txt]
         public bool Matched;      // true if matches current regex
+        public bool Skip;         // true if marked to skip (not renamed)
         public bool PreserveExt;  // true if 'Preserve file extension' checked
         public bool Selected;     // true if row is currently selected
 

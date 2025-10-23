@@ -61,6 +61,7 @@
     <None Include="Native\Interop\Shell32.ContextMenu.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="itext" Version="9.3.0" />
     <PackageReference Include="itext.bouncy-castle-adapter" Version="9.3.0" />
     <PackageReference Include="itext.bouncy-castle-fips-adapter" Version="9.3.0" />

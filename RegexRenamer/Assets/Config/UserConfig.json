@@ -165,7 +165,7 @@ Auto Environment variables
         // Supports {filepath} {author} {series} {title} {volume} {filepath} variables
         //"-a \"{author}\" -s \"{series}\" -t \"{title}\" -i \"{volume}\" \"{filepath}\""
         //"-p \" \" -a \" \" -t \" \" -c \" \" -s \" \" -i \"-1\" \"{filepath}\""
-		"--authors= --comments= --identifier= --index=-1 --publisher= --series= --tags= --title= --category= \"{filepath}\""
+        "--authors= --comments= --identifier= --index=-1 --publisher= --series= --tags= --title= --category= \"{filepath}\""
       ]
     },
     {
@@ -325,6 +325,10 @@ Auto Environment variables
       "(.+)\\s*-\\s*(.+)",
       "(.+)"
     ]
+  },
+  "Translator": {
+    "From": "en",
+    "To": "ta"
   },
   // Default working dir
   "DefaultWorkspace": "%userprofile%\\Documents",

@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using RegexRenamer.Tools.EBookPDFTools;
 using RegexRenamer.Forms;
+using RegexRenamer.Tools.Translate;
 
 namespace Config;
 
@@ -46,7 +47,7 @@ public class UserConfig
 
     public MetadataFormConfig Meta { get; set; } = new MetadataFormConfig();
    
-
+    public TranslatorConfig Translator { get; set; } = new TranslatorConfig();
     #endregion
 
 
