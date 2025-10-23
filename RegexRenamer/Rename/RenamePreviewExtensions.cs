@@ -1,4 +1,5 @@
-﻿using RegexRenamer.Tools.Kavita;
+﻿using Kavita;
+using Kavita.Enum;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

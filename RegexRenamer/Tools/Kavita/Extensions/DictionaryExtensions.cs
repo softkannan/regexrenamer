@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RegexRenamer.Tools.Kavita
+namespace Kavita.Extensions
 {
     public static class DictionaryExtensions
     {

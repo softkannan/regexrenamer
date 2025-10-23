@@ -1,9 +1,9 @@
-﻿using RegexRenamer.Kavita;
+﻿using Kavita.ParserImpl;
 using System;
 using System.Globalization;
 using System.Linq;
 
-namespace RegexRenamer.Tools.Kavita;
+namespace Kavita;
 
 #nullable enable
 /// <summary>

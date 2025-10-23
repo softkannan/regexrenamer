@@ -1,4 +1,5 @@
-﻿using RegexRenamer.Tools.Kavita;
+﻿using Kavita;
+using Kavita.ParserImpl;
 using System;
 using System.Collections.Generic;
 using System.IO;

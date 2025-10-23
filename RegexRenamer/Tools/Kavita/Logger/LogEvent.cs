@@ -19,84 +19,83 @@ using System.Drawing;
 using System.IO;
 // ReSharper disable IntroduceOptionalParameters.Global
 
-namespace RegexRenamer.Tools.Kavita
+namespace Kavita.Logger;
+
+
+/// <summary>
+/// A log event.
+/// </summary>
+public class LogEvent
 {
+    /// <summary>
+    /// Construct a new <seealso cref="LogEvent"/>.
+    /// </summary>
+    /// <param name="timestamp">The time at which the event occurred.</param>
+    /// <param name="level">The level of the event.</param>
+    /// <param name="exception">An exception associated with the event, or null.</param>
+    public LogEvent(DateTimeOffset timestamp, LogEventLevel level, Exception exception, string format, object[] args)
+    {
+        Timestamp = timestamp;
+        Level = level;
+        Exception = exception;
+        Format = format;
+        Args = args;
+    }
 
     /// <summary>
-    /// A log event.
+    /// The time at which the event occurred.
     /// </summary>
-    public class LogEvent
+    public DateTimeOffset Timestamp { get; }
+
+    /// <summary>
+    /// The level of the event.
+    /// </summary>
+    public LogEventLevel Level { get; }
+
+    /// <summary>
+    /// Arguments
+    /// </summary>
+    public object[] Args { get; }
+
+    /// <summary>
+    /// string format string
+    /// </summary>
+    public string Format { get; }
+
+    /// <summary>
+    /// Render the message template to the specified output, given the properties associated
+    /// with the event.
+    /// </summary>
+    /// <param name="output">The output.</param>
+    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+    public void RenderMessage(TextWriter output, IFormatProvider formatProvider = null)
     {
-        /// <summary>
-        /// Construct a new <seealso cref="LogEvent"/>.
-        /// </summary>
-        /// <param name="timestamp">The time at which the event occurred.</param>
-        /// <param name="level">The level of the event.</param>
-        /// <param name="exception">An exception associated with the event, or null.</param>
-        public LogEvent(DateTimeOffset timestamp, LogEventLevel level, Exception exception, string format, object[] args)
-        {
-            Timestamp = timestamp;
-            Level = level;
-            Exception = exception;
-            Format = format;
-            Args = args;
-        }
+        //MessageTemplate.Render(Properties, output, formatProvider);
+    }
 
-        /// <summary>
-        /// The time at which the event occurred.
-        /// </summary>
-        public DateTimeOffset Timestamp { get; }
+    /// <summary>
+    /// Render the message template given the properties associated
+    /// with the event, and return the result.
+    /// </summary>
+    /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
+    public string RenderMessage(IFormatProvider formatProvider = null)
+    {
+        return string.Empty; //  MessageTemplate.Render(Properties, formatProvider);
+    }
 
-        /// <summary>
-        /// The level of the event.
-        /// </summary>
-        public LogEventLevel Level { get; }
+    /// <summary>
+    /// An exception associated with the event, or null.
+    /// </summary>
+    public Exception Exception { get; }
 
-        /// <summary>
-        /// Arguments
-        /// </summary>
-        public object[] Args { get; }
-
-        /// <summary>
-        /// string format string
-        /// </summary>
-        public string Format { get; }
-
-        /// <summary>
-        /// Render the message template to the specified output, given the properties associated
-        /// with the event.
-        /// </summary>
-        /// <param name="output">The output.</param>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        public void RenderMessage(TextWriter output, IFormatProvider formatProvider = null)
-        {
-            //MessageTemplate.Render(Properties, output, formatProvider);
-        }
-
-        /// <summary>
-        /// Render the message template given the properties associated
-        /// with the event, and return the result.
-        /// </summary>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        public string RenderMessage(IFormatProvider formatProvider = null)
-        {
-            return string.Empty; //  MessageTemplate.Render(Properties, formatProvider);
-        }
-
-        /// <summary>
-        /// An exception associated with the event, or null.
-        /// </summary>
-        public Exception Exception { get; }
-
-        internal LogEvent Copy()
-        {
-            return new LogEvent(
-                Timestamp,
-                Level,
-                Exception,
-                Format,
-                Args
-                );
-        }
+    internal LogEvent Copy()
+    {
+        return new LogEvent(
+            Timestamp,
+            Level,
+            Exception,
+            Format,
+            Args
+            );
     }
 }

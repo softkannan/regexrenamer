@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace RegexRenamer.Tools.Kavita
+namespace Kavita.Common
 {
 
     /**

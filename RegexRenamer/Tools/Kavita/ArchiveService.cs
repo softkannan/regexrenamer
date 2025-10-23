@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Logging;
-using RegexRenamer.Kavita;
+using Kavita.Enum;
 using SharpCompress.Archives;
+using Kavita.ParserImpl;
 
-namespace RegexRenamer.Tools.Kavita;
+namespace Kavita;
 
 
 #nullable enable

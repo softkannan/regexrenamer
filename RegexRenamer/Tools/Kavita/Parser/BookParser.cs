@@ -3,9 +3,9 @@ using VersOne.Epub.Options;
 using VersOne.Epub.Schema;
 using System;
 using System.IO;
-using RegexRenamer.Tools.Kavita;
+using Kavita.Enum;
 
-namespace RegexRenamer.Tools.Kavita;
+namespace Kavita.ParserImpl;
 #nullable enable
 public class BookParser(IDirectoryService directoryService, BasicParser basicParser) : DefaultParser(directoryService)
 {

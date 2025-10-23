@@ -9,10 +9,12 @@ using System;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Globalization;
-using RegexRenamer.Tools.Kavita;
-using RegexRenamer.Kavita;
+using Kavita.Enum;
+using Kavita;
+using Kavita.ParserImpl;
 
-namespace RegexRenamer.Tools.Kavita;
+
+namespace Kavita.Helpers;
 #nullable enable
 
 public interface IPdfComicInfoExtractor

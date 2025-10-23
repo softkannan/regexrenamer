@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace RegexRenamer.Tools.Kavita
+namespace Kavita.Extensions
 {
 
     public static class EnumerableExtensions

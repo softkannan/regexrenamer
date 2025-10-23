@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace RegexRenamer.Tools.Kavita;
+namespace Kavita.Enum;
 
 
 /// <summary>

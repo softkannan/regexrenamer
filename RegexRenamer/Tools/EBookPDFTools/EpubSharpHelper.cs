@@ -1,7 +1,7 @@
 ﻿using EpubSharp;
 using EpubSharp.Format.Writers;
 using Org.BouncyCastle.Asn1.Cms;
-using RegexRenamer.Tools.Kavita;
+using Kavita;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;

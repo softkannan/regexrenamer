@@ -1,6 +1,6 @@
 ﻿using Config;
 using PdfSharp.Pdf;
-using RegexRenamer.Tools.Kavita;
+using Kavita;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,10 +1,13 @@
-﻿using Microsoft.Win32;
+﻿using ConfigFileParser;
+using Microsoft.Win32;
 using RegexRenamer.Rename;
 using RegexRenamer.Tools.FindReplace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,17 +17,16 @@ namespace RegexRenamer
     public partial class MainForm
     {
         // load/save settings & regex history
-
         private void LoadSettings()
         {
 #if !DEBUG
       try
       {
 #endif
+            var configFile = new ConfigFile();
 
             // general
-
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\RegexRenamer"))
+            var key = configFile.Data["Global"];
             {
                 if (key != null)
                 {
@@ -44,85 +46,41 @@ namespace RegexRenamer
                             MAX_VIEW_PAGE_SIZE = maxViewFilesOverride;
                     }
                     catch { } // ignore if wrong reg key type
-                    key.Close();
                 }
             }
 
-
             // options
-
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\RegexRenamer\\Options"))
+            key = configFile.Data["Options"];
             {
                 if (key != null)
                 {
                     EnableUpdates = false;
 
-                    itmOptionsShowHidden.Checked = (string)key.GetValue("ShowHiddenFiles") == "True";
-                    itmOptionsPreserveExt.Checked = (string)key.GetValue("PreserveExtension") == "True";
-                    itmOptionsRealtimePreview.Checked = (string)key.GetValue("RealtimePreview", "True") == "True";
-                    itmOptionsAllowRenSub.Checked = (string)key.GetValue("AllowRenameIntoSubfolders") == "True";
-                    itmOptionsRememberWinPos.Checked = (string)key.GetValue("RememberWindowPosition", "True") == "True";
-                    itmOptionsRenameSelectedRows.Checked = (string)key.GetValue("OnlyRenameSelectedRows") == "True";
+                    itmOptionsShowHidden.Checked = key.GetValue("ShowHiddenFiles") == "True";
+                    itmOptionsPreserveExt.Checked = key.GetValue("PreserveExtension") == "True";
+                    itmOptionsRealtimePreview.Checked = key.GetValue("RealtimePreview", "True") == "True";
+                    itmOptionsAllowRenSub.Checked = key.GetValue("AllowRenameIntoSubfolders") == "True";
+                    itmOptionsRememberWinPos.Checked = key.GetValue("RememberWindowPosition", "True") == "True";
+                    itmOptionsRenameSelectedRows.Checked = key.GetValue("OnlyRenameSelectedRows") == "True";
 
                     EnableUpdates = true;
-
-                    key.Close();
                 }
             }
-
-
-            // explorer shell context menu
-
-            using (RegistryKey key = Registry.ClassesRoot.OpenSubKey("Folder\\shell\\RegexRenamer\\command"))
-            {
-                if (key != null)
-                {
-                    if (((string)key.GetValue("", "")).StartsWith(Application.ExecutablePath))
-                        itmOptionsAddContextMenu.Checked = true;
-
-                    key.Close();
-                }
-            }
-
 
             // stats
-
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\RegexRenamer\\Stats"))
+            key = configFile.Data["Stats"];
             {
                 if (key != null)
                 {
-                    _countProgLaunches = (int)key.GetValue("ProgramLaunches", 0) + 1;
-                    _countFilesRenamed = (int)key.GetValue("FilesRenamed", 0);
-
-                    key.Close();
+                    _countProgLaunches = key.GetValue<int>("ProgramLaunches", 0) + 1;
+                    _countFilesRenamed = key.GetValue<int>("FilesRenamed", 0);
                 }
             }
-
-
-            // check for old reg keys (maintain backwards compatibility)
-
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\RegexRenamer", true))
-            {
-                if (key != null)
-                {
-                    int cpl = (int)key.GetValue("CountProgLaunches", 0);
-                    int cfr = (int)key.GetValue("CountFilesRenamed", 0);
-                    if (cpl > 0) _countProgLaunches = cpl;
-                    if (cfr > 0) _countFilesRenamed = cfr;
-
-                    key.DeleteValue("CountProgLaunches", false);
-                    key.DeleteValue("CountFilesRenamed", false);
-                    key.DeleteValue("ShowHiddenFiles", false);
-                    key.DeleteValue("PreserveExtension", false);
-                }
-            }
-
 
             // window position
-
             if (!itmOptionsRememberWinPos.Checked) return;  // skip
 
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\RegexRenamer\\WindowPosition"))
+            key = configFile.Data["WindowPosition"];
             {
                 if (key != null)
                 {
@@ -132,15 +90,12 @@ namespace RegexRenamer
                     }
                     else // not maximized
                     {
-                        // get size and offset from registry
+                        // get size and offset from config
+                        int winx = key.GetValue<int>("WindowX", 0); // used to be a dword, now a string
+                        int winy = key.GetValue<int>("WindowY", 0);
 
-                        object oWinX = key.GetValue("WindowX", "0"); // used to be a dword, now a string
-                        object oWinY = key.GetValue("WindowY", "0");
-                        int winx = oWinX is int ? (int)oWinX : int.Parse((string)oWinX);
-                        int winy = oWinY is int ? (int)oWinY : int.Parse((string)oWinY);
-
-                        int height = (int)key.GetValue("WindowHeight", -1);
-                        int width = (int)key.GetValue("WindowWidth", -1);
+                        int height = key.GetValue<int>("WindowHeight", -1);
+                        int width = key.GetValue<int>("WindowWidth", -1);
 
 
                         // validate (to prevent drawing window off-screen)
@@ -166,8 +121,6 @@ namespace RegexRenamer
                             itmOptionsRememberWinPos.Checked = false;
                         }
                     }
-
-                    key.Close();
                 }
             }
 
@@ -184,23 +137,21 @@ namespace RegexRenamer
       try
       {
 #endif
-            // general
+            var configFile = new ConfigFile();
 
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Software\\RegexRenamer"))
+            // general
+            var key = configFile.Data["Global"];
             {
                 if (key != null)
                 {
                     key.SetValue("LastPath", _activePath);
                     key.SetValue("MoveCopyPath", fbdMoveCopy.SelectedPath);
                     key.SetValue("RenameFolders", RenameFolders);
-                    key.Close();
                 }
             }
 
-
             // options
-
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Software\\RegexRenamer\\Options"))
+            key = configFile.Data["Options"];
             {
                 if (key != null)
                 {
@@ -210,27 +161,21 @@ namespace RegexRenamer
                     key.SetValue("AllowRenameIntoSubfolders", itmOptionsAllowRenSub.Checked);
                     key.SetValue("RememberWindowPosition", itmOptionsRememberWinPos.Checked);
                     key.SetValue("OnlyRenameSelectedRows", itmOptionsRenameSelectedRows.Checked);
-                    key.Close();
                 }
             }
 
-
             // stats
-
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Software\\RegexRenamer\\Stats"))
+            key = configFile.Data["Stats"];
             {
                 if (key != null)
                 {
                     key.SetValue("ProgramLaunches", _countProgLaunches);
                     key.SetValue("FilesRenamed", _countFilesRenamed);
-                    key.Close();
                 }
             }
 
-
             // window position
-
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Software\\RegexRenamer\\WindowPosition"))
+            key = configFile.Data["WindowPosition"];
             {
                 if (key != null)
                 {
@@ -239,9 +184,10 @@ namespace RegexRenamer
                     key.SetValue("WindowHeight", this.Height);
                     key.SetValue("WindowWidth", this.Width);
                     key.SetValue("WindowState", this.WindowState);
-                    key.Close();
                 }
             }
+
+            configFile.Save();
 
 #if !DEBUG
       }
@@ -251,14 +197,13 @@ namespace RegexRenamer
 
         private void LoadRegexHistory()
         {
-            cmbMatch.LoadFromRegistry();
-            cmbReplace.LoadFromRegistry();
-
+            cmbMatch.LoadFromConfigFile();
+            cmbReplace.LoadFromConfigFile();
         }
         private void SaveRegexHistory()
         {
-            cmbMatch.SaveToRegistry();
-            cmbReplace.SaveToRegistry();
+            cmbMatch.SaveToConfigFile();
+            cmbReplace.SaveToConfigFile();
         }
 
 

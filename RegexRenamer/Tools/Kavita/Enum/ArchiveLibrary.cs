@@ -1,4 +1,4 @@
-﻿namespace RegexRenamer.Tools.Kavita;
+﻿namespace Kavita.Enum;
 
 /// <summary>
 /// Represents which library should handle opening this library

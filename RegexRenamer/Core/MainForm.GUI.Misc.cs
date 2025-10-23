@@ -99,38 +99,7 @@ namespace RegexRenamer
         {
             try
             {
-                if (!itmOptionsAddContextMenu.Checked)  // add key
-                {
-                    using (RegistryKey key = Registry.ClassesRoot.CreateSubKey("Folder\\shell\\RegexRenamer"))
-                    {
-                        if (key != null)
-                        {
-                            key.SetValue("", "Rename using RegexRenamer");
-                            key.Close();
-                        }
-                    }
-                    using (RegistryKey key = Registry.ClassesRoot.CreateSubKey("Folder\\shell\\RegexRenamer\\command"))
-                    {
-                        if (key != null)
-                        {
-                            key.SetValue("", Application.ExecutablePath + " \"%L\"");
-                            key.Close();
-                        }
-                    }
-                    itmOptionsAddContextMenu.Checked = true;
-                }
-                else  // delete key
-                {
-                    using (RegistryKey key = Registry.ClassesRoot.OpenSubKey("Folder\\shell\\RegexRenamer"))
-                    {
-                        if (key != null)  // make sure exists before trying to delete
-                        {
-                            key.Close();
-                            Registry.ClassesRoot.DeleteSubKeyTree("Folder\\shell\\RegexRenamer");
-                        }
-                    }
-                    itmOptionsAddContextMenu.Checked = false;
-                }
+                
             }
             catch (Exception ex)
             {

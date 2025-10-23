@@ -19,8 +19,8 @@ using System.Windows.Forms;
 using Windows.ApplicationModel.VoiceCommands;
 using RegexRenamer.Rename;
 using RegexRenamer.Tools.EBookPDFTools;
-using RegexRenamer.Tools.Kavita;
 using RegexRenamer.Utility.RegexMenu;
+using Kavita;
 
 namespace RegexRenamer.Forms;
 
@@ -31,7 +31,6 @@ public partial class EditMetadataForm : Form
     private readonly string _activePath;
     private readonly string _searchPattern;
     private readonly bool _preserveExtension;
-    private readonly string _defaultMatchPattern = "(.+)\\s*-\\s*(.+)";
 
     private RegExContextMenuProvider regExCtxMenu;
 
@@ -110,7 +109,6 @@ public partial class EditMetadataForm : Form
 
         cmbEPUBToolsList.Items.AddRange(Enum.GetNames(typeof(EBookToolsList)));
         cmbEPUBToolsList.SelectedItem = UserConfig.Inst.Meta.PreferredEBookTool;
-
 
         this.FormClosing += Form_Closing;
 

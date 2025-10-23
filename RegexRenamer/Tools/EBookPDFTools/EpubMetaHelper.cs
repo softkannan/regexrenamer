@@ -2,7 +2,7 @@
 using EpubSharp.Format.Writers;
 using iText.Pdfua.Checkers.Utils;
 using Org.BouncyCastle.Asn1.Cms;
-using RegexRenamer.Tools.Kavita;
+using Kavita;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
@@ -177,10 +177,20 @@ public static class EpubMetaHelper
         public string Value { get; set; }
         public bool IsWritten { get; set; }
 
+        public bool ForceWrite { get;private set; }
+
         public MetadataFiledInfo(string value)
         {
             Value = value;
             IsWritten = false;
+            ForceWrite = false;
+        }
+
+        public MetadataFiledInfo(string value, bool forceWrite)
+        {
+            Value = value;
+            IsWritten = false;
+            ForceWrite = forceWrite;
         }
     }
 
@@ -252,14 +262,15 @@ public static class EpubMetaHelper
                     {
                         { "belongs-to-collection", new MetadataFiledInfo(metadata.Series) },
                         { "collection-type", new MetadataFiledInfo("series") },
-                        { "group-position", new MetadataFiledInfo(metadata.Volume) }
+                        { "group-position", new MetadataFiledInfo(metadata.Volume) },
+                        { "title-type", new MetadataFiledInfo("", true) }
                     };
 
                     Dictionary<string, MetadataFiledInfo> metaNameSets = new Dictionary<string, MetadataFiledInfo>(StringComparer.OrdinalIgnoreCase)
                     {
                         { "calibre:series", new MetadataFiledInfo(metadata.Series) },
                         { "calibre:series_index", new MetadataFiledInfo(metadata.Volume) },
-                        { "calibre:title_sort", new MetadataFiledInfo(metadata.IsSpecial ? metadata.Title : "" ) },
+                        { "calibre:title_sort", new MetadataFiledInfo(metadata.IsSpecial ? metadata.Title : "", true) },
                     }
                 ;
 
@@ -269,20 +280,20 @@ public static class EpubMetaHelper
                         {
                             var propertyAttr = childNode.Attributes["property"];
                             var nameAttr = childNode.Attributes["name"];
-                            if ((propertyAttr != null && metaPropertySets.ContainsKey(propertyAttr.Value)))
+                            if (propertyAttr != null && metaPropertySets.ContainsKey(propertyAttr.Value))
                             {
                                 var mataValue = metaPropertySets[propertyAttr.Value];
-                                if (!string.IsNullOrWhiteSpace(mataValue.Value))
+                                if (!string.IsNullOrWhiteSpace(mataValue.Value) || mataValue.ForceWrite)
                                 {
                                     XmlElement nodeElem = (XmlElement)childNode;
                                     nodeElem.InnerText = mataValue.Value;
                                     mataValue.IsWritten = true;
                                 }
                             }
-                            if ((nameAttr != null && metaNameSets.ContainsKey(nameAttr.Value)))
+                            if (nameAttr != null && metaNameSets.ContainsKey(nameAttr.Value))
                             {
                                 var mataValue = metaNameSets[nameAttr.Value];
-                                if (!string.IsNullOrWhiteSpace(mataValue.Value))
+                                if (!string.IsNullOrWhiteSpace(mataValue.Value) || mataValue.ForceWrite)
                                 {
                                     XmlElement nodeElem = (XmlElement)childNode;
                                     nodeElem.SetAttribute("content", mataValue.Value);

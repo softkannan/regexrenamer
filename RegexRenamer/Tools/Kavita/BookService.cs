@@ -9,12 +9,15 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.XPath;
 using Microsoft.Extensions.Logging;
-using RegexRenamer.Tools.Kavita;
+using Kavita.Extensions;
+using Kavita.Helpers;
 using VersOne.Epub;
 using VersOne.Epub.Options;
 using VersOne.Epub.Schema;
+using Kavita.Enum;
+using Kavita.ParserImpl;
 
-namespace RegexRenamer.Kavita;
+namespace Kavita;
 
 #nullable enable
 

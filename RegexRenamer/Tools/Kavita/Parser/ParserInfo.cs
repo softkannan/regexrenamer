@@ -1,5 +1,7 @@
 ﻿
-namespace RegexRenamer.Tools.Kavita;
+using Kavita.Enum;
+
+namespace Kavita.ParserImpl;
 #nullable enable
 
 /// <summary>

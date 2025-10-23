@@ -6,7 +6,7 @@ using System.Xml;
 using System.IO;
 using Microsoft.Extensions.Logging;
 
-namespace RegexRenamer.Tools.Kavita;
+namespace Kavita.Helpers;
 #nullable enable
 
 /**

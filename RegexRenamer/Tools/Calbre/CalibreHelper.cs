@@ -1,6 +1,6 @@
 ﻿using LogEx;
+using Kavita;
 using RegexRenamer.Tools.EBookPDFTools;
-using RegexRenamer.Tools.Kavita;
 using RegexRenamer.Utility;
 using SharpCompress.Common;
 using System;

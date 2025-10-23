@@ -1,7 +1,9 @@
-﻿using Microsoft.Win32;
+﻿using ConfigFileParser;
+using Microsoft.Win32;
 using RegexRenamer.Controls.ListViewExCtrl;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -15,7 +17,7 @@ namespace RegexRenamer.Tools.FindReplace
     public static class FindReplaceHelpers
     {
         private const int MAX_HISTORY = 20;
-        public static void SaveToRegistry(this ComboBox pThis, string appName = "", string keyName = "")
+        public static void SaveToConfigFile(this ComboBox pThis, string appName = "", string keyName = "")
         {
 #if !DEBUG
       try
@@ -29,28 +31,26 @@ namespace RegexRenamer.Tools.FindReplace
             {
                 keyName = pThis.Name;
             }
-            string regKey = $"Software\\{appName}\\{keyName}";
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(regKey))
+            var configFile = new ConfigFile();
+            var key = configFile.Data[keyName];
             {
                 if (key == null) return;
 
-                foreach (string name in key.GetValueNames())
-                    key.DeleteValue(name);
+                key.RemoveAllKeys();
 
                 for (int i = 0; i < pThis.Items.Count; i++)
                 {
                     if(i < MAX_HISTORY)
                         key.SetValue(i.ToString("00"), pThis.Items[i]);  // update padding if changing MAX_HISTORY
                 }
-
-                key.Close();
             }
+            configFile.Save();
 #if !DEBUG
       }
       catch {}
 #endif
         }
-        public static void LoadFromRegistry(this ComboBox pThis, string appName = "", string keyName = "")
+        public static void LoadFromConfigFile(this ComboBox pThis, string appName = "", string keyName = "")
         {
 #if !DEBUG
       try
@@ -64,17 +64,15 @@ namespace RegexRenamer.Tools.FindReplace
             {
                 keyName = pThis.Name;
             }
-            string regKey = $"Software\\{appName}\\{keyName}";
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(regKey))
+
+            var configFile = new ConfigFile();
+
+            var key = configFile.Data[keyName];
             {
                 if (key == null) return;
-
                 pThis.Items.Clear();
-
-                foreach (string name in key.GetValueNames())
-                    pThis.Items.Add(key.GetValue(name));
-
-                key.Close();
+                foreach (var item in key)
+                    pThis.Items.Add(item.Value);
             }
 #if !DEBUG
       }

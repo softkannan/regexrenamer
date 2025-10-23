@@ -5,7 +5,7 @@ using iText.IO.Source;
 using iText.Kernel.Pdf;
 using iText.Kernel.XMP;
 using iText.Kernel.XMP.Options;
-using RegexRenamer.Tools.Kavita;
+using Kavita;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;

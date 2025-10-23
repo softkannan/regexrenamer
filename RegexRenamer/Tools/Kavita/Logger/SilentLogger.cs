@@ -14,7 +14,7 @@
 
 using System;
 
-namespace RegexRenamer.Tools.Kavita
+namespace Kavita.Logger
 {
 
     sealed class SilentLogger : ILogger

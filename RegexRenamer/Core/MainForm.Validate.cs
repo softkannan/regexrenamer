@@ -57,7 +57,6 @@ namespace RegexRenamer
 
                 // check for valid filename
                 string validFilenameErrmsg = ValidateFilename(_fileStore.Files[afi].PreviewExt, itmOptionsAllowRenSub.Checked);
-
                 if (validFilenameErrmsg != null)
                 {
                     dgvFiles.Rows[dfi].Cells[2].Tag = validFilenameErrmsg;
@@ -199,7 +198,7 @@ namespace RegexRenamer
 
             // update matched/conflicts counters
             int matched = 0, conflict = 0;
-
+            
             for (int idx = 0; idx < _fileStore.Files.Count; idx++)
                 if (_fileStore.Files[idx].Matched) matched++;
 

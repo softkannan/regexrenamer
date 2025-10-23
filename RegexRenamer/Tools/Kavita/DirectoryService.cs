@@ -1,13 +1,16 @@
-﻿using RegexRenamer.Kavita;
+﻿using Kavita.Common;
+using Kavita.Logger;
+using Kavita;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Kavita.ParserImpl;
 
 
-namespace RegexRenamer.Tools.Kavita; 
+namespace Kavita; 
 
 public interface IDirectoryService
 {

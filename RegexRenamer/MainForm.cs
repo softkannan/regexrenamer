@@ -24,7 +24,6 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 using RegexRenamer.Controls;      // ExtractIcons
-using Microsoft.Win32;          // Registry
 using System.Reflection;
 using System.Security;
 using RegexRenamer.Utility;
@@ -32,7 +31,7 @@ using System.Threading;
 using RegexRenamer.Native;
 using RegexRenamer.Forms;
 using RegexRenamer.Rename;
-using RegexRenamer.Tools.Kavita;
+using Kavita;
 using Config;        // FieldInfo
 
 
@@ -272,11 +271,10 @@ namespace RegexRenamer
                 itmHelpRegexReference.ToolTipText = "Not installed";
             }
 
-            // load settings & regex history from registry
-
             cmbMatch.SetCueBanner("Shift+RightClick for a menu of regex elements");
             cmbReplace.SetCueBanner("Use $1, $2, ... to insert captured text, $# auto number, $` text before match, $' text after match, $_ original filename");
 
+            // load settings & regex history from registry
             LoadSettings();
             LoadRegexHistory();
         }

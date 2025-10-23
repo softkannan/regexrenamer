@@ -1,8 +1,9 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
-using RegexRenamer.Kavita;
+using Kavita.Enum;
+using Kavita.ParserImpl;
 
-namespace RegexRenamer.Tools.Kavita;
+namespace Kavita;
 #nullable enable
 
 public class ReadingItemService 

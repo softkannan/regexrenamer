@@ -123,13 +123,8 @@ namespace RegexRenamer
             eBookOperationsFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             eBookOperationsFileViewToolStripMenuItem.Text = "Tools";
             eBookOperationsFileViewToolStripMenuItem.Click += toolsFileViewToolStripMenuItem_Click;
-
-
-
             
         }
-
-        
 
         private void InitializeFileListView()
         {

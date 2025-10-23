@@ -1,9 +1,8 @@
 ﻿using Config;
 using EpubSharp;
 using PdfSharp.Pdf;
-using RegexRenamer.Kavita;
+using Kavita;
 using RegexRenamer.Tools.Calbre;
-using RegexRenamer.Tools.Kavita;
 using RegexRenamer.Utility;
 using SharpCompress.Common;
 using System;
@@ -16,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
 using static System.Net.Mime.MediaTypeNames;
+using Kavita.ParserImpl;
 
 namespace RegexRenamer.Tools.EBookPDFTools;
 

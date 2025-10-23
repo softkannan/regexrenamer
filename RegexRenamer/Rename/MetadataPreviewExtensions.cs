@@ -1,6 +1,6 @@
 ﻿using J2N;
 using RegexRenamer.Forms;
-using RegexRenamer.Tools.Kavita;
+using Kavita;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

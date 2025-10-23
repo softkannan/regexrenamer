@@ -392,14 +392,14 @@ public partial class TextReplaceForm : Form
     private void LoadRegexHistory()
     {
 
-        this.cbSearchPattern.LoadFromRegistry();
-        this.cbReplacePattern.LoadFromRegistry();
+        this.cbSearchPattern.LoadFromConfigFile();
+        this.cbReplacePattern.LoadFromConfigFile();
     }
 
     
     private void SaveRegexHistory()
     {
-        this.cbSearchPattern.SaveToRegistry();
-        this.cbReplacePattern.SaveToRegistry();
+        this.cbSearchPattern.SaveToConfigFile();
+        this.cbReplacePattern.SaveToConfigFile();
     }
 }

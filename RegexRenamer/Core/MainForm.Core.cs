@@ -1,5 +1,5 @@
 ﻿using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
-using RegexRenamer.Kavita;
+using Kavita;
 using RegexRenamer.Native;
 using RegexRenamer.Rename;
 using RegexRenamer.Tools.FindReplace;
