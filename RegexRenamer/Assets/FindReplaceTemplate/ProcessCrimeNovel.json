@@ -1,0 +1,38 @@
+﻿/*
+
+*/
+{
+  "Name": "ProcessCrimeNovel",
+  "TextFileProcessing": [
+    {
+      "Pattern": "([^-\\:])(\\d{1,2})([^\\d\\s\\-\\.\\:])",
+      "Replace": "$1\r\n\f$2\r\n$3",
+      "Type": "Regex",
+      "ActionType": "Review"
+    },
+    {
+      "Pattern": "”“",
+      "Replace": "\r\n",
+      "Type": "Text",
+      "ActionType": "Auto"
+    },
+    {
+      "Pattern": "”",
+      "Replace": "\r\n",
+      "Type": "Text",
+      "ActionType": "Auto"
+    },
+    {
+      "Pattern": "“",
+      "Replace": "\r\n",
+      "Type": "Text",
+      "ActionType": "Auto"
+    },
+    {
+      "Pattern": "\"",
+      "Replace": "\r\n",
+      "Type": "Text",
+      "ActionType": "Auto"
+    }
+  ]
+}

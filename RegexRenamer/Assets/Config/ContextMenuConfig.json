@@ -1,0 +1,91 @@
+﻿{
+  // Tools  Definition Start
+  "FileViewMenu": [
+    {
+      "Name": "Edit",
+      "Command": "Edit"
+    },
+    {
+      "Name": "Launch Editor",
+      "Command": "Launch Editor"
+    },
+    {
+      "Name": "Translate",
+      "Command": "Translate"
+    },
+    {
+      "Name": "Translate GUI",
+      "Command": "Translate GUI"
+    },
+    {
+      "Name": "Explorer Context Menu",
+      "Command": "Explorer Context Menu"
+    },
+    {
+      "Name": "Copy",
+      "Command": "Copy"
+    },
+    {
+      "Name": "Cut",
+      "Command": "Cut"
+    },
+    {
+      "Name": "Paste",
+      "Command": "Paste"
+    },
+    {
+      "Name": "Delete",
+      "Command": "Delete"
+    },
+    {
+      "Name": "Clear/Edit Metadata",
+      "Command": "Clear/Edit Metadata"
+    },
+    {
+      "Name": "Tools",
+      "Command": "Tools"
+    }
+  ],
+  "FolderViewMenu": [
+    {
+      "Name": "Set As Kavita Library Root",
+      "Command": "Set As Kavita Library Root"
+    },
+    {
+      "Name": "Explorer Context Menu",
+      "Command": "Explorer Context Menu"
+    },
+    {
+      "Name": "Rename",
+      "Command": "Rename"
+    },
+    {
+      "Name": "Delete",
+      "Command": "Delete"
+    },
+    {
+      "Name": "Paste",
+      "Command": "Paste"
+    },
+    {
+      "Name": "Cut",
+      "Command": "Cut"
+    },
+    {
+      "Name": "Copy",
+      "Command": "Copy"
+    },
+    {
+      "Name": "Copy Path",
+      "Command": "Copy Path"
+    },
+    {
+      "Name": "Open In Explorer",
+      "Command": "Open In Explorer"
+    },
+    {
+      "Name": "Clear / Edit Metadata",
+      "Command": "Clear / Edit Metadata"
+    }
+  ]
+}

@@ -1,0 +1,348 @@
+﻿/*
+Auto Environment variables
+%APP_DIR% => LaunchEnvironment.exe folder
+%OpenFolder% => Tool Launch folder
+{activeview} => Active view name
+{compareFile1} => First file/folder to compare
+{compareFile2} => Second file/folder to compare
+{compareFile3} => Third file/folder to compare
+{zipFileName} => output zip file name
+{infoFileName} => list of files to zip, uses the relative path
+
+// Tool definition
+{
+  "Name": "Tool Name",
+  "ToolDir":"tool install folder"
+  "Type"="RegularApp(launch check for existance, default)/Action (inbuilt action)/DynamicApp (file existance not checked)/StoreApp (windows store app)",
+  "Style": { 
+  "UseShellExecute":true,
+  "ExecuteAsAdmin":false,
+  "CreateNoWindow":true,
+  "WindowStyle":"Normal/Hidden/Minimized/Maximized"
+  },
+  "Path":"exe path, accepts expandable string"
+  "Args":[
+    "tool argument, if argument contains environment varible then if all the variable declared then only given argument is included",
+    "arg2",
+    "arg3",
+  ]
+  "Script": [
+    "Launches multiple commands one after another",
+    "Command 1",
+    "Command 2"
+  ],
+  "Envs": [
+    {
+      "Name": "Env Name",
+      "Value": "Env Value, accepts expandable string",
+      "Action": "Append/Overwrite/Prefix",
+      "Type": "Path/String"
+    },
+    {
+      "Name": "Env Name 2",
+      "Value": "Env Value 2, accepts expandable string",
+      // Optional, if not given then default action is Append
+      //Append value to existing environment value / registry value
+      //ovrwrite the existing environment value / registry value
+      //prefix value to existing environment value / registry value
+      "Action": "Append/Overwrite/Prefix",
+      // Optional, if not given then default type is Path
+      "Type": "Path/String"
+    }
+  ],
+  }
+*/
+{
+  // Tools  Definition Start
+  "Tools": [
+    {
+      "Name": "EbookMeta",
+      "Path": "%CalibreDir%\\ebook-meta.exe",
+      "ToolDir": "%CalibreDir%"
+    },
+    {
+      "Name": "EbookConvert",
+      "Path": "%CalibreDir%\\ebook-convert.exe",
+      "ToolDir": "%CalibreDir%"
+    },
+    {
+      "Name": "EbookViewer",
+      "Path": "%CalibreDir%\\ebook-viewer.exe",
+      "ToolDir": "%CalibreDir%"
+    },
+    {
+      "Name": "PDFViewer",
+      "Path": "%userprofile%\\AppData\\Local\\SumatraPDF\\SumatraPDF.exe",
+      "ToolDir": "%CalibreDir%"
+    },
+    {
+      "Name": "EbookEditor",
+      "Path": "%CalibreDir%\\ebook-edit.exe",
+      "ToolDir": "%CalibreDir%"
+    },
+    {
+      "Name": "EbookPolish",
+      "Path": "%CalibreDir%\\ebook-polish.exe",
+      "ToolDir": "%CalibreDir%"
+    },
+    {
+      "Name": "FileExplorer",
+      "Path": "%SystemRoot%\\explorer.exe",
+      "ToolDir": "%SystemRoot%"
+    },
+    {
+      "Name": "WinMerge",
+      "Path": "%ProgramFiles%\\WinMerge\\WinMergeU.exe",
+      "ToolDir": "%ProgramFiles%\\WinMerge"
+    },
+    {
+      "Name": "7zip",
+      "Path": "%APP_DIR%\\Assets\\7z\\7za.exe",
+      "ToolDir": "%APP_DIR%\\Assets\\7z"
+    },
+    {
+      "Name": "Notepad++",
+      "Path": "%ProgramFiles%\\Notepad++\\notepad++.exe",
+      "ToolDir": "%ProgramFiles%\\Notepad++"
+    },
+    {
+      "Name": "Terminal",
+      "Path": "wt.exe",
+      "ToolDir": "%SystemRoot%",
+      "Type": "StoreApp",
+      "Args": [
+        "-p",
+        "PowerShell",
+        "-d",
+        "%OpenFolder%"
+      ]
+    },
+    {
+      "Name": "PowerShell",
+      "Path": "%SystemRoot%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "ToolDir": "%SystemRoot%"
+    },
+    {
+      "Name": "Cmd",
+      "Path": "%SystemRoot%\\system32\\cmd.exe",
+      "Path32Bit": "%SystemRoot%\\\\syswow64\\\\cmd.exe",
+      "ToolDir": "%SystemRoot%"
+    }
+  ],
+  // Tools Definition End
+
+  // Apply to all environment variables start
+  "Envs": [
+    {
+      "Name": "ToolDir",
+      "Value": "%userprofile%\\Documents\\Tools"
+    },
+    {
+      "Name": "CalibreDir",
+      "Value": "%ProgramFiles%\\Calibre2"
+    },
+    {
+      "Name": "WinDbgDir",
+      "Value": "%userprofile%\\Documents\\Tools\\WinDBG"
+    },
+    {
+      "Name": "VSSTUDIODIR",
+      "Value": "%ProgramFiles%\\Microsoft Visual Studio\\2022\\Professional"
+    }
+  ],
+  // Apply to all environment variables End
+
+  // ClearTool config start
+  "KnownCmds": [
+    {
+      "Name": "WriteEbookMetaData",
+      "ToolName": "EbookMeta"
+    },
+    {
+      "Name": "ClearEbookMetaData",
+      "ToolName": "EbookMeta",
+      "Args": [
+        // Supports {filepath} {author} {series} {title} {volume} {filepath} variables
+        //"-a \"{author}\" -s \"{series}\" -t \"{title}\" -i \"{volume}\" \"{filepath}\""
+        //"-p \" \" -a \" \" -t \" \" -c \" \" -s \" \" -i \"-1\" \"{filepath}\""
+        "--authors= --comments= --identifier= --index=-1 --publisher= --series= --tags= --title= --category= \"{filepath}\""
+      ]
+    },
+    {
+      "Name": "PolishEPUB",
+      "ToolName": "EbookPolish",
+      "Args": [
+        // Supports {srcfilepath} {destfilepath} variables
+        "--download-external-resources --remove-unused-css \"{srcfilepath}\" \"{destfilepath}\""
+      ]
+    },
+    {
+      "Name": "ConvertBookToEPUB",
+      "ToolName": "EbookConvert",
+      "Args": [
+        // Supports {srcfilepath} {destfilepath} variables , {extraoptions} optional and it must be at the end
+        "\"{srcfilepath}\" \"{destfilepath}\" {extraoptions}"
+      ]
+    },
+    {
+      "Name": "ConvertBookToPDF",
+      "ToolName": "EbookConvert",
+      "Args": [
+        // Supports {srcfilepath} {destfilepath} variables, {extraoptions} optional and it must be at the end
+        "\"{srcfilepath}\" \"{destfilepath}\" {extraoptions}"
+      ]
+    },
+    {
+      "Name": "EditEbook",
+      "ToolName": "EbookEditor",
+      "Args": [
+        // Supports {filepath} variables
+        "\"{filepath}\""
+      ]
+    },
+    {
+      "Name": "LaunchEbook",
+      "ToolName": "EbookViewer",
+      "Args": [
+        // Supports {filepath} variables
+        "\"{filepath}\""
+      ]
+    },
+    {
+      "Name": "LaunchPDF",
+      "ToolName": "PDFViewer",
+      "Args": [
+        // Supports {filepath} variables
+        "\"{filepath}\""
+      ]
+    },
+    {
+      "Name": "LaunchEditor",
+      "ToolName": "Notepad++",
+      "Args": [
+        // Supports {options} {filepath} variables
+        "{options} \"{filepath}\""
+      ]
+    },
+    {
+      "Name": "NavigateToFolder",
+      "ToolName": "FileExplorer",
+      "Args": [
+        // Supports {folderpath} variables
+        "\"{folderpath}\""
+      ]
+    },
+    // Winmerge commands
+    {
+      "Name": "CompareFiles",
+      "ToolName": "WinMerge",
+      "Args": [
+        // Supports {compareFile1}, {compareFile2} and {compareFile3} variables
+        "/s \"{compareFile1}\" \"{compareFile2}\""
+      ]
+    },
+    // Archive file creation and extraction
+    {
+      "Name": "CreateArchiveFromListFile",
+      "ToolName": "7zip",
+      "Args": [
+        // Supports {outputFolder} {fileslist} variables
+        //"a -t7z -mx9 -r \"{outputFolder}\\ActivityFiles.7z\" @{fileslist}"
+        "a -tzip -mx9 -r \"{outputFolder}\\ActivityFiles.zip\" @{fileslist}"
+      ]
+    },
+    {
+      "Name": "CreateArchiveFromFolder",
+      "ToolName": "7zip",
+      "Args": [
+        // Supports {outputFolder} {folderpath} variables
+        //"a -t7z -mx9 -r \"{outputFolder}\\ActivityFiles.7z\" \"{folderpath}\""
+        "a -tzip -mx9 -r \"{outputFolder}\\ActivityFiles.zip\" \"{folderpath}\""
+      ]
+    },
+    {
+      "Name": "CreateArchiveFromFile",
+      "ToolName": "7zip",
+      "Args": [
+        // Supports {outputFolder} {filepath} variables
+        //"a -t7z -mx9 -r \"{outputFolder}\\ActivityFiles.7z\" \"{filepath}\""
+        "a -tzip -mx9 -r \"{outputFolder}\\ActivityFiles.zip\" \"{filepath}\""
+      ]
+    },
+    {
+      "Name": "ListArchiveFile",
+      "ToolName": "7zip",
+      "Args": [
+        // Supports {zipFile} environment variables
+        "l \"{zipFile}\""
+      ]
+    },
+    {
+      "Name": "ExtractArchiveToFolder",
+      "ToolName": "7zip",
+      "Args": [
+        // Supports {zipFile} and {outputFolder} environment variables
+        "x -y \"{zipFile}\""
+      ]
+    },
+    {
+      "Name": "ExtractArchiveEntries",
+      "ToolName": "7zip",
+      "Args": [
+        // Supports {zipFile}, {zipEntryName} and {outputFolder} environment variables
+        "x -y \"{zipFile}\" \"{zipEntryName}\""
+      ]
+    },
+    {
+      "Name": "DeleteArchiveEntry",
+      "ToolName": "7zip",
+      "Args": [
+        // Supports {zipFile} environment variables
+        "d \"{zipFile}\" \"{fileentry}\""
+      ]
+    }
+  ],
+  // ClearTool config End
+
+  // To run always as admin then enable this value
+  "RunasAdmin": false,
+
+  "Meta": {
+    "IgnoreError": false,
+    "ApplyRecursively": false,
+    // Default PDF tool, options: Calibre, SharpPDF, iTextSharp
+    "PreferredPDFTool": "SharpPDF",
+    // Default EBook tool, options: Calibre, EpubMeta, EpubSharp
+    "PreferredEBookTool": "EpubMeta",
+
+    "DefaultMatchPattern": "(.+)\\s*-\\s*(.+)",
+    "DefaultSeriesPattern": "$2",
+    "DefaultVolumePattern": "$#",
+    "DefaultTitlePattern": "$1",
+    "DefaultAuthorPattern": "$2",
+    "DefaultLanguagePattern": "",
+    "PredefMatchPatterns": [
+      "(.+)\\s*-\\s*(.+)",
+      "(.+)"
+    ]
+  },
+  "Translator": {
+    "From": "en",
+    "To": "ta",
+    // Options: WebView2, PuppeteerSharp
+    "WebEngine": "PuppeteerSharp",
+    "ServiceProviders": [
+      {
+        "Name": "Google",
+        "Url": "https://translate.google.com/?sl=auto&tl=ta&op=translate"
+      },
+      {
+        "Name": "Microsoft",
+        "Url": "https://www.bing.com/translator"
+      }
+    ]
+  },
+  // Default working dir
+  "DefaultWorkspace": "%userprofile%\\Documents",
+  "DefaultOutputPath": "%userprofile%\\Downloads"
+}
