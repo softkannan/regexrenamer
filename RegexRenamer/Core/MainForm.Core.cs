@@ -55,7 +55,7 @@ public partial class MainForm
         this.Cursor = Cursors.AppStarting;
 
         GlobInfo globInfo = new GlobInfo(_activePath, _activeFilter, cbFilterExclude.Checked, itmOptionsShowHidden.Checked, itmOptionsPreserveExt.Checked, rbFilterGlob.Checked);
-        _fileStore = new FilesStore(globInfo, RenameFolders);
+        _fileStore = new FilesStore(globInfo, RenameFolders, chkIncludeSubfolder.Checked);
 
         // create datagridview items w/ filename
         for (int idx = 0; idx < _fileStore.Files.Count; idx++)

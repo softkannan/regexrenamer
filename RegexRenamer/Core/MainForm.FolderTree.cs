@@ -114,6 +114,8 @@ namespace RegexRenamer
             openInExplorerFolderViewToolStripMenuItem.Click += openInExplorerFolderViewToolStripMenuItem_Click;
             editMetadataFolderViewToolStripMenuItem.Click += editFolderViewMetadataFolderToolStripMenuItem_Click;
         }
+
+        
         private void InitializeFolderTreeView()
         {
             CreateFolderViewMenu();
@@ -130,7 +132,7 @@ namespace RegexRenamer
         }
 
         #region Folder View Context Menu
-
+       
         private void setAsKavitaLibraryRootFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _kavitaLibRootpath = _activePath;

@@ -60,13 +60,18 @@ namespace RegexRenamer.Rename
             return Uri.UnescapeDataString(str);
         }
 
+        public static bool IsValidFileName(this string str)
+        {
+            return !string.IsNullOrEmpty(str) && str.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
+        }
+
         public static string ToCleanFileName(this string str)
         {
             str = str.Trim();
             str = Uri.UnescapeDataString(str);
             foreach (char c in Path.GetInvalidFileNameChars())
             {
-                str = str.Replace(c, '-');
+                str = str.Replace(c, ' ');
             }
             char[] repeatingChars = {'-',' ','_'};
             foreach (char c in repeatingChars)

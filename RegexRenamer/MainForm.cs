@@ -344,31 +344,29 @@ namespace RegexRenamer
         // stats mouseover
         private void lblStats_MouseEnter(object sender, EventArgs e)
         {
-            if (this.ActiveControl == txtFilter || this.ActiveControl == cbFilterExclude)  // store state
+            if (this.ActiveControl == cmbFilter || this.ActiveControl == cbFilterExclude)  // store state
             {
-                txtFilter.Tag = new object[] { this.ActiveControl, txtFilter.Text, txtFilter.SelectionStart, txtFilter.SelectionLength };
+                cmbFilter.Tag = new object[] { this.ActiveControl, cmbFilter.Text, cmbFilter.SelectionStart, cmbFilter.SelectionLength };
                 UnFocusAll();
             }
             else
-                txtFilter.Tag = null;
+                cmbFilter.Tag = null;
 
-            gbFilter.Enabled = false;
             lblStats.ForeColor = Color.FromArgb(0, 70, 213);  // default winxp groupbox header colour
             pnlStats.Visible = true;
         }
         private void lblStats_MouseLeave(object sender, EventArgs e)
         {
-            gbFilter.Enabled = true;
             lblStats.ForeColor = SystemColors.ControlDark;
             pnlStats.Visible = false;
 
-            if (txtFilter.Tag != null)  // restore state
+            if (cmbFilter.Tag != null)  // restore state
             {
-                object[] state = (object[])txtFilter.Tag;
+                object[] state = (object[])cmbFilter.Tag;
                 ((Control)state[0]).Focus();
-                txtFilter.Text = (string)state[1];
-                txtFilter.SelectionStart = (int)state[2];
-                txtFilter.SelectionLength = (int)state[3];
+                cmbFilter.Text = (string)state[1];
+                cmbFilter.SelectionStart = (int)state[2];
+                cmbFilter.SelectionLength = (int)state[3];
             }
         }
 

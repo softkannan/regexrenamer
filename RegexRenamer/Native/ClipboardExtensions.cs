@@ -60,6 +60,13 @@ namespace RegexRenamer.Native
             return names;
         }
 
+        public static void CopyFilesPathToClipboad(this List<RenameItemInfo> pThis, bool move = false)
+        {
+            var fileText = pThis.Select(x => x.Fullpath).Aggregate((total, next) => total + "\r\n" + next);
+
+            Clipboard.SetText(fileText);
+        }
+
         public static void CopyFilesToClipboad(this List<RenameItemInfo> pThis, bool move = false)
         {
             var dropEffect = move ? DragDropEffects.Move : DragDropEffects.Copy;

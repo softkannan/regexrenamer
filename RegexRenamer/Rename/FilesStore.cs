@@ -66,19 +66,25 @@ namespace RegexRenamer.Rename
         public FileCount Stats { get; private set; } = new FileCount();
 
         private readonly GlobInfo _globInfo;
+        private readonly bool _searchInFolders;
+        private readonly bool _searchForFolders;
 
         public FilesStore()
         {
             _globInfo = null;
         }
 
-        public FilesStore(GlobInfo globInfo, bool folderStore)
+        public FilesStore(GlobInfo globInfo, bool searchForFolders, bool searchInFolders)
         {
             _globInfo = globInfo;
-            if (folderStore)
+            _searchInFolders = searchInFolders;
+            _searchForFolders = searchForFolders;
+            if (searchForFolders) {
                 BuildFoldersStore();
-            else
+            }
+            else {
                 BuildFilesStore();
+            }
         }
 
         public void Update(int idx, RenameItemInfo item)
@@ -149,10 +155,16 @@ namespace RegexRenamer.Rename
             var filter = _globInfo.CreateGlobFilter();
             DirectoryInfo activeDir = new DirectoryInfo(_globInfo.RootPath);
             FileInfo[] files = new FileInfo[0];
-            
             try
             {
-                files = activeDir.GetFiles();
+                if (_searchInFolders)
+                {
+                    files = activeDir.GetFiles("*", SearchOption.AllDirectories);
+                }
+                else
+                {
+                    files = activeDir.GetFiles();
+                }
             }
             catch (Exception)
             {

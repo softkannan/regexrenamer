@@ -109,8 +109,8 @@ public class FileOperationAPI
             var fs = new SHFILEOPSTRUCT
             {
                 wFunc = SHFileOperationType.FO_RENAME,
-                pFrom = srcPath,
-                pTo = destPath,
+                pFrom = srcPath + "\0\0",
+                pTo = destPath + "\0\0",
                 fFlags = SHFileOperationFlags.FOF_ALLOWUNDO | flags
             };
             SHFileOperation(ref fs);

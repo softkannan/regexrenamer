@@ -193,10 +193,14 @@ public static class EBookHelper
         {
             return false;
         }
-        var cmdName = "LaunchEbook";
+        var cmdName = "default";
         if (Parser.IsPdf(filePath))
         {
             cmdName = "LaunchPDF";
+        }
+        else if (Parser.IsEpub(filePath))
+        {
+            cmdName = "LaunchEbook";
         }
         await cmdName.ExecNamedCmdAsync(Path.GetDirectoryName(filePath), new List<Tuple<string, string>>()
                     {
@@ -219,7 +223,15 @@ public static class EBookHelper
         {
             return false;
         }
-        var cmdName = "EditEbook";
+        var cmdName = "LaunchEditor";
+        if (Parser.IsPdf(filePath))
+        {
+            cmdName = "EditPDF";
+        }
+        else if (Parser.IsEpub(filePath))
+        {
+            cmdName = "EditEbook";
+        }
         await cmdName.ExecNamedCmdAsync(Path.GetDirectoryName(filePath), new List<Tuple<string, string>>()
                     {
                         new Tuple<string, string>("{filepath}", filePath)

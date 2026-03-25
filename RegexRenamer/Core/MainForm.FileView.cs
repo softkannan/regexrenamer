@@ -37,6 +37,7 @@ namespace RegexRenamer
             var launchEditorFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var explorerFileViewContextMenuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var copyFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var copyPathFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var cutFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var pasteFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var deleteFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +52,7 @@ namespace RegexRenamer
             cmFileView.ImageScalingSize = new System.Drawing.Size(20, 20);
             cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { editFileViewToolStripMenuItem, 
                 launchEditorFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItemGui,
-                explorerFileViewContextMenuToolStripMenuItem, copyFileViewToolStripMenuItem, 
+                explorerFileViewContextMenuToolStripMenuItem, copyFileViewToolStripMenuItem, copyPathFileViewToolStripMenuItem,
                 cutFileViewToolStripMenuItem, pasteFileViewToolStripMenuItem, deleteFileViewToolStripMenuItem, 
                 editMetadataFileViewToolStripMenuItem, eBookOperationsFileViewToolStripMenuItem });
             cmFileView.Name = "contextMenuStripFileView";
@@ -98,6 +99,13 @@ namespace RegexRenamer
             copyFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             copyFileViewToolStripMenuItem.Text = "Copy";
             copyFileViewToolStripMenuItem.Click += copyFileViewToolStripMenuItem_Click;
+            // 
+            // copyPathFileViewToolStripMenuItem
+            // 
+            copyPathFileViewToolStripMenuItem.Name = "copyPathFileViewToolStripMenuItem";
+            copyPathFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            copyPathFileViewToolStripMenuItem.Text = "Copy Path";
+            copyPathFileViewToolStripMenuItem.Click += copyPathFileViewToolStripMenuItem_Click;
             // 
             // cutFileViewToolStripMenuItem
             // 
@@ -152,7 +160,6 @@ namespace RegexRenamer
             dgvFiles.Leave += dgvFiles_Leave;
 
             dgvFiles.SortCompare += DgvFiles_SortCompare;
-            chkOrderByReverse.CheckedChanged += ChkOrderByReverse_CheckedChanged;
 
             colModified.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             colFileSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -171,25 +178,21 @@ namespace RegexRenamer
            // colPreview.DefaultCellStyle.Alignment = alignment;
         }
 
-        private void ChkOrderByReverse_CheckedChanged(object sender, EventArgs e)
-        {
-            if(!EnableUpdates) return;
-
-            if(chkOrderByReverse.Checked)
-            {
-                UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment.MiddleRight);
-            }
-            else
-            {
-                UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment.MiddleLeft);
-            }
-
-            UpdatePreview();
-        }
+        
 
         private void DgvFiles_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
-            if (e.Column == colFileSize)
+            if ((!string.IsNullOrWhiteSpace(cmbSort.Text)) && _activeSortMatch != null)
+            {
+                // reverse sort for other columns
+                var val1 = e.CellValue1?.ToString() ?? "";
+                var val2 = e.CellValue2?.ToString() ?? "";
+                val1 = val1.ConvertToSortText(_activeSortMatch);
+                val2 = val2.ConvertToSortText(_activeSortMatch);
+                e.SortResult = string.Compare(val1, val2);
+                e.Handled = true; // Indicate that sorting is handled
+            }
+            else if (e.Column == colFileSize)
             {
                 var obj1 = e.CellValue1 as FileSizeInfo;
                 var obj2 = e.CellValue2 as FileSizeInfo;
@@ -209,16 +212,6 @@ namespace RegexRenamer
                     e.SortResult = obj1.CompareTo(obj2);
                     e.Handled = true; // Indicate that sorting is handled
                 }
-            }
-            else if(chkOrderByReverse.Checked)
-            {
-                // reverse sort for other columns
-                var val1 = e.CellValue1?.ToString() ?? "";
-                var val2 = e.CellValue2?.ToString() ?? "";
-                val1 = val1.ReverseTextElements();
-                val2 = val2.ReverseTextElements();
-                e.SortResult = string.Compare(val1, val2);
-                e.Handled = true; // Indicate that sorting is handled
             }
         }
         #endregion
@@ -297,6 +290,13 @@ namespace RegexRenamer
             {
                 newFilename += _fileStore.Files[afi].Extension;
             }
+
+            //Remove invalid characters from filename with empty string to get valid filename
+            if (!string.IsNullOrWhiteSpace(newFilename) && !newFilename.IsValidFileName())
+            {
+                newFilename = newFilename.ToCleanFileName();
+            }
+
             string newFullpath = Path.Combine(_activePath, newFilename);
 
             // validate
@@ -595,6 +595,12 @@ namespace RegexRenamer
         {
             List<RenameItemInfo> selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files);
             selectedFiles.CopyFilesToClipboad();
+        }
+
+        private void copyPathFileViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            List<RenameItemInfo> selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files);
+            selectedFiles.CopyFilesPathToClipboad();
         }
 
         private void editFileViewToolStripMenuItem_Click(object sender, EventArgs e)

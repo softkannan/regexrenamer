@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RegexRenamer.Controls;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -32,15 +33,15 @@ public class RegExContextMenuProvider
         CreateRegexReplaceContextMenu(components);
     }
 
-    public void ShowGlobMenu(TextBox txtCtrl, bool showGlob, Point loc)
+    public void ShowGlobMenu(MyComboBox cmbCtrl, bool showGlob, Point loc)
     {
-        lastControlRightClicked = txtCtrl;
-        txtCtrl.ContextMenuStrip = cmsBlank;  // prevent default cms from being displayed
-        txtCtrl.Focus();
+        lastControlRightClicked = cmbCtrl;
+        cmbCtrl.ContextMenuStrip = cmsBlank;  // prevent default cms from being displayed
+        cmbCtrl.Focus();
         if (showGlob)
-            cmGlobMatch.Show(txtCtrl, loc);
+            cmGlobMatch.Show(cmbCtrl, loc);
         else
-            cmRegexMatch.Show(txtCtrl, loc);
+            cmRegexMatch.Show(cmbCtrl, loc);
     }
 
     public void ShowMatchMenu(ComboBox cmbCtrl, Point loc)

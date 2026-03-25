@@ -56,7 +56,7 @@ namespace RegexRenamer
                 }
 
                 // check for valid filename
-                string validFilenameErrmsg = ValidateFilename(_fileStore.Files[afi].PreviewExt, itmOptionsAllowRenSub.Checked);
+                string validFilenameErrmsg = ValidateFilename(_fileStore.Files[afi].PreviewExt, false);
                 if (validFilenameErrmsg != null)
                 {
                     dgvFiles.Rows[dfi].Cells[2].Tag = validFilenameErrmsg;
@@ -340,21 +340,42 @@ namespace RegexRenamer
             string errorMessage;
 
             if (rbFilterGlob.Checked)
-                errorMessage = ValidateGlob(txtFilter.Text);
+                errorMessage = ValidateGlob(cmbFilter.Text);
             else  // regex
-                errorMessage = ValidateRegex(txtFilter.Text);
+                errorMessage = ValidateRegex(cmbFilter.Text);
 
             if (errorMessage == null)
             {
-                txtFilter.BackColor = SystemColors.Window;
-                toolTip.Hide(txtFilter);
+                cmbFilter.BackColor = SystemColors.Window;
+                toolTip.Hide(cmbFilter);
                 _validFilter = true;
             }
             else
             {
-                txtFilter.BackColor = Color.MistyRose;
-                toolTip.Show(errorMessage, txtFilter, 0, txtFilter.Height);
+                cmbFilter.BackColor = Color.MistyRose;
+                toolTip.Show(errorMessage, cmbFilter, 0, cmbFilter.Height);
                 _validFilter = false;
+            }
+        }
+
+        private void ValidateSort()
+        {
+            if (!EnableUpdates) return;
+
+            string errorMessage;
+            errorMessage = ValidateRegex(cmbSort.Text);
+
+            if (errorMessage == null)
+            {
+                cmbSort.BackColor = SystemColors.Window;
+                toolTip.Hide(cmbSort);
+                _validSortMatch = true;
+            }
+            else
+            {
+                cmbSort.BackColor = Color.MistyRose;
+                toolTip.Show(errorMessage, cmbSort, 0, cmbSort.Height);
+                _validSortMatch = false;
             }
         }
 
