@@ -92,6 +92,7 @@ public class BookParser(IDirectoryService directoryService, BasicParser basicPar
         try
         {
             using var epubBook = EpubReader.OpenBook(filePath, LenientBookReaderOptions);
+            if (epubBook == null) return null;
 
             // <meta content="The Dark Tower" name="calibre:series"/>
             // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
@@ -108,8 +109,6 @@ public class BookParser(IDirectoryService directoryService, BasicParser basicPar
                 var seriesIndex = string.Empty;
                 var series = string.Empty;
                 var specialName = string.Empty;
-
-
                 foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
                 {
                     // EPUB 2 and 3

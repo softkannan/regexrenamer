@@ -109,7 +109,7 @@ namespace RegexRenamer.Rename
             {
                 dirs = activeDir.GetDirectories();
             }
-            catch (Exception ex)
+            catch
             {
             }
 

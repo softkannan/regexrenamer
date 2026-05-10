@@ -64,7 +64,7 @@ public static class EpubMetaHelper
     {
         string tempFilePath = filePath.GetInFolderTempFilePath();
         // EPUB files are ZIP archives. Use SharpCompress to open and modify.
-        using (var archive = ZipArchive.Open(filePath))
+        using (var archive = ZipArchive.OpenArchive(filePath))
         {
             // Find the OPF file (package.opf) and clear metadata
             var opfEntry = archive.Entries.FirstOrDefault(e => e.Key.EndsWith(".opf", StringComparison.OrdinalIgnoreCase));
@@ -198,7 +198,7 @@ public static class EpubMetaHelper
     {
         string tempFilePath = filePath.GetInFolderTempFilePath();
         // EPUB files are ZIP archives. Use SharpCompress to open and modify.
-        using (var archive = ZipArchive.Open(filePath))
+        using (var archive = ZipArchive.OpenArchive(filePath))
         {
             // Find the OPF file (package.opf) and clear metadata
             var opfEntry = archive.Entries.FirstOrDefault(e => e.Key.EndsWith(".opf", StringComparison.OrdinalIgnoreCase));

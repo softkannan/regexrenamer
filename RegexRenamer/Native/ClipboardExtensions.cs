@@ -84,27 +84,33 @@ namespace RegexRenamer.Native
         }
         public static void ClipboardPasteFiles(this string pastePath)
         {
-            DataObject data = Clipboard.GetDataObject() as DataObject;
-            var obj = data.GetData(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT);
+            var data = Clipboard.GetDataObject() as DataObject;
+            if(data == null) return;
             bool isMove = false;
-            if (obj != null)
+            if (data.TryGetData<MemoryStream>(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, out var dropEffectStream))
             {
-                if (obj is MemoryStream) //from Windows
+                int dropEffect = dropEffectStream.ReadByte();
+                // Checks if the 'Copy' flag (1) is present within the value 5
+                if ((dropEffect & 1) != 0)
                 {
-                    var m = (obj as MemoryStream).ToArray();
-                    isMove = m[0] == 2;
+                    // Handle Copy
+                    isMove = false;
                 }
-                else
+                if ((dropEffect & 2) != 0)
                 {
-                    isMove = obj.ToString() == "Move";
+                    // Handle Move
+                    isMove = true;
+                }
+                // Checks if the 'Link' flag (4) is present within the value 5
+                if ((dropEffect & 4) != 0)
+                {
+                    // Handle Link
                 }
             }
-
             List<string> files = new List<string>();
-
             foreach(var item in data.GetFileDropList())
             {
-                files.Add(item.ToString());
+                files.Add(item!.ToString());
             }
 
             PInvoke.FileOperationAPI.MoveFiles(files, pastePath,isMove);

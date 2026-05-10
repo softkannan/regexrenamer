@@ -433,6 +433,7 @@ public partial class BookService
         try
         {
             using var epubBook = EpubReader.OpenBook(filePath, LenientBookReaderOptions);
+            if(epubBook == null) return null;
 
             // <meta content="The Dark Tower" name="calibre:series"/>
             // <meta content="Wolves of the Calla" name="calibre:title_sort"/>

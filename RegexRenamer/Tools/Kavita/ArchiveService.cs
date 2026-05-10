@@ -52,7 +52,7 @@ public class ArchiveService
         {
             try
             {
-                using var a1 = ArchiveFactory.Open(archivePath);
+                using var a1 = ArchiveFactory.OpenArchive(archivePath);
                 return ArchiveLibrary.SharpCompress;
             }
             catch (Exception)
@@ -119,7 +119,7 @@ public class ArchiveService
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
-                    using var archive = ArchiveFactory.Open(archivePath);
+                    using var archive = ArchiveFactory.OpenArchive(archivePath);
                     var entry = archive.Entries.FirstOrDefault(entry => entry.Key == ComicInfoFilename) ??
                         archive.Entries.FirstOrDefault(entry =>
                         IsComicInfoArchiveEntry(Path.GetDirectoryName(entry.Key) ?? string.Empty, entry?.Key ?? string.Empty));
