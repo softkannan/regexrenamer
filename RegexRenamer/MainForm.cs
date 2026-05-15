@@ -216,6 +216,7 @@ namespace RegexRenamer
             InitializeFileListView();
             InitializeCore();
             InitializeFilter();
+            InitializeSort();
             InitializeOptionsHelp();
             InitializeKavita();
 
