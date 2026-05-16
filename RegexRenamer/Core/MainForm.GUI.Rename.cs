@@ -1,4 +1,5 @@
-﻿using RegexRenamer.Rename;
+using RegexRenamer.Models;
+using RegexRenamer.Rename;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -65,7 +66,7 @@ namespace RegexRenamer
             cmbMatch.Update();
 
             if (itmOptionsRealtimePreview.Checked)
-                UpdatePreview();
+                UpdateUserInputValues();
         }
         private void cmbMatch_Enter(object sender, EventArgs e)
         {
@@ -78,21 +79,21 @@ namespace RegexRenamer
             if (cmbReplace.Focused || cbModifierI.Focused || cbModifierG.Focused || cbModifierX.Focused) return;
 
             if (PreviewNeedsUpdate)
-                UpdatePreview();
+                UpdateUserInputValues();
         }
         private void cmbReplace_TextChanged(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmbMatch.Text.StartsWith("/")) return;  // skip when selection from combobox
 
             if (itmOptionsRealtimePreview.Checked)
-                UpdatePreview();
+                UpdateUserInputValues();
         }
         private void cmbReplace_Leave(object sender, EventArgs e)
         {
             if (cmbMatch.Focused || cbModifierI.Focused || cbModifierG.Focused || cbModifierX.Focused) return;
 
             if (PreviewNeedsUpdate)
-                UpdatePreview();
+                UpdateUserInputValues();
         }
 
         // parse combobox history string
@@ -135,7 +136,7 @@ namespace RegexRenamer
             {
                 if (_validMatch && PreviewNeedsUpdate)
                 {
-                    UpdatePreview();
+                    UpdateUserInputValues();
                     e.SuppressKeyPress = true;
                 }
                 e.Handled = true;
@@ -145,13 +146,13 @@ namespace RegexRenamer
                 ResetFields();
                 cmbMatch.Items.Clear();
                 SaveRegexHistory();
-                UpdateFileList();
+                UpdateUserInputValues();
                 e.Handled = true;
             }
             else if (e.KeyCode == Keys.Back && e.Control)  // ctrl+backspace = clear fields
             {
                 ResetFields();
-                UpdateFileList();
+                UpdateUserInputValues();
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }
@@ -172,7 +173,7 @@ namespace RegexRenamer
             {
                 if (_validMatch && PreviewNeedsUpdate)
                 {
-                    UpdatePreview();
+                    UpdateUserInputValues();
                     e.SuppressKeyPress = true;
                 }
                 e.Handled = true;
@@ -180,7 +181,7 @@ namespace RegexRenamer
             else if (e.KeyCode == Keys.Back && e.Control)  // ctrl+backspace = clear fields
             {
                 ResetFields();
-                UpdateFileList();
+                UpdateUserInputValues();
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }
@@ -228,124 +229,54 @@ namespace RegexRenamer
         private void ChkRenameSelectionOnly_Click(object sender, EventArgs e)
         {
             _renameSelectionOnly = chkRenameSelectionOnly.Checked;
-            UpdateFileList();
+            UpdateUserInputValues();
         }
 
         private void RenameFilesCMSRenameItem_Click(object sender, EventArgs e)
         {
             RenameFolders = false;
-            UpdateFileList();
+            UpdateUserInputValues();
         }
         private void RenameFoldersCMSRenameItem_Click(object sender, EventArgs e)
         {
             RenameFolders = true;
-            UpdateFileList();
+            UpdateUserInputValues();
         }
 
         private void PerformRename()
         {
-            // check for errors
-            string errorMessage = null;
+            // Snapshot current user input for business logic
+            _currentInput = GetUserInput();
 
-            // invalid match regex
-            if (!_validMatch) errorMessage = "The match regular expression in invalid.";
+            // run pre-rename validation via service
+            var fileErrors = _lastValidationResult?.FileErrors ?? [];
+            var checkResult = _validationService.CheckBeforeRename(
+                _fileStore.Files, _currentInput, _validMatch, fileErrors, strFile, strFilename);
 
-            // preview errors exist
-            if (errorMessage == null)
+            if (!checkResult.CanProceed)
             {
-                foreach (DataGridViewRow row in dgvFiles.Rows)
-                {
-                    int afi = (int)row.Tag;
-                    if (_renameSelectionOnly && !_fileStore.Files[afi].Selected)
-                        continue;  // ignore unselected rows
-
-                    if (row.Cells[2].Tag != null)
-                    {
-                        errorMessage = "Can't rename while errors exist (highlighted in red).";
-                        break;
-                    }
-                }
-            }
-
-            // no files need renaming
-            int filesToRename = 0;
-            if (errorMessage == null)
-            {
-                foreach (RenameItemInfo file in _fileStore.Files)
-                {
-                    if (_renameSelectionOnly && !file.Selected)
-                        continue;  // ignore unselected rows
-
-                    if ((itmOutputRenameInPlace.Checked && file.Name != file.Preview)
-                     || (!itmOutputRenameInPlace.Checked && file.Matched))
-                        filesToRename++;
-                }
-
-                if (filesToRename == 0) errorMessage = "There are no " + strFile + "s to rename.";
-            }
-
-            // move/copy path doesn't exist
-            if (errorMessage == null && !itmOutputRenameInPlace.Checked && !Directory.Exists(fbdMoveCopy.SelectedPath))
-            {
-                if (itmOutputMoveTo.Checked) errorMessage = "'Move to' folder '" + fbdMoveCopy.SelectedPath + "' is not a valid path.";
-                else if (itmOutputCopyTo.Checked) errorMessage = "'Copy to' folder '" + fbdMoveCopy.SelectedPath + "' is not a valid path.";
-                else if (itmOutputBackupTo.Checked) errorMessage = "'Backup to' folder '" + fbdMoveCopy.SelectedPath + "' is not a valid path.";
-            }
-
-            // move/copy path same as activePath
-            if (errorMessage == null && !itmOutputRenameInPlace.Checked && fbdMoveCopy.SelectedPath == _activePath)
-            {
-                if (itmOutputMoveTo.Checked) errorMessage = "'Move to' folder is the same as the currently selected folder.";
-                else if (itmOutputCopyTo.Checked) errorMessage = "'Copy to' folder is the same as the currently selected folder.";
-                else if (itmOutputBackupTo.Checked) errorMessage = "'Backup to' folder is the same as the currently selected folder.";
-            }
-
-            // if error found, display dialog & abort
-            if (errorMessage != null)
-            {
-                MessageBox.Show(errorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(checkResult.ErrorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             // warn if any files start with space or dot
-            bool beginWithInvalidChars = false;
-            Regex regexInvalidChars = new Regex("(^|\\\\)[ .]");
-
-            foreach (RenameItemInfo file in _fileStore.Files)
+            if (checkResult.HasInvalidStartChars)
             {
-                if (itmOutputRenameInPlace.Checked)
-                {
-                    if (file.Name == file.Preview) continue;
-                }
-                else
-                {
-                    if (!file.Matched) continue;
-                }
-
-                if (regexInvalidChars.IsMatch(file.Preview))
-                {
-                    beginWithInvalidChars = true;
-                    break;
-                }
-            }
-
-            if (beginWithInvalidChars)
-            {
-                errorMessage = "One or more " + strFilename + "s begin with a space or a dot. While this is technically possible, Windows\n"
+                string warningMessage = "One or more " + strFilename + "s begin with a space or a dot. While this is technically possible, Windows\n"
                              + "normally won't let you do this as it may cause problems with other programs.\n"
                              + "\n"
                              + "Are you sure you want to continue?";
 
-                if (MessageBox.Show(errorMessage, "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning)
+                if (MessageBox.Show(warningMessage, "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning)
                     == DialogResult.Cancel)
                     return;
             }
 
             // remember regex history string to store later (in case the user changes the fields during rename)
-            string regexString = "/" + cmbMatch.Text + "/" + cmbReplace.Text + "/";
-            if (cbModifierI.Checked) regexString += "i";
-            if (cbModifierG.Checked) regexString += "g";
-            if (cbModifierX.Checked) regexString += "x";
+            string regexString = "/" + _currentInput.MatchPattern + "/" + _currentInput.ReplacePattern + "/";
+            if (_currentInput.Modifiers.IgnoreCase) regexString += "i";
+            if (_currentInput.Modifiers.ReplaceEveryMatch) regexString += "g";
+            if (_currentInput.Modifiers.IgnorePatternWhitespace) regexString += "x";
 
             cmbMatch.Tag = regexString;
 
@@ -367,7 +298,7 @@ namespace RegexRenamer
 
 
             // perform rename operation in background thread
-            bgwRename.RunWorkerAsync(filesToRename);
+            bgwRename.RunWorkerAsync(checkResult.FilesToRename);
         }
 
         
@@ -468,7 +399,7 @@ namespace RegexRenamer
 
             // redo validation
             this.Update();
-            UpdateValidation();
+            UpdateUserInputValues();
         }
         private void itmOutputRenameInPlace_Click(object sender, EventArgs e)
         {

@@ -84,7 +84,7 @@ namespace RegexRenamer
                         && (bool)mnuNumbering.DropDownItems[3].Tag;
 
             if (_validNumber)
-                UpdatePreview();
+                UpdateUserInputValues();
         }
         private void txtNumberingStart_TextChanged(object sender, EventArgs e)
         {
@@ -113,7 +113,7 @@ namespace RegexRenamer
                 if (txtNumberingReset.Text != "0") txtNumberingReset.Text = "0";
                 EnableUpdates = true;
 
-                UpdatePreview();
+                UpdateUserInputValues();
             }
         }
     }

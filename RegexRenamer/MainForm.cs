@@ -50,6 +50,10 @@ namespace RegexRenamer
 
         private string _activeFilter = "*.*";  // current filter
         private FilesStore _fileStore = new FilesStore();  // files in activePath displayed in filelist
+        private readonly List<Models.FileViewRowData> _fileViewRows = new();
+
+        private readonly ValidationService _validationService = new();
+        private readonly RenameService _renameService = new();
 
         private int _countProgLaunches = 1;    // counters for
         private int _countFilesRenamed = 0;    // about-dialog stats
@@ -219,6 +223,7 @@ namespace RegexRenamer
             InitializeSort();
             InitializeOptionsHelp();
             InitializeKavita();
+            InitializeNumbering();
 
             FormClosing += MainForm_FormClosing;
             Load += MainForm_Load;

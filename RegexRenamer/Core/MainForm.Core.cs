@@ -1,5 +1,6 @@
-﻿using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
+using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using Kavita;
+using RegexRenamer.Models;
 using RegexRenamer.Native;
 using RegexRenamer.Rename;
 using RegexRenamer.Tools.FindReplace;
@@ -18,6 +19,20 @@ using System.Windows.Forms;
 
 namespace RegexRenamer;
 
+/// <summary>Specifies which UI refresh stages to execute.</summary>
+[Flags]
+public enum UpdateStage
+{
+    None = 0,
+    FileList = 1 << 0,
+    Preview = 1 << 1,
+    Validation = 1 << 2,
+    Selection = 1 << 3,
+
+    /// <summary>Full cascade: FileList → Preview → Validation → Selection.</summary>
+    All = FileList | Preview | Validation | Selection,
+}
+
 public partial class MainForm
 {
     private int MAX_VIEW_PAGE_SIZE = 200;
@@ -29,21 +44,53 @@ public partial class MainForm
         bgwRename.RunWorkerCompleted += bgwRename_RunWorkerCompleted;
     }
 
+    /// <summary>
+    /// Unified refresh entry point. Executes the requested stages in cascade order.
+    /// Stages that depend on earlier ones (e.g., Preview depends on FileList) are
+    /// automatically included when a higher-level stage is requested.
+    /// </summary>
+    private void RefreshView(UpdateStage stages)
+    {
+        if (!EnableUpdates) return;
+
+        if (stages.HasFlag(UpdateStage.FileList))
+        {
+            UpdateFileList();
+            return; // UpdateFileList already cascades into Preview → Validation → Selection
+        }
+
+        if (stages.HasFlag(UpdateStage.Preview))
+        {
+            UpdatePreview();
+            return; // UpdatePreview already cascades into Validation
+        }
+
+        if (stages.HasFlag(UpdateStage.Validation))
+            UpdateValidation();
+
+        if (stages.HasFlag(UpdateStage.Selection))
+            UpdateSelection();
+    }
+
     // update directory tree/filenames/previews/validation (each cascades into the one below)
     private void UpdateFileList()
     {
         if (!EnableUpdates) return;
 
+        // Snapshot current user input for business logic
+        _currentInput = GetUserInput();
+
         dgvFiles.Tag = 0;  // reset files ignored
-        dgvFiles.Rows.Clear();
+        dgvFiles.RowCount = 0;
+        _fileViewRows.Clear();
         _fileViewIconCache.ClearDynamicIcons();
 
         // update txtPath
-        txtPath.Text = _activePath;
+        txtPath.Text = _currentInput.ActivePath;
         txtPath.Update();
 
         // if invalid selection, clear all
-        if (string.IsNullOrEmpty(_activePath))
+        if (string.IsNullOrEmpty(_currentInput.ActivePath))
         {
             _fileStore = new FilesStore();
             lblNumMatched.Text = "0";
@@ -54,10 +101,12 @@ public partial class MainForm
 
         this.Cursor = Cursors.AppStarting;
 
-        GlobInfo globInfo = new GlobInfo(_activePath, _activeFilter, cbFilterExclude.Checked, itmOptionsShowHidden.Checked, itmOptionsPreserveExt.Checked, rbFilterGlob.Checked);
-        _fileStore = new FilesStore(globInfo, RenameFolders, chkIncludeSubfolder.Checked);
+        GlobInfo globInfo = new GlobInfo(_currentInput.ActivePath, _activeFilter, _currentInput.FilterExclude, _currentInput.ShowHiddenFiles, _currentInput.PreserveExtension, _currentInput.FilterIsGlob);
+        _fileStore = new FilesStore(globInfo, _currentInput.RenameFolders, _currentInput.IncludeSubfolders);
 
         // create datagridview items w/ filename
+        int expectedCount = Math.Min(_fileStore.Files.Count, FilesStore.MAX_FILES);
+        _fileViewRows.Capacity = Math.Max(_fileViewRows.Capacity, expectedCount);
         for (int idx = 0; idx < _fileStore.Files.Count; idx++)
         {
             if (idx >= FilesStore.MAX_FILES)  // reached limit
@@ -67,29 +116,32 @@ public partial class MainForm
                 break;
             }
 
-            // add new item
-            dgvFiles.Rows.Add(null, _fileStore.Files[idx].Name, null);
-            dgvFiles.Rows[idx].Tag = idx;  // store activeFiles index so we can refer back when under different sorting
+            // add new row data
+            var rowData = new Models.FileViewRowData { ActiveFileIndex = idx };
+            rowData.CellValues[1] = _fileStore.Files[idx].Name;
 
             // add image (keyed by extension)
 #if !DEBUG
     try  
     {
 #endif
-            // Update the icons, for folders, always use folder icon
-            dgvFiles.Rows[idx].Cells[0].Value = _fileViewIconCache.GetIcon(_fileStore.Files[idx]);
+            rowData.CellValues[0] = _fileViewIconCache.GetIcon(_fileStore.Files[idx]);
 
 #if !DEBUG
     }
     catch  // default: no image
     {
-      dgvFiles.Rows[idx].Cells[0].Value = new Bitmap( 1, 1 );
+      rowData.CellValues[0] = new Bitmap( 1, 1 );
     }
 #endif
+            _fileViewRows.Add(rowData);
         }
 
-        _fileStore.Stats.SetShown(dgvFiles.Rows.Count);
+        dgvFiles.RowCount = _fileViewRows.Count;
+
+        _fileStore.Stats.SetShown(_fileViewRows.Count);
         UpdateFileStats();
+        ApplyGridThemeColors();
         UpdateSelection();
         UpdatePreview();
     }
@@ -108,39 +160,12 @@ public partial class MainForm
     {
         if (!EnableUpdates || !_validMatch) return;
 
+        // Snapshot current user input for business logic
+        _currentInput = GetUserInput();
+
         this.Cursor = Cursors.AppStarting;
 
-        // run the match and build the preview using replace pattern
-        string matchingPattern = cmbMatch.Text;
-        string userReplacePattern = cmbReplace.Text;
-
-        AutoNumberingInfo numInfo = new AutoNumberingInfo()
-        {
-            ValidNumber = _validNumber,
-            NumberingStart = txtNumberingStart.Text,
-            NumberingIncStep = txtNumberingInc.Text,
-            NumberingReset = txtNumberingReset.Text,
-            NumberingPad = txtNumberingPad.Text
-        };
-
-        KavitaInfo kavitaInfo = new KavitaInfo()
-        {
-            ShowPreview = noneKavitaMenuItem.Checked == false,
-            KavitaRoot = _kavitaLibRootpath,
-            KavitaLibType = _kavitaPreviewLibType,
-            UseMetadata = _kavitaUseMetadata
-        };
-
-        ChangeCaseOption changeCaseOption = GetChangeCaseInfo();
-
-        RegexModifierInfo modifierInfo = new RegexModifierInfo()
-        {
-            IgnoreCase = cbModifierI.Checked,
-            ReplaceEveryMatch = cbModifierG.Checked,
-            IgnorePatternWhitespace = cbModifierX.Checked
-        };
-
-        _fileStore.BuildPreview(cmbMatch.Text, cmbReplace.Text, numInfo,changeCaseOption, kavitaInfo,modifierInfo);
+        _fileStore.BuildPreview(_currentInput.MatchPattern, _currentInput.ReplacePattern, _currentInput.Numbering, _currentInput.ChangeCase, _currentInput.Kavita, _currentInput.Modifiers);
 
         // write the preview data to the datagridview
         WriteToDataGrid(_fileStore.Files);
@@ -149,8 +174,8 @@ public partial class MainForm
         UpdateValidation();
 
         // redraw
-        dgvFiles.Sort(this.dgvFiles.SortedColumn ?? this.colFilename,
-                       dgvFiles.SortOrder == SortOrder.Descending ? ListSortDirection.Descending : ListSortDirection.Ascending);  // resort
+        SortFileViewRows(dgvFiles.SortedColumn ?? colFilename,
+                         dgvFiles.SortOrder == SortOrder.Descending ? ListSortDirection.Descending : ListSortDirection.Ascending);
 
         this.Cursor = Cursors.Default;
 
@@ -167,7 +192,7 @@ public partial class MainForm
         }
 
         // keep selection cleared
-        if (!_renameSelectionOnly)
+        if (!_currentInput.RenameSelectionOnly)
             dgvFiles.ClearSelection();
 
         PreviewNeedsUpdate = false;
@@ -177,51 +202,53 @@ public partial class MainForm
     private void WriteToDataGrid(IReadOnlyList<RenameItemInfo> listOfItems)
     {
         // update file list
-        for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)
+        for (int dfi = 0; dfi < _fileViewRows.Count; dfi++)
         {
+            var rowData = _fileViewRows[dfi];
+            int afi = rowData.ActiveFileIndex;
             // column 0 is file icon, column 1 is filename and column 2 is preview filename
-            int colStart = 2;  
-            int afi = (int)dgvFiles.Rows[dfi].Tag;
-            // column 0 is file icon, column 1 is filename and column 2 is preview filename
-            dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].Preview;
+            int colStart = 2;
+            rowData.CellValues[colStart++] = listOfItems[afi].Preview;
 
             colStart = 3;  // reset to column 3 for extra info
             if (chkShowInfo.Checked)
             {
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].Extension;
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].Size;
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].FileModified;
+                rowData.CellValues[colStart++] = listOfItems[afi].Extension;
+                rowData.CellValues[colStart++] = listOfItems[afi].Size;
+                rowData.CellValues[colStart++] = listOfItems[afi].FileModified;
             }
 
             colStart = 6; //reset to column 6 for kavita info
             if (listOfItems[afi].ParseInfo != null)
             {
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].ParseInfo.Title;
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].ParseInfo.Series;
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].ParseInfo.Volumes;
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].ParseInfo.Chapters;
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].ParseInfo.Edition;
-                dgvFiles.Rows[dfi].Cells[colStart++].Value = listOfItems[afi].ParseInfo.IsSpecial ? "true" : "false";
+                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Title;
+                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Series;
+                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Volumes;
+                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Chapters;
+                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Edition;
+                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.IsSpecial ? "true" : "false";
             }
         }
     }
 
     private void UpdateSelection()
     {
-        if (dgvFiles.Rows.Count != this._fileStore.Files.Count)
+        if (_fileViewRows.Count != this._fileStore.Files.Count)
             return;
 
-        RenameItemInfo firstSelection = null;
-        foreach (DataGridViewRow row in dgvFiles.Rows)
-        {
-            if (row.Tag == null) continue;
+        // Bulk-clear all selected flags first
+        for (int i = 0; i < _fileStore.Files.Count; i++)
+            _fileStore.Files[i].Selected = false;
 
-            int afi = (int)row.Tag;
-            this._fileStore.Files[afi].Selected = row.Selected;
-            if(firstSelection == null && this._fileStore.Files[afi].Selected)
-            {
-                firstSelection = this._fileStore.Files[afi];
-            }
+        // Only iterate actually-selected rows (typically very few)
+        RenameItemInfo firstSelection = null;
+        foreach (DataGridViewRow row in dgvFiles.SelectedRows)
+        {
+            if (row.Index < 0 || row.Index >= _fileViewRows.Count) continue;
+
+            int afi = _fileViewRows[row.Index].ActiveFileIndex;
+            _fileStore.Files[afi].Selected = true;
+            firstSelection ??= _fileStore.Files[afi];
         }
 
         UpdateFileInfo(firstSelection);
@@ -231,108 +258,14 @@ public partial class MainForm
     private void bgwRename_DoWork(object sender, DoWorkEventArgs e)
     {
         BackgroundWorker bw = sender as BackgroundWorker;
-        RenameResult result = new RenameResult();
         int filesToRename = (int)e.Argument;
-        float filesRenamed = 0.5F;
 
-        string outputPath = _activePath;
-        if (itmOutputMoveTo.Checked || itmOutputCopyTo.Checked)
-            outputPath = fbdMoveCopy.SelectedPath;
-
-
-        for (int afi = 0; afi < _fileStore.Files.Count; afi++)
-        {
-            // abort if user cancelled
-            if (bw.CancellationPending)
-            {
-                // e.Cancel = true;       // don't use this as it prevents access to the result object
-                result.Cancelled = true;  // use our own instead
-                break;
-            }
-
-
-            // skip ignored/unselected files
-            if (itmOutputRenameInPlace.Checked)
-            {
-                if (_fileStore.Files[afi].Name == _fileStore.Files[afi].Preview) continue;
-            }
-            else
-            {
-                if (!_fileStore.Files[afi].Matched) continue;
-            }
-
-            if (_renameSelectionOnly)
-            {
-                if (!_fileStore.Files[afi].Selected) continue;
-            }
-
-
-            // update progressbar
-            bw.ReportProgress((int)((filesRenamed / filesToRename) * 100));
-            filesRenamed++;
-
-
-            // get new fullpath
-            string newFullpath = Path.Combine(outputPath, _fileStore.Files[afi].Preview);
-            if (itmOptionsPreserveExt.Checked)
-                newFullpath += _fileStore.Files[afi].Extension;
-
-
-            // create subdirs (if any)
-            if (_fileStore.Files[afi].Preview.Contains("\\"))
-            {
-                string newDirectory = Path.GetDirectoryName(newFullpath);
-                if (!Directory.Exists(newDirectory))
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(newDirectory);
-                    }
-                    catch (Exception ex)
-                    {
-                        result.ReportError(_fileStore.Files[afi].Name,
-                                            _fileStore.Files[afi].Preview,
-                                            "Create folder '" + newDirectory + "' failed: " + ex.Message);
-                        continue;
-                    }
-                }
-                result.RenameToSubfolders = true;
-            }
-
-
-            // rename/move/copy, catch any errors
-            try
-            {
-                if (RenameFolders)
-                {
-                    Directory.Move(_fileStore.Files[afi].Fullpath, newFullpath);
-                }
-                else
-                {
-                    if (itmOutputRenameInPlace.Checked || itmOutputMoveTo.Checked)
-                        File.Move(_fileStore.Files[afi].Fullpath, newFullpath);
-                    else if (itmOutputCopyTo.Checked)
-                        File.Copy(_fileStore.Files[afi].Fullpath, newFullpath);
-                    else  // backup to
-                    {
-                        File.Copy(_fileStore.Files[afi].Fullpath, Path.Combine(fbdMoveCopy.SelectedPath, Path.GetFileName(_fileStore.Files[afi].Filename)));
-                        File.Move(_fileStore.Files[afi].Fullpath, newFullpath);
-                    }
-                }
-
-                result.ReportSuccess();
-            }
-            catch (Exception ex)
-            {
-                result.ReportError(_fileStore.Files[afi].Name, _fileStore.Files[afi].Preview, ex.Message);
-                continue;
-            }
-
-        }  // end rename loop
-
-
-        bw.ReportProgress(100);
-        e.Result = result;
+        e.Result = _renameService.Execute(
+            _fileStore.Files,
+            _currentInput,
+            filesToRename,
+            progress => bw.ReportProgress(progress),
+            () => bw.CancellationPending);
     }
     private void bgwRename_ProgressChanged(object sender, ProgressChangedEventArgs e)
     {
@@ -350,18 +283,18 @@ public partial class MainForm
 
 
         // if necessary, refresh nodes in folder tree
-        if (RenameFolders)
+        if (_currentInput.RenameFolders)
         {
             tvwFolders.RefreshNode(tvwFolders.SelectedNode);
-            if (itmOutputMoveTo.Checked && !fbdMoveCopy.SelectedPath.StartsWith(_activePath))
-                tvwFolders.RefreshNode(fbdMoveCopy.SelectedPath);
+            if (_currentInput.Output == OutputMode.MoveTo && !_currentInput.MoveCopyPath.StartsWith(_currentInput.ActivePath))
+                tvwFolders.RefreshNode(_currentInput.MoveCopyPath);
         }
         else if (result.RenameToSubfolders)
         {
-            if (itmOutputRenameInPlace.Checked || itmOutputBackupTo.Checked)
+            if (_currentInput.Output == OutputMode.RenameInPlace || _currentInput.Output == OutputMode.BackupTo)
                 tvwFolders.RefreshNode(tvwFolders.SelectedNode);
             else  // Move to, Copy to
-                tvwFolders.RefreshNode(fbdMoveCopy.SelectedPath);
+                tvwFolders.RefreshNode(_currentInput.MoveCopyPath);
         }
 
 
@@ -401,7 +334,7 @@ public partial class MainForm
 
         // reactivate form & refresh filelist
         SetFormActive(true);
-        UpdateFileList();
+        RefreshView(UpdateStage.FileList);
         cmbMatch.Focus();
     }
 }

@@ -112,18 +112,6 @@ namespace RegexRenamer
             fbdMoveCopy = new System.Windows.Forms.FolderBrowserDialog();
             lblPath = new System.Windows.Forms.Label();
             dgvFiles = new System.Windows.Forms.DataGridView();
-            colIcon = new System.Windows.Forms.DataGridViewImageColumn();
-            colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colPreview = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colExt = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colFileSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colTitle = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSeries = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colVolume = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colChapter = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
             tsOptions = new System.Windows.Forms.ToolStrip();
             mnuOptions = new System.Windows.Forms.ToolStripDropDownButton();
             itmOptionsShowHidden = new System.Windows.Forms.ToolStripMenuItem();
@@ -150,6 +138,18 @@ namespace RegexRenamer
             lblFilter = new System.Windows.Forms.Label();
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
+            colIcon = new System.Windows.Forms.DataGridViewImageColumn();
+            colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colPreview = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colExt = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colFileSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colTitle = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSeries = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colVolume = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colChapter = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
             cmsRename.SuspendLayout();
             pnlStats.SuspendLayout();
             tsMenu.SuspendLayout();
@@ -270,7 +270,7 @@ namespace RegexRenamer
             rbFilterGlob.Location = new System.Drawing.Point(1228, 43);
             rbFilterGlob.Margin = new System.Windows.Forms.Padding(4);
             rbFilterGlob.Name = "rbFilterGlob";
-            rbFilterGlob.Size = new System.Drawing.Size(50, 19);
+            rbFilterGlob.Size = new System.Drawing.Size(51, 19);
             rbFilterGlob.TabIndex = 3;
             rbFilterGlob.TabStop = true;
             rbFilterGlob.Text = "Glob";
@@ -278,10 +278,10 @@ namespace RegexRenamer
             // rbFilterRegex
             // 
             rbFilterRegex.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            rbFilterRegex.Location = new System.Drawing.Point(1286, 42);
+            rbFilterRegex.Location = new System.Drawing.Point(1283, 42);
             rbFilterRegex.Margin = new System.Windows.Forms.Padding(4);
             rbFilterRegex.Name = "rbFilterRegex";
-            rbFilterRegex.Size = new System.Drawing.Size(56, 19);
+            rbFilterRegex.Size = new System.Drawing.Size(63, 19);
             rbFilterRegex.TabIndex = 3;
             rbFilterRegex.Text = "Regex";
             // 
@@ -399,7 +399,7 @@ namespace RegexRenamer
             cbModifierX.Location = new System.Drawing.Point(766, 62);
             cbModifierX.Margin = new System.Windows.Forms.Padding(4);
             cbModifierX.Name = "cbModifierX";
-            cbModifierX.Size = new System.Drawing.Size(36, 19);
+            cbModifierX.Size = new System.Drawing.Size(38, 19);
             cbModifierX.TabIndex = 5;
             cbModifierX.Tag = false;
             cbModifierX.Text = "/x";
@@ -762,110 +762,6 @@ namespace RegexRenamer
             dgvFiles.StandardTab = true;
             dgvFiles.TabIndex = 6;
             // 
-            // colIcon
-            // 
-            colIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            colIcon.HeaderText = "";
-            colIcon.MinimumWidth = 6;
-            colIcon.Name = "colIcon";
-            colIcon.ReadOnly = true;
-            colIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            colIcon.Width = 20;
-            // 
-            // colFilename
-            // 
-            colFilename.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            colFilename.HeaderText = "Filename";
-            colFilename.MinimumWidth = 6;
-            colFilename.Name = "colFilename";
-            // 
-            // colPreview
-            // 
-            colPreview.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            colPreview.HeaderText = "Preview";
-            colPreview.MinimumWidth = 6;
-            colPreview.Name = "colPreview";
-            colPreview.ReadOnly = true;
-            // 
-            // colExt
-            // 
-            colExt.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colExt.HeaderText = "Ext";
-            colExt.Name = "colExt";
-            colExt.ReadOnly = true;
-            colExt.Visible = false;
-            // 
-            // colFileSize
-            // 
-            colFileSize.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            colFileSize.HeaderText = "Size";
-            colFileSize.Name = "colFileSize";
-            colFileSize.ReadOnly = true;
-            colFileSize.Visible = false;
-            // 
-            // colModified
-            // 
-            colModified.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            colModified.HeaderText = "Modified";
-            colModified.MinimumWidth = 10;
-            colModified.Name = "colModified";
-            colModified.ReadOnly = true;
-            colModified.Visible = false;
-            // 
-            // colTitle
-            // 
-            colTitle.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            colTitle.HeaderText = "Title";
-            colTitle.MinimumWidth = 6;
-            colTitle.Name = "colTitle";
-            colTitle.ReadOnly = true;
-            colTitle.Visible = false;
-            // 
-            // colSeries
-            // 
-            colSeries.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            colSeries.HeaderText = "Series";
-            colSeries.MinimumWidth = 6;
-            colSeries.Name = "colSeries";
-            colSeries.ReadOnly = true;
-            colSeries.Visible = false;
-            // 
-            // colVolume
-            // 
-            colVolume.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colVolume.HeaderText = "Volume";
-            colVolume.MinimumWidth = 6;
-            colVolume.Name = "colVolume";
-            colVolume.ReadOnly = true;
-            colVolume.Visible = false;
-            // 
-            // colChapter
-            // 
-            colChapter.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colChapter.HeaderText = "Chapters";
-            colChapter.MinimumWidth = 6;
-            colChapter.Name = "colChapter";
-            colChapter.ReadOnly = true;
-            colChapter.Visible = false;
-            // 
-            // colEdition
-            // 
-            colEdition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colEdition.HeaderText = "Edition";
-            colEdition.MinimumWidth = 6;
-            colEdition.Name = "colEdition";
-            colEdition.ReadOnly = true;
-            colEdition.Visible = false;
-            // 
-            // colSpecial
-            // 
-            colSpecial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            colSpecial.HeaderText = "Special";
-            colSpecial.MinimumWidth = 6;
-            colSpecial.Name = "colSpecial";
-            colSpecial.ReadOnly = true;
-            colSpecial.Visible = false;
-            // 
             // tsOptions
             // 
             tsOptions.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
@@ -960,48 +856,48 @@ namespace RegexRenamer
             // 
             itmHelpContents.Name = "itmHelpContents";
             itmHelpContents.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            itmHelpContents.Size = new System.Drawing.Size(211, 22);
+            itmHelpContents.Size = new System.Drawing.Size(212, 22);
             itmHelpContents.Text = "Contents";
             // 
             // itmHelpRegexReference
             // 
             itmHelpRegexReference.Name = "itmHelpRegexReference";
             itmHelpRegexReference.ShortcutKeys = System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F1;
-            itmHelpRegexReference.Size = new System.Drawing.Size(211, 22);
+            itmHelpRegexReference.Size = new System.Drawing.Size(212, 22);
             itmHelpRegexReference.Text = "Regex Reference";
             // 
             // itmHelpSep1
             // 
             itmHelpSep1.Name = "itmHelpSep1";
-            itmHelpSep1.Size = new System.Drawing.Size(208, 6);
+            itmHelpSep1.Size = new System.Drawing.Size(209, 6);
             // 
             // itmHelpEmailAuthor
             // 
             itmHelpEmailAuthor.Name = "itmHelpEmailAuthor";
-            itmHelpEmailAuthor.Size = new System.Drawing.Size(211, 22);
+            itmHelpEmailAuthor.Size = new System.Drawing.Size(212, 22);
             itmHelpEmailAuthor.Text = "Email the author";
             // 
             // itmHelpReportBug
             // 
             itmHelpReportBug.Name = "itmHelpReportBug";
-            itmHelpReportBug.Size = new System.Drawing.Size(211, 22);
+            itmHelpReportBug.Size = new System.Drawing.Size(212, 22);
             itmHelpReportBug.Text = "Report a bug";
             // 
             // itmHelpHomepage
             // 
             itmHelpHomepage.Name = "itmHelpHomepage";
-            itmHelpHomepage.Size = new System.Drawing.Size(211, 22);
+            itmHelpHomepage.Size = new System.Drawing.Size(212, 22);
             itmHelpHomepage.Text = "Homepage";
             // 
             // itmHelpSep2
             // 
             itmHelpSep2.Name = "itmHelpSep2";
-            itmHelpSep2.Size = new System.Drawing.Size(208, 6);
+            itmHelpSep2.Size = new System.Drawing.Size(209, 6);
             // 
             // itmHelpAbout
             // 
             itmHelpAbout.Name = "itmHelpAbout";
-            itmHelpAbout.Size = new System.Drawing.Size(211, 22);
+            itmHelpAbout.Size = new System.Drawing.Size(212, 22);
             itmHelpAbout.Text = "About RegexRenamer";
             // 
             // progressBar
@@ -1108,6 +1004,121 @@ namespace RegexRenamer
             groupBoxFileView.Size = new System.Drawing.Size(1048, 732);
             groupBoxFileView.TabIndex = 9;
             groupBoxFileView.TabStop = false;
+            // 
+            // colIcon
+            // 
+            colIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colIcon.HeaderText = "";
+            colIcon.MinimumWidth = 6;
+            colIcon.Name = "colIcon";
+            colIcon.ReadOnly = true;
+            colIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            colIcon.Width = 20;
+            // 
+            // colFilename
+            // 
+            colFilename.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colFilename.HeaderText = "Filename";
+            colFilename.MinimumWidth = 80;
+            colFilename.Name = "colFilename";
+            colFilename.Width = 350;
+            // 
+            // colPreview
+            // 
+            colPreview.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colPreview.HeaderText = "Preview";
+            colPreview.MinimumWidth = 80;
+            colPreview.Name = "colPreview";
+            colPreview.ReadOnly = true;
+            colPreview.Width = 350;
+            // 
+            // colExt
+            // 
+            colExt.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colExt.HeaderText = "Ext";
+            colExt.Name = "colExt";
+            colExt.ReadOnly = true;
+            colExt.Visible = false;
+            colExt.Width = 60;
+            // 
+            // colFileSize
+            // 
+            colFileSize.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colFileSize.HeaderText = "Size";
+            colFileSize.Name = "colFileSize";
+            colFileSize.ReadOnly = true;
+            colFileSize.Visible = false;
+            colFileSize.Width = 160;
+            // 
+            // colModified
+            // 
+            colModified.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colModified.HeaderText = "Modified";
+            colModified.MinimumWidth = 10;
+            colModified.Name = "colModified";
+            colModified.ReadOnly = true;
+            colModified.Visible = false;
+            colModified.Width = 160;
+            // 
+            // colTitle
+            // 
+            colTitle.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colTitle.HeaderText = "Title";
+            colTitle.MinimumWidth = 6;
+            colTitle.Name = "colTitle";
+            colTitle.ReadOnly = true;
+            colTitle.Visible = false;
+            colTitle.Width = 160;
+            // 
+            // colSeries
+            // 
+            colSeries.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colSeries.HeaderText = "Series";
+            colSeries.MinimumWidth = 6;
+            colSeries.Name = "colSeries";
+            colSeries.ReadOnly = true;
+            colSeries.Visible = false;
+            colSeries.Width = 160;
+            // 
+            // colVolume
+            // 
+            colVolume.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colVolume.HeaderText = "Volume";
+            colVolume.MinimumWidth = 6;
+            colVolume.Name = "colVolume";
+            colVolume.ReadOnly = true;
+            colVolume.Visible = false;
+            colVolume.Width = 60;
+            // 
+            // colChapter
+            // 
+            colChapter.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colChapter.HeaderText = "Chapters";
+            colChapter.MinimumWidth = 6;
+            colChapter.Name = "colChapter";
+            colChapter.ReadOnly = true;
+            colChapter.Visible = false;
+            colChapter.Width = 60;
+            // 
+            // colEdition
+            // 
+            colEdition.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colEdition.HeaderText = "Edition";
+            colEdition.MinimumWidth = 6;
+            colEdition.Name = "colEdition";
+            colEdition.ReadOnly = true;
+            colEdition.Visible = false;
+            colEdition.Width = 60;
+            // 
+            // colSpecial
+            // 
+            colSpecial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            colSpecial.HeaderText = "Special";
+            colSpecial.MinimumWidth = 6;
+            colSpecial.Name = "colSpecial";
+            colSpecial.ReadOnly = true;
+            colSpecial.Visible = false;
+            colSpecial.Width = 60;
             // 
             // MainForm
             // 
@@ -1223,6 +1234,13 @@ namespace RegexRenamer
         private System.Windows.Forms.ToolStripMenuItem itmChangeCaseCleanName;
         private System.Windows.Forms.ToolStripMenuItem useMetadataKavitaMenuItem;
         private System.Windows.Forms.CheckBox chkShowInfo;
+        private System.Windows.Forms.ToolStripMenuItem itmOptionsEditConfig;
+        private System.Windows.Forms.CheckBox chkRenameSelectionOnly;
+        private System.Windows.Forms.CheckBox chkIncludeSubfolder;
+        private Controls.MyComboBox cmbFilter;
+        private Controls.MyComboBox cmbSort;
+        private System.Windows.Forms.Label lblSort;
+        private System.Windows.Forms.Label lblFilter;
         private System.Windows.Forms.DataGridViewImageColumn colIcon;
         private System.Windows.Forms.DataGridViewTextBoxColumn colFilename;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPreview;
@@ -1235,13 +1253,6 @@ namespace RegexRenamer
         private System.Windows.Forms.DataGridViewTextBoxColumn colChapter;
         private System.Windows.Forms.DataGridViewTextBoxColumn colEdition;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSpecial;
-        private System.Windows.Forms.ToolStripMenuItem itmOptionsEditConfig;
-        private System.Windows.Forms.CheckBox chkRenameSelectionOnly;
-        private System.Windows.Forms.CheckBox chkIncludeSubfolder;
-        private Controls.MyComboBox cmbFilter;
-        private Controls.MyComboBox cmbSort;
-        private System.Windows.Forms.Label lblSort;
-        private System.Windows.Forms.Label lblFilter;
     }
 }
 

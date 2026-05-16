@@ -49,10 +49,10 @@ namespace RegexRenamer
             if (!EnableUpdates) return;
 
             SetShowInfoColumnVisibility(chkShowInfo.Checked);
+            ResetColumnDistribution();
 
-            // update preview
             this.Update();
-            UpdatePreview();
+            UpdateUserInputValues();
         }
 
         // OPTIONS/HELP
@@ -73,7 +73,7 @@ namespace RegexRenamer
         private void itmOptionsShowHidden_Click(object sender, EventArgs e)
         {
             this.Update();
-            UpdateFileList();
+            UpdateUserInputValues();
         }
         private void itmOptionsPreserveExt_Click(object sender, EventArgs e)
         {
@@ -88,12 +88,12 @@ namespace RegexRenamer
                 dgvFiles.Rows[dfi].Cells[1].Value = _fileStore.Files[(int)dgvFiles.Rows[dfi].Tag].Name;
 
             // update preview column
-            UpdatePreview();
+            UpdateUserInputValues();
         }
         private void itmOptionsAllowRenSub_Click(object sender, EventArgs e)
         {
             this.Update();
-            UpdateValidation();
+            UpdateUserInputValues();
         }
         private void itmOptionsAddContextMenu_Click(object sender, EventArgs e)
         {

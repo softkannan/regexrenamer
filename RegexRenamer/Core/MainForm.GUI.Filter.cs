@@ -55,7 +55,7 @@ namespace RegexRenamer
             if (!EnableUpdates || !_validFilter) return;
 
             _activeFilter = cmbFilter.Text;
-            UpdateFileList();
+            UpdateUserInputValues();
         }
 
         private void cmbFilter_SelectedValueChanged(object sender, EventArgs e)
@@ -71,7 +71,7 @@ namespace RegexRenamer
 
             lblStats.Text = "Updating file list...";
 
-            UpdateFileList();
+            UpdateUserInputValues();
         }
         private void rbFilterRegex_CheckedChanged(object sender, EventArgs e)
         {

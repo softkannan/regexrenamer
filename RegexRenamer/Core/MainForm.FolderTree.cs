@@ -1,4 +1,4 @@
-﻿using RegexRenamer.Controls.FolderTreeViewCtrl;
+using RegexRenamer.Controls.FolderTreeViewCtrl;
 using RegexRenamer.Forms;
 using RegexRenamer.Native;
 using RegexRenamer.Utility;
@@ -244,7 +244,7 @@ namespace RegexRenamer
         }
         private void editFolderViewMetadataFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedFiles = dgvFiles.GetAllFileInfo(_fileStore.Files);
+            var selectedFiles = dgvFiles.GetAllFileInfo(_fileStore.Files, GetActiveFileIndex);
             using (EditMetadataForm editMetaForm = new EditMetadataForm(_activePath, 
                 _activeFilter, "Modify Metadata", "Edit", itmOptionsPreserveExt.Checked))
             {
@@ -291,7 +291,7 @@ namespace RegexRenamer
             // update filelist
 
             _activePath = newPath;
-            UpdateFileList();
+            UpdateUserInputValues();
         }
 
         // update file list on select different path
@@ -339,7 +339,7 @@ namespace RegexRenamer
                 toolTip.Show("Click to browse the network", btnNetwork, 0, btnNetwork.Height, 5000);
 
             _activePath = tvwFolders.GetSelectedNodePath();
-            UpdateFileList();
+            UpdateUserInputValues();
         }
 
         // F5 = refresh
@@ -388,7 +388,7 @@ namespace RegexRenamer
                     _activePath = txtPath.Text;
                     toolTip.Hide(txtPath);
                     this.Update();
-                    UpdateFileList();
+                    UpdateUserInputValues();
                 }
                 else
                 {

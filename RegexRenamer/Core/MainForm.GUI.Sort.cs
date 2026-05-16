@@ -116,7 +116,7 @@ namespace RegexRenamer
                 UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment.MiddleLeft);
             }
 
-            UpdatePreview();
+            UpdateUserInputValues();
         }
         #endregion
     }

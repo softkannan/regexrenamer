@@ -80,7 +80,7 @@ namespace RegexRenamer
 
             // update preview
             this.Update();
-            UpdatePreview();
+            UpdateUserInputValues();
         }
         
         private void mnuChangeCase_MouseDown(object sender, MouseEventArgs e)

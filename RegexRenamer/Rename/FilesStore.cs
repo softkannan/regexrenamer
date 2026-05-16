@@ -104,21 +104,18 @@ namespace RegexRenamer.Rename
         {
             var filter = _globInfo.CreateGlobFilter();
             DirectoryInfo activeDir = new DirectoryInfo(_globInfo.RootPath);
-            DirectoryInfo[] dirs = new DirectoryInfo[0];
+            IEnumerable<DirectoryInfo> dirs;
             try
             {
-                dirs = activeDir.GetDirectories();
+                dirs = activeDir.EnumerateDirectories();
             }
             catch
             {
+                return;
             }
 
-            //TODO: fill the paging
-            int pageEnd = dirs.Length;
-            int pageStart = 0;
-            for (int idx = pageStart; idx < pageEnd; idx++)
+            foreach (DirectoryInfo dir in dirs)
             {
-                DirectoryInfo dir = dirs[idx] as DirectoryInfo;
                 Stats.IncrementTotal();
 
                 // ignore if filtered out
@@ -154,28 +151,25 @@ namespace RegexRenamer.Rename
         {
             var filter = _globInfo.CreateGlobFilter();
             DirectoryInfo activeDir = new DirectoryInfo(_globInfo.RootPath);
-            FileInfo[] files = new FileInfo[0];
+            IEnumerable<FileInfo> files;
             try
             {
                 if (_searchInFolders)
                 {
-                    files = activeDir.GetFiles("*", SearchOption.AllDirectories);
+                    files = activeDir.EnumerateFiles("*", SearchOption.AllDirectories);
                 }
                 else
                 {
-                    files = activeDir.GetFiles();
+                    files = activeDir.EnumerateFiles();
                 }
             }
             catch (Exception)
             {
+                return;
             }
 
-            //TODO: fill the paging
-            int pageEnd = files.Length;
-            int pageStart = 0;
-            for (int idx = pageStart; idx < pageEnd; idx++)
+            foreach (FileInfo file in files)
             {
-                FileInfo file = files[idx] as FileInfo;
                 Stats.IncrementTotal();
 
                 // ignore if filtered out
