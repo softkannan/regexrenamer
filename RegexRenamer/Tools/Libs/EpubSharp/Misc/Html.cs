@@ -53,7 +53,7 @@ namespace EpubSharp
         private static string SpecialSymbolsEvaluator(Match m)
         {
             if (!m.Groups["defined"].Success) return " ";
-            switch (m.Groups["defined"].Value.ToLower())
+            switch (m.Groups["defined"].Value)
             {
                 case "&nbsp;": return " ";
                 case "&nbsp": return " ";

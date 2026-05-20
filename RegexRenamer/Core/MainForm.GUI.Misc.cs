@@ -79,13 +79,9 @@ namespace RegexRenamer
         {
             this.Update();
 
-            // update activeFiles
-            for (int afi = 0; afi < _fileStore.Files.Count; afi++)
-                _fileStore.Files[afi].PreserveExt = itmOptionsPreserveExt.Checked;
-
-            // update filename column
-            for (int dfi = 0; dfi < dgvFiles.Rows.Count; dfi++)
-                dgvFiles.Rows[dfi].Cells[1].Value = _fileStore.Files[(int)dgvFiles.Rows[dfi].Tag].Name;
+            //// update activeFiles
+            //for (int afi = 0; afi < _fileStore.Files.Count; afi++)
+            //    _fileStore.Files[afi].PreserveExt = itmOptionsPreserveExt.Checked;
 
             // update preview column
             UpdateUserInputValues();

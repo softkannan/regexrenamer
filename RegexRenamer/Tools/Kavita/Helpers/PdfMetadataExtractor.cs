@@ -806,8 +806,8 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
 {
     private readonly PdfLexer _lexer;
     private readonly FileStream _stream;
-    private readonly Dictionary<long, long> _objectOffsets = [];
-    private readonly Dictionary<string, string> _metadata = [];
+    private readonly Dictionary<long, long> _objectOffsets = new();
+    private readonly Dictionary<string, string> _metadata = new(StringComparer.OrdinalIgnoreCase);
     private readonly Stack<MetadataRef> _metadataRef = new();
     private bool _disposed;
 
@@ -1276,7 +1276,7 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
             throw new PdfMetadataExtractorException("Expected object header");
         }
 
-        Dictionary<string, long> indirectObjects = [];
+        Dictionary<string, long> indirectObjects = new(StringComparer.OrdinalIgnoreCase);
 
         ParseDictionary(delegate(string key, PdfLexer.Token value)
         {

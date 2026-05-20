@@ -47,16 +47,16 @@ internal sealed class RenameService
             // skip ignored/unselected files
             if (input.Output == OutputMode.RenameInPlace)
             {
-                if (files[afi].Name == files[afi].Preview) continue;
+                if (files[afi].Name == files[afi].Context.Preview) continue;
             }
             else
             {
-                if (!files[afi].Matched) continue;
+                if (!files[afi].Context.Matched) continue;
             }
 
             if (input.RenameSelectionOnly)
             {
-                if (!files[afi].Selected) continue;
+                if (!files[afi].Context.Selected) continue;
             }
 
             // update progress
@@ -64,12 +64,12 @@ internal sealed class RenameService
             filesRenamed++;
 
             // get new fullpath
-            string newFullpath = Path.Combine(outputPath, files[afi].Preview);
+            string newFullpath = Path.Combine(outputPath, files[afi].Context.Preview);
             if (input.PreserveExtension)
                 newFullpath += files[afi].Extension;
 
             // create subdirs (if any)
-            if (files[afi].Preview.Contains("\\"))
+            if (files[afi].Context.Preview.Contains("\\"))
             {
                 string newDirectory = Path.GetDirectoryName(newFullpath);
                 if (!Directory.Exists(newDirectory))
@@ -80,7 +80,7 @@ internal sealed class RenameService
                     }
                     catch (Exception ex)
                     {
-                        result.ReportError(files[afi].Name, files[afi].Preview,
+                        result.ReportError(files[afi].Name, files[afi].Context.Preview,
                             "Create folder '" + newDirectory + "' failed: " + ex.Message);
                         continue;
                     }
@@ -113,7 +113,7 @@ internal sealed class RenameService
             }
             catch (Exception ex)
             {
-                result.ReportError(files[afi].Name, files[afi].Preview, ex.Message);
+                result.ReportError(files[afi].Name, files[afi].Context.Preview, ex.Message);
                 continue;
             }
         }

@@ -991,14 +991,14 @@ namespace DarkModeForms
 			{
 				_ret = CurrentLanguage;
 			}
-			if (CurrentLanguage.ToLowerInvariant().Equals("zh"))
+			if (CurrentLanguage.Equals("zh", StringComparison.OrdinalIgnoreCase))
 			{
 				var LangVariable = CultureInfo.CurrentCulture.Name;
-				if (string.Equals(LangVariable, "zh-CN") || string.Equals(LangVariable, "zh-SG") || string.Equals(LangVariable, "zh-Hans"))
+				if (string.Equals(LangVariable, "zh-CN", StringComparison.OrdinalIgnoreCase) || string.Equals(LangVariable, "zh-SG", StringComparison.OrdinalIgnoreCase) || string.Equals(LangVariable, "zh-Hans", StringComparison.OrdinalIgnoreCase))
 				{
 					_ret = "zh-Hans";
 				}
-				else if (string.Equals(LangVariable, "zh-TW") || string.Equals(LangVariable, "zh-HK") || string.Equals(LangVariable, "zh-MO") || string.Equals(LangVariable, "zh-Hant"))
+				else if (string.Equals(LangVariable, "zh-TW", StringComparison.OrdinalIgnoreCase) || string.Equals(LangVariable, "zh-HK", StringComparison.OrdinalIgnoreCase) || string.Equals(LangVariable, "zh-MO", StringComparison.OrdinalIgnoreCase) || string.Equals(LangVariable, "zh-Hant", StringComparison.OrdinalIgnoreCase))
 				{
 					_ret = "zh-Hant";
 				}

@@ -32,6 +32,7 @@ namespace RegexRenamer.Native
         }
         public static void CopyNamesToClipboad(this List<RenameItemInfo> pThis)
         {
+            if (pThis.Count == 0) return;
             var fileText = pThis.Select(x => x.Name).Aggregate((total, next) => total + "\r\n" + next);
             var data = new DataObject();
             data.SetText(fileText, TextDataFormat.UnicodeText);
@@ -41,7 +42,7 @@ namespace RegexRenamer.Native
         public static List<string> GetNamesFromClipboard()
         {
             DataObject data = Clipboard.GetDataObject() as DataObject;
-            var text = data.GetText(TextDataFormat.UnicodeText);
+            var text = data?.GetText(TextDataFormat.UnicodeText) ?? string.Empty;
             List<string> names = new List<string>();
             using (var reader = new StringReader(text))
             {
@@ -62,6 +63,7 @@ namespace RegexRenamer.Native
 
         public static void CopyFilesPathToClipboad(this List<RenameItemInfo> pThis, bool move = false)
         {
+            if (pThis.Count == 0) return;
             var fileText = pThis.Select(x => x.Fullpath).Aggregate((total, next) => total + "\r\n" + next);
 
             Clipboard.SetText(fileText);
@@ -69,12 +71,13 @@ namespace RegexRenamer.Native
 
         public static void CopyFilesToClipboad(this List<RenameItemInfo> pThis, bool move = false)
         {
+            if (pThis.Count == 0) return;
             var dropEffect = move ? DragDropEffects.Move : DragDropEffects.Copy;
 
             var droplist = new StringCollection();
             droplist.AddRange(pThis.Select(x => x.Fullpath).ToArray());
 
-            var fileText = pThis.Select(x => x.Preview ).Aggregate((total, next) => total + ";" + next );
+            var fileText = pThis.Select(x => x.Context.Preview ).Aggregate((total, next) => total + ";" + next );
 
             var data = new DataObject();
             data.SetFileDropList(droplist);
@@ -87,7 +90,7 @@ namespace RegexRenamer.Native
             var data = Clipboard.GetDataObject() as DataObject;
             if(data == null) return;
             bool isMove = false;
-            if (data.TryGetData<MemoryStream>(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, out var dropEffectStream))
+            if (data.TryGetData<MemoryStream>(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, out var dropEffectStream) && dropEffectStream != null)
             {
                 int dropEffect = dropEffectStream.ReadByte();
                 // Checks if the 'Copy' flag (1) is present within the value 5

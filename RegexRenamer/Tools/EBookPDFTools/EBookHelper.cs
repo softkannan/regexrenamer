@@ -166,9 +166,9 @@ public static class EBookHelper
     /// <returns>True if operation succeeded, false if file type is unsupported.</returns>
     public static async Task<bool> PolishEbook(string filePath)
     {
-        var fileExt = Path.GetExtension(filePath).ToLowerInvariant().TrimStart('.');
+        var fileExt = Path.GetExtension(filePath).TrimStart('.');
         // check file is with ebook extension
-        if (!supportedEpubEditFileFormats.Contains(fileExt))
+        if (!supportedEpubEditFileFormats.Contains(fileExt, StringComparer.OrdinalIgnoreCase))
         {
             return false;
         }
@@ -187,9 +187,9 @@ public static class EBookHelper
     /// <returns>True if operation succeeded, false if file type is unsupported.</returns>
     public static async Task<bool> LaunchEBookAsync(string filePath)
     {
-        var fileExt = Path.GetExtension(filePath).ToLowerInvariant().TrimStart('.');
+        var fileExt = Path.GetExtension(filePath).TrimStart('.');
         // check file is with ebook extension
-        if (!supportedEPubReadFileFormats.Contains(fileExt))
+        if (!supportedEPubReadFileFormats.Contains(fileExt, StringComparer.OrdinalIgnoreCase))
         {
             return false;
         }
@@ -217,9 +217,9 @@ public static class EBookHelper
     /// <returns>True if operation succeeded, false if file type is unsupported.</returns>
     public static async Task<bool> EditEBookAsync(string filePath)
     {
-        var fileExt = Path.GetExtension(filePath).ToLowerInvariant().TrimStart('.');
+        var fileExt = Path.GetExtension(filePath).TrimStart('.');
         // check file is with ebook extension
-        if (!supportedEpubEditFileFormats.Contains(fileExt))
+        if (!supportedEpubEditFileFormats.Contains(fileExt, StringComparer.OrdinalIgnoreCase))
         {
             return false;
         }

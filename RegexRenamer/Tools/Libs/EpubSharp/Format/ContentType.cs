@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace EpubSharp.Format
@@ -23,7 +24,7 @@ namespace EpubSharp.Format
 
     internal class ContentType
     {
-        public static readonly IReadOnlyDictionary<string, EpubContentType> MimeTypeToContentType = new Dictionary<string, EpubContentType>
+        public static readonly IReadOnlyDictionary<string, EpubContentType> MimeTypeToContentType = new Dictionary<string, EpubContentType>(StringComparer.OrdinalIgnoreCase)
         {
             { "application/xhtml+xml", EpubContentType.Xhtml11 },
             { "application/x-dtbook+xml", EpubContentType.Dtbook },

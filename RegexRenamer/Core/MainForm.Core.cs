@@ -208,7 +208,7 @@ public partial class MainForm
             int afi = rowData.ActiveFileIndex;
             // column 0 is file icon, column 1 is filename and column 2 is preview filename
             int colStart = 2;
-            rowData.CellValues[colStart++] = listOfItems[afi].Preview;
+            rowData.CellValues[colStart++] = listOfItems[afi].Context.Preview;
 
             colStart = 3;  // reset to column 3 for extra info
             if (chkShowInfo.Checked)
@@ -219,14 +219,14 @@ public partial class MainForm
             }
 
             colStart = 6; //reset to column 6 for kavita info
-            if (listOfItems[afi].ParseInfo != null)
+            if (listOfItems[afi].Context.ParseInfo != null)
             {
-                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Title;
-                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Series;
-                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Volumes;
-                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Chapters;
-                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.Edition;
-                rowData.CellValues[colStart++] = listOfItems[afi].ParseInfo.IsSpecial ? "true" : "false";
+                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Title;
+                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Series;
+                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Volumes;
+                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Chapters;
+                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Edition;
+                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.IsSpecial ? "true" : "false";
             }
         }
     }
@@ -238,7 +238,7 @@ public partial class MainForm
 
         // Bulk-clear all selected flags first
         for (int i = 0; i < _fileStore.Files.Count; i++)
-            _fileStore.Files[i].Selected = false;
+            _fileStore.Files[i].Context.Selected = false;
 
         // Only iterate actually-selected rows (typically very few)
         RenameItemInfo firstSelection = null;
@@ -247,11 +247,12 @@ public partial class MainForm
             if (row.Index < 0 || row.Index >= _fileViewRows.Count) continue;
 
             int afi = _fileViewRows[row.Index].ActiveFileIndex;
-            _fileStore.Files[afi].Selected = true;
+            _fileStore.Files[afi].Context.Selected = true;
             firstSelection ??= _fileStore.Files[afi];
         }
 
-        UpdateFileInfo(firstSelection);
+        if (firstSelection != null)
+            UpdateFileInfo(firstSelection);
     }
 
     // background worker

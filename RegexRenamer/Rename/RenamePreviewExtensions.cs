@@ -68,7 +68,7 @@ public static class RenamePreviewExtensions
                 case ChangeCaseOption.Lowercase:
                     return _ti.ToLower(match.Groups[1].Value);
                 case ChangeCaseOption.Titlecase:
-                    return _ti.ToTitleCase(match.Groups[1].Value.ToLower());
+                    return _ti.ToTitleCase(match.Groups[1].Value);
                 case ChangeCaseOption.CleanName:
                     return match.Groups[1].Value.ToCleanFileName();
                 case ChangeCaseOption.NoChange:
@@ -137,7 +137,7 @@ public static class RenamePreviewExtensions
             {
                 // if starting is letter sequence, then increment step and reset must be 1
                 if (doingAutoNumLetter)
-                    numStart = SequenceLetterToNumber(numInfo.NumberingStart.ToLower());
+                    numStart = SequenceLetterToNumber(numInfo.NumberingStart.ToLowerInvariant());
                 else
                     numStart = Int32.Parse(numInfo.NumberingStart);
 
@@ -157,17 +157,17 @@ public static class RenamePreviewExtensions
             for (int idx = 0; idx < files.Count; idx++)
             {
                 // check if matches
-                files[idx].ComicInfo = null;
-                files[idx].ParseInfo = null;
-                files[idx].Matched = regex.IsMatch(files[idx].Name);
+                files[idx].Context.ComicInfo = null;
+                files[idx].Context.ParseInfo = null;
+                files[idx].Context.Matched = regex.IsMatch(files[idx].Name);
 
                 // if not, bail early, don't incrememnt autonum
-                if (!files[idx].Matched)
+                if (!files[idx].Context.Matched)
                 {
-                    files[idx].Preview = files[idx].Name;
+                    files[idx].Context.Preview = files[idx].Name;
                     continue;
                 }
-                if (files[idx].Skip)
+                if (files[idx].Context.Skip)
                     continue;
 
                 // increment autonum and replace numbering pattern with current number
@@ -213,15 +213,15 @@ public static class RenamePreviewExtensions
                     replacePatternFinal = "\n" + replacePatternFinal + "\n";  // delimit change-case boundaries
 
                 // do replace and store preview
-                files[idx].Preview = regex.Replace(files[idx].Name, replacePatternFinal, count);
+                files[idx].Context.Preview = regex.Replace(files[idx].Name, replacePatternFinal, count);
 
                 // if change case selected, then do it now, looks for all \n delimited sections,
                 if (changeCaseInfo != ChangeCaseOption.NoChange)
-                    files[idx].Preview = Regex.Replace(files[idx].Preview, @"\n([^\n]*)\n", matchEval);
+                    files[idx].Context.Preview = Regex.Replace(files[idx].Context.Preview, @"\n([^\n]*)\n", matchEval);
 
                 // if preview is empty, use original name
-                if (files[idx].Preview.Length == 0)
-                    files[idx].Preview = files[idx].Name;
+                if (files[idx].Context.Preview.Length == 0)
+                    files[idx].Context.Preview = files[idx].Name;
 
                 // if kavita preview is selected, then get the kavita parse info and attach to the item
                 if (showKavitaPreview)
@@ -235,13 +235,13 @@ public static class RenamePreviewExtensions
         {
             for (int idx = 0; idx < files.Count; idx++)
             {
-                files[idx].Matched = false;
-                if (files[idx].Skip)
+                files[idx].Context.Matched = false;
+                if (files[idx].Context.Skip)
                 {
-                    files[idx].Skip = false;
+                    files[idx].Context.Skip = false;
                     continue;
                 }
-                files[idx].Preview = files[idx].Name;
+                files[idx].Context.Preview = files[idx].Name;
                 // if kavita preview is selected, then get the kavita parse info and attach to the item
                 if (showKavitaPreview)
                 {
@@ -303,7 +303,7 @@ public static class RenamePreviewExtensions
         kavitaRoot ??= Directory.GetDirectoryRoot(match.Fullpath);
 
         var parseInfo = parser.ParseFile(match.PreviewFullPath, kavitaRoot, kavitaRoot, pThis.KavitaLibType, pThis.UseMetadata);
-        match.ParseInfo = parseInfo;
+        match.Context.ParseInfo = parseInfo;
 
         //var comicInfo = parser.GetComicInfo(match.PreviewFullPath, true); //, kavithaRoot, libType);
         //match.ComicInfo = comicInfo;

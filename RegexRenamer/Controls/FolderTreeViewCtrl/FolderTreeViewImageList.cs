@@ -52,8 +52,8 @@ public class FolderTreeViewImageList
         }
     }
 
-    private Dictionary<string,int> KnownIndexsNormal { get; set; } = new Dictionary<string,int>();
-    private Dictionary<string, int> KnownIndexsSelected { get; set; } = new Dictionary<string, int>();
+    private Dictionary<string,int> KnownIndexsNormal { get; set; } = new Dictionary<string,int>(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, int> KnownIndexsSelected { get; set; } = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
     public int GetIcon(string name, bool isNormal = true)
     {

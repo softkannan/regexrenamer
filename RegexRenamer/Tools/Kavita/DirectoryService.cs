@@ -472,7 +472,7 @@ public class DirectoryService : IDirectoryService
     public Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
     {
         var stopLookingForDirectories = false;
-        var dirs = new Dictionary<string, string>();
+        var dirs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var folder in libraryFolders.Select(Parser.NormalizePath))
         {
             if (stopLookingForDirectories) break;

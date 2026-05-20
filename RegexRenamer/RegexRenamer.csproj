@@ -18,6 +18,7 @@
 	<ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
 	<ForceDesignerDpiUnaware>true</ForceDesignerDpiUnaware>
 	<UserSecretsId>87e4aac4-b67b-4da6-98d0-249cbb0fbeb2</UserSecretsId>
+	<Nullable>disable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <CodeAnalysisLogFile>bin\Debug\RegexRenamer.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
@@ -91,7 +92,7 @@
     </Reference>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="COPY &quot;$(ProjectDir)\Documents\Regex Quick Reference.chm&quot; &quot;$(OutDir)\.&quot;&#xD;&#xA;COPY &quot;$(ProjectDir)\Documents\RegexRenamer.chm&quot; &quot;$(OutDir)\.&quot;&#xD;&#xA;if $(ConfigurationName) == Release (&#xD;&#xA;XCOPY /s /K /D /H /Y &quot;$(OutDir)&quot; &quot;$(ProjectDir)\.Build&quot;&#xD;&#xA;)" />
+    <Exec Command="COPY &quot;$(ProjectDir)\Documents\Regex Quick Reference.chm&quot; &quot;$(ProjectDir)$(OutDir).&quot;&#xD;&#xA;COPY &quot;$(ProjectDir)\Documents\RegexRenamer.chm&quot; &quot;$(ProjectDir)$(OutDir).&quot;&#xD;&#xA;if $(ConfigurationName) == Release (&#xD;&#xA;XCOPY /S /K /D /H /Y &quot;$(ProjectDir)$(OutDir)&quot; &quot;$(ProjectDir).Build&quot;&#xD;&#xA;)" />
   </Target>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="if NOT EXIST &quot;$(ProjectDir)\RegexRenamer.snk&quot; (&#xD;&#xA;&quot;$(TargetFrameworkSDKToolsDirectory)sn.exe&quot; -k &quot;$(ProjectDir)\RegexRenamer.snk&quot;&#xD;&#xA;)&#xD;&#xA;&quot;$(TargetFrameworkSDKToolsDirectory)tlbimp.exe&quot; &quot;$(SystemRoot)\System32\shell32.dll&quot; /out:&quot;$(ProjectDir)\Common\Interop.Shell32.dll&quot; /keyfile:&quot;$(ProjectDir)\RegexRenamer.snk&quot; /asmversion:1.0.0.0 /nologo /machine:&quot;Agnostic&quot; /strictref" />

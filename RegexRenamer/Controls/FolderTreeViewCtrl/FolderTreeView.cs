@@ -238,9 +238,6 @@ public class FolderTreeView : TreeView
         {
             _isUpdating = true;
 
-            //if (path.StartsWith("\\\\")) return;
-            path = path.ToLower();
-
             TreeNode currentNode = Nodes[0].Nodes[0];  // assume My Computer is first node under Desktop
             bool foundParent = false, foundChild = false;
 
@@ -251,14 +248,14 @@ public class FolderTreeView : TreeView
                 {
                     if (node.Tag.ToString() == "DUMMYNODE")
                         return;
-                    string nodePath = node.TreeNodeToPath().ToLower();
-                    if (path == nodePath)
+                    string nodePath = node.TreeNodeToPath();
+                    if (string.Compare(path, nodePath, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         currentNode = node;
                         foundChild = true;
                         break;
                     }
-                    else if (path.StartsWith(nodePath))
+                    else if (path.StartsWith(nodePath, StringComparison.OrdinalIgnoreCase))
                     {
                         currentNode = node;
                         foundParent = true;
@@ -345,7 +342,7 @@ public class FolderTreeView : TreeView
             string prevPathExpand = null;
             if (SelectedNode != null && SelectedNode.IsExpanded)
             {
-                prevPathExpand = activePath.ToLower();
+                prevPathExpand = activePath;
             }
 
             // init tvwFolders with directory tree
@@ -372,7 +369,7 @@ public class FolderTreeView : TreeView
                 // select My Network Places
                 SelectedNode = (TreeNode)Tag;
             }
-            else if (Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory).Equals(activePath, StringComparison.CurrentCultureIgnoreCase))
+            else if (string.Equals(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), activePath, StringComparison.OrdinalIgnoreCase))
             {
                 // select root node
                 SelectedNode = Nodes[0];
@@ -387,7 +384,7 @@ public class FolderTreeView : TreeView
             }
 
             // re-expand
-            if (SelectedNode != null && prevPathExpand == activePath.ToLower())
+            if (SelectedNode != null && string.Equals(prevPathExpand, activePath, StringComparison.OrdinalIgnoreCase))
             {
                 SelectedNode.Expand();
             }

@@ -668,8 +668,8 @@ namespace RegexRenamer
 
                 for(int idx = 0; idx < selectedItems.Count; idx++)
                 {
-                    selectedItems[idx].Preview = newNames[idx];
-                    selectedItems[idx].Skip = true;
+                    selectedItems[idx].Context.Preview = newNames[idx];
+                    selectedItems[idx].Context.Skip = true;
                 }
                 RefreshView(UpdateStage.Preview);
             }
@@ -696,7 +696,7 @@ namespace RegexRenamer
 
                 foreach (var fileItem in selectedItems)
                 {
-                    fileItem.Skip = false;
+                    fileItem.Context.Skip = false;
                     if (fileItem != null)
                     {
                         var filePath = fileItem.Name;
@@ -711,8 +711,8 @@ namespace RegexRenamer
                             MessageBox.Show("Translation failed or returned empty result.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
-                        fileItem.Preview = result.MergedTranslation;
-                        fileItem.Skip = true;
+                        fileItem.Context.Preview = result.MergedTranslation;
+                        fileItem.Context.Skip = true;
                     }
                 }
 

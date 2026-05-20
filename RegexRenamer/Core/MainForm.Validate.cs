@@ -40,7 +40,7 @@ namespace RegexRenamer
                 rowData.PreviewErrorTag = _lastValidationResult.FileErrors.TryGetValue(afi, out string error) ? error : null;
 
                 // filename forecolor
-                if (file.Matched)
+                if (file.Context.Matched)
                     rowData.FilenameForeColor = Color.Blue;
                 else if (file.Hidden)
                     rowData.FilenameForeColor = SystemColors.GrayText;
@@ -50,9 +50,9 @@ namespace RegexRenamer
                 // preview forecolor
                 if (rowData.PreviewErrorTag != null)
                     rowData.PreviewForeColor = Color.Red;
-                else if (isRenameInPlace && file.Name != file.Preview)
+                else if (isRenameInPlace && file.Name != file.Context.Preview)
                     rowData.PreviewForeColor = Color.Blue;
-                else if (!isRenameInPlace && file.Matched)
+                else if (!isRenameInPlace && file.Context.Matched)
                     rowData.PreviewForeColor = Color.Blue;
                 else if (file.Hidden)
                     rowData.PreviewForeColor = SystemColors.GrayText;

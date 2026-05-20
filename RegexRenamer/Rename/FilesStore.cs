@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Enumeration;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -42,7 +43,7 @@ namespace RegexRenamer.Rename
             if (!string.IsNullOrWhiteSpace(filterText))
             {
                 if (IsGlobFilter && filterText == "*.*")  // convert to "*" (include files with no extension)
-                    filterText = "*";
+                    return null;
 
                 if (IsGlobFilter)  // convert glob to regex
                     filterText = "^" + Regex.Escape(filterText).Replace("\\*", ".*").Replace("\\?", ".") + "$";
@@ -60,7 +61,7 @@ namespace RegexRenamer.Rename
 
         private readonly List<RenameItemInfo> _files = new List<RenameItemInfo>();
 
-        private readonly Dictionary<string, InactiveReason> _inActiveFiles = new Dictionary<string, InactiveReason>();
+        private readonly Dictionary<string, InactiveReason> _inActiveFiles = new Dictionary<string, InactiveReason>(StringComparer.OrdinalIgnoreCase);
         public IReadOnlyDictionary<string, InactiveReason> InactiveFiles => _inActiveFiles;
 
         public FileCount Stats { get; private set; } = new FileCount();
@@ -83,7 +84,8 @@ namespace RegexRenamer.Rename
                 BuildFoldersStore();
             }
             else {
-                BuildFilesStore();
+                //BuildFilesStore();
+                BuildFilesStoreFast();
             }
         }
 
@@ -118,11 +120,13 @@ namespace RegexRenamer.Rename
             {
                 Stats.IncrementTotal();
 
+                var name = dir.Name;
+
                 // ignore if filtered out
-                if (filter != null && filter.IsMatch(dir.Name) == _globInfo.IsExclude)
+                if (filter != null && filter.IsMatch(name) == _globInfo.IsExclude)
                 {
-                    if (!_inActiveFiles.ContainsKey(dir.Name.ToLower()))
-                        _inActiveFiles.Add(dir.Name.ToLower(), InactiveReason.Filtered);
+                    if (!_inActiveFiles.ContainsKey(name))
+                        _inActiveFiles.Add(name, InactiveReason.Filtered);
                     Stats.IncrementFiltered();
                     continue;
                 }
@@ -138,15 +142,67 @@ namespace RegexRenamer.Rename
                 if (hidden) Stats.IncrementHidden();
                 if (!_globInfo.ShowHidden && hidden)
                 {
-                    if (!_inActiveFiles.ContainsKey(dir.Name.ToLower()))
-                        _inActiveFiles.Add(dir.Name.ToLower(), InactiveReason.Hidden);
+                    if (!_inActiveFiles.ContainsKey(name))
+                        _inActiveFiles.Add(name, InactiveReason.Hidden);
                     continue;
                 }
 
                 _files.Add(new RenameItemInfo(dir, hidden, _globInfo.PreserveExt));
             }
         }
+        private void BuildFilesStoreFast()
+        {
+            var filter = _globInfo.CreateGlobFilter();
+            DirectoryInfo activeDir = new DirectoryInfo(_globInfo.RootPath);
+            var options = new EnumerationOptions { 
+                IgnoreInaccessible = true,
+                RecurseSubdirectories = _searchInFolders,
+            };
+            var enumerator = new FileSystemEnumerable<RenameItemInfo>(
+                activeDir.FullName,
+                (ref FileSystemEntry entry) =>
+                    {
+                        if((entry.Attributes & FileAttributes.Directory) != 0)
+                            return null;
 
+                        Stats.IncrementTotal();
+
+                        // ignore if filtered out
+                        if (filter != null && filter.IsMatch(entry.FileName) == _globInfo.IsExclude)
+                        {
+                            var fileName = entry.FileName.NormalizeToC();
+                            if (!_inActiveFiles.ContainsKey(fileName))
+                                _inActiveFiles.Add(fileName, InactiveReason.Filtered);
+                            Stats.IncrementFiltered();
+                            return null;
+                        }
+
+                        // ignore if hidden and not showing hidden files
+                        bool hidden = entry.IsHidden;
+                        if (hidden) Stats.IncrementHidden();
+                        if (!_globInfo.ShowHidden && hidden)
+                        {
+                            var fileName = entry.FileName.NormalizeToC();
+                            if (!_inActiveFiles.ContainsKey(fileName))
+                                _inActiveFiles.Add(fileName, InactiveReason.Hidden);
+                            return null;
+                        }
+
+                        return new RenameItemInfo(ref entry, _globInfo.PreserveExt);
+                    },
+                options
+            );
+
+            // 2. Perform exactly ONE I/O pass
+            foreach (var file in enumerator)
+            {
+
+                if(file == null)
+                    continue;
+
+                _files.Add(file);
+            }
+        }
         private void BuildFilesStore()
         {
             var filter = _globInfo.CreateGlobFilter();
@@ -172,11 +228,13 @@ namespace RegexRenamer.Rename
             {
                 Stats.IncrementTotal();
 
+                var name = file.Name;
+
                 // ignore if filtered out
-                if (filter != null && filter.IsMatch(file.Name) == _globInfo.IsExclude)
+                if (filter != null && filter.IsMatch(name) == _globInfo.IsExclude)
                 {
-                    if (!_inActiveFiles.ContainsKey(file.Name.ToLower()))
-                        _inActiveFiles.Add(file.Name.ToLower(), InactiveReason.Filtered);
+                    if (!_inActiveFiles.ContainsKey(name))
+                        _inActiveFiles.Add(name, InactiveReason.Filtered);
                     Stats.IncrementFiltered();
                     continue;
                 }
@@ -192,8 +250,8 @@ namespace RegexRenamer.Rename
                 if (hidden) Stats.IncrementHidden();
                 if (!_globInfo.ShowHidden && hidden)
                 {
-                    if (!_inActiveFiles.ContainsKey(file.Name.ToLower()))
-                        _inActiveFiles.Add(file.Name.ToLower(), InactiveReason.Hidden);
+                    if (!_inActiveFiles.ContainsKey(name))
+                        _inActiveFiles.Add(name, InactiveReason.Hidden);
                     continue;
                 }
 

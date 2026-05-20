@@ -13,7 +13,7 @@ public static class StringExtensions
 
     public static string SentenceCase(this string value)
     {
-        return SentenceCaseRegex.Replace(value.ToLower(), s => s.Value.ToUpper());
+        return SentenceCaseRegex.Replace(value, s => s.Value.ToUpperInvariant());
     }
 
     /// <summary>

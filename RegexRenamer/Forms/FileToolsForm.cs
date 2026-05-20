@@ -120,8 +120,8 @@ public partial class FileToolsForm : Form
                             Application.DoEvents();
                             try
                             {
-                                var fileExt = Path.GetExtension(file.FullName).ToLowerInvariant();
-                                if(fileExt == ".txt")
+                                var fileExt = Path.GetExtension(file.FullName);
+                                if(string.Equals(fileExt, ".txt", StringComparison.OrdinalIgnoreCase))
                                 {
                                     var processor = new ReFormatTextFiles(file.FullName);
                                     var (windowStateRet, dresult) = processor.Process(windowState);
@@ -312,7 +312,7 @@ public partial class FileToolsForm : Form
                         }
                         pbToolsForm.Value = 0;
                         pbToolsForm.Maximum = _activeFiles.Count;
-                        Dictionary<string,CalibreOptions> inputOptions = new Dictionary<string,CalibreOptions>();
+                        Dictionary<string,CalibreOptions> inputOptions = new Dictionary<string,CalibreOptions>(StringComparer.OrdinalIgnoreCase);
                         for (int index = 0; index < _activeFiles.Count; index++)
                         {
                             var file = _activeFiles[index];
@@ -321,7 +321,7 @@ public partial class FileToolsForm : Form
                             listViewFiles.SelectedItems.Clear();
                             listViewFiles.Items[index].Selected = true;
                             var filePath = file.FullName;
-                            var fileExt = Path.GetExtension(filePath).ToLowerInvariant();
+                            var fileExt = Path.GetExtension(filePath);
                             var extraArgs = string.Empty;
                             if(!inputOptions.ContainsKey(fileExt))
                             {

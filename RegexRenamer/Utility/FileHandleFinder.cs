@@ -93,7 +93,7 @@ public class FileHandleFinder
         var currentProcessId = (uint)currentProcess.Id;
 
         // Normalize the file path
-        targetFilePath = Path.GetFullPath(targetFilePath).ToLower();
+        targetFilePath = Path.GetFullPath(targetFilePath);
 
         // Get all system handles
         uint systemInfoLength = 0;
@@ -134,7 +134,7 @@ public class FileHandleFinder
                                 var nameInfo = Marshal.PtrToStructure<OBJECT_NAME_INFORMATION>(objectNameInfo);
                                 string path = Marshal.PtrToStringUni(nameInfo.Name.Buffer, nameInfo.Name.Length / 2);
 
-                                if (path != null && path.ToLower().Contains(targetFilePath))
+                                if (path != null && path.Contains(targetFilePath, StringComparison.OrdinalIgnoreCase))
                                 {
                                     handles.Add(new IntPtr(handleInfo.HandleValue));
                                 }

@@ -40,7 +40,7 @@ public class ArchiveService
     {
         if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.IsArchive(archivePath) || Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
 
-        var ext = Path.GetExtension(archivePath).ToUpper();
+        var ext = Path.GetExtension(archivePath).ToUpperInvariant();
         if (ext.Equals(".CBR") || ext.Equals(".RAR")) return ArchiveLibrary.SharpCompress;
 
         try

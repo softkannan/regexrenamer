@@ -1069,7 +1069,7 @@ public static partial class Parser
 
     public static string Normalize(string name)
     {
-        return NormalizeRegex.Replace(name, string.Empty).Trim().ToLower();
+        return NormalizeRegex.Replace(name, string.Empty).Trim();
     }
 
     /// <summary>

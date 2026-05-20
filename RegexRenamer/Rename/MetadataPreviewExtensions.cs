@@ -42,7 +42,7 @@ namespace RegexRenamer.Rename
                     case ChangeCaseOption.Lowercase:
                         return _ti.ToLower(match.Groups[1].Value);
                     case ChangeCaseOption.Titlecase:
-                        return _ti.ToTitleCase(match.Groups[1].Value.ToLower());
+                        return _ti.ToTitleCase(match.Groups[1].Value);
                     case ChangeCaseOption.CleanName:
                         return match.Groups[1].Value.ToCleanFileName();
                     case ChangeCaseOption.NoChange:
@@ -137,7 +137,7 @@ namespace RegexRenamer.Rename
                 {
                     if (doingAutoNumLetter)
                     {
-                        numStart = SequenceLetterToNumber(numInfo.NumberingStart.ToLower());
+                        numStart = SequenceLetterToNumber(numInfo.NumberingStart.ToLowerInvariant());
                     }
                     else
                     {

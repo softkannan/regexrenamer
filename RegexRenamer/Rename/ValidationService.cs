@@ -167,13 +167,13 @@ internal sealed class ValidationService
     {
         ValidationResult result = new();
         bool[] hasError = new bool[fileCount];
-        Dictionary<string, List<int>> hashPreview = [];
+        Dictionary<string, List<int>> hashPreview = new(StringComparer.OrdinalIgnoreCase);
 
         // generate hash of preview filenames
         for (int dfi = 0; dfi < fileCount; dfi++)
         {
             int afi = getActiveFileIndex(dfi);
-            string preview = files[afi].PreviewExt.ToLower();
+            string preview = files[afi].PreviewExt;
 
             if (!hashPreview.ContainsKey(preview))
                 hashPreview.Add(preview, []);
@@ -189,17 +189,17 @@ internal sealed class ValidationService
         for (int dfi = 0; dfi < fileCount; dfi++)
         {
             int afi = getActiveFileIndex(dfi);
-            string preview = files[afi].PreviewExt.ToLower();
+            string preview = files[afi].PreviewExt;
 
             if (hasError[dfi]) continue;
 
             if (input.Output == OutputMode.RenameInPlace)
             {
-                if (files[afi].Name == files[afi].Preview) continue;
+                if (files[afi].Name == files[afi].Context.Preview) continue;
             }
             else
             {
-                if (!files[afi].Matched) continue;
+                if (!files[afi].Context.Matched) continue;
             }
 
             // valid filename check
@@ -211,7 +211,7 @@ internal sealed class ValidationService
             }
 
             // dupe filename conflicts
-            if (!files[afi].Preview.Contains("\\")
+            if (!files[afi].Context.Preview.Contains("\\")
                 && (input.Output == OutputMode.RenameInPlace || input.Output == OutputMode.BackupTo))
             {
                 // check against active files
@@ -303,7 +303,7 @@ internal sealed class ValidationService
 
         // compute counts
         for (int idx = 0; idx < files.Count; idx++)
-            if (files[idx].Matched) result.MatchedCount++;
+            if (files[idx].Context.Matched) result.MatchedCount++;
 
         result.ConflictCount = result.FileErrors.Count;
 
@@ -336,7 +336,7 @@ internal sealed class ValidationService
         foreach (var kvp in fileErrors)
         {
             int afi = kvp.Key;
-            if (input.RenameSelectionOnly && !files[afi].Selected)
+            if (input.RenameSelectionOnly && !files[afi].Context.Selected)
                 continue;
 
             return new PreRenameCheckResult { ErrorMessage = "Can't rename while errors exist (highlighted in red)." };
@@ -346,11 +346,11 @@ internal sealed class ValidationService
         int filesToRename = 0;
         foreach (RenameItemInfo file in files)
         {
-            if (input.RenameSelectionOnly && !file.Selected)
+            if (input.RenameSelectionOnly && !file.Context.Selected)
                 continue;
 
-            if ((input.Output == OutputMode.RenameInPlace && file.Name != file.Preview)
-             || (input.Output != OutputMode.RenameInPlace && file.Matched))
+            if ((input.Output == OutputMode.RenameInPlace && file.Name != file.Context.Preview)
+             || (input.Output != OutputMode.RenameInPlace && file.Context.Matched))
                 filesToRename++;
         }
 
@@ -391,14 +391,14 @@ internal sealed class ValidationService
         {
             if (input.Output == OutputMode.RenameInPlace)
             {
-                if (file.Name == file.Preview) continue;
+                if (file.Name == file.Context.Preview) continue;
             }
             else
             {
-                if (!file.Matched) continue;
+                if (!file.Context.Matched) continue;
             }
 
-            if (regexInvalidChars.IsMatch(file.Preview))
+            if (regexInvalidChars.IsMatch(file.Context.Preview))
             {
                 hasInvalidStartChars = true;
                 break;

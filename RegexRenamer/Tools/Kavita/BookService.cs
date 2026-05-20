@@ -107,7 +107,7 @@ public partial class BookService
                 Year = year,
                 Title = epubBook?.Title ?? string.Empty,
                 Genre = string.Join(",",
-                    epubBook?.Schema.Package.Metadata.Subjects.Select(s => s.Subject.ToLower().Trim()) ?? new string[] { }),
+                    epubBook?.Schema.Package.Metadata.Subjects.Select(s => s.Subject.Trim()) ?? new string[] { }),
                 LanguageISO = ValidateLanguage(epubBook?.Schema.Package.Metadata.Languages
                     .Select(l => l.Language)
                     .FirstOrDefault())

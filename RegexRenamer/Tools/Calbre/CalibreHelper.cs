@@ -114,7 +114,7 @@ public class CalibreHelper
 
         if(!string.IsNullOrEmpty(metadata.LanguageISO))
         {
-            cmdArgs.Append($"--language=\"{metadata.LanguageISO.ToLower().Trim()}\" ");
+            cmdArgs.Append($"--language=\"{metadata.LanguageISO.ToLowerInvariant().Trim()}\" ");
             needToRun=true;
         }
 
@@ -152,9 +152,9 @@ public class CalibreHelper
     public static async Task<bool> ConvertCalibre(string srcFilePath, string destFilePath)
     {
         var extraoptions = new StringBuilder();
-        string inExt = Path.GetExtension(srcFilePath).ToLowerInvariant();
-        string outExt = Path.GetExtension(destFilePath).ToLowerInvariant();
-        if (outExt != ".epub" && outExt != ".pdf")
+        string inExt = Path.GetExtension(srcFilePath);
+        string outExt = Path.GetExtension(destFilePath);
+        if (!string.Equals(outExt, ".epub", StringComparison.OrdinalIgnoreCase) && !string.Equals(outExt, ".pdf", StringComparison.OrdinalIgnoreCase))
         {
             ErrorLog.Inst.ShowError("Calibre conversion only supports epub and pdf output");
             return false;
@@ -162,24 +162,14 @@ public class CalibreHelper
         // Supports {srcfilepath} {destfilepath} variables
         var cmdName = "ConvertBookToEPUB";
 
-        switch(outExt)
-        {
-            case ".pdf":
-                cmdName = "ConvertBookToPDF";
-                break;
-            case "":
-                cmdName = "ConvertBookToEPUB";
-                break;
-        }
+        if(string.Equals(outExt, ".pdf", StringComparison.OrdinalIgnoreCase))
+            cmdName = "ConvertBookToPDF";
+        else if(string.Equals(outExt, ".epub", StringComparison.OrdinalIgnoreCase))
+            cmdName = "ConvertBookToEPUB";
 
-        switch (inExt)
+        if(inExt.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
         {
-            case ".txt":
-                {
-                    //var txtFileEncoding = srcFilePath.GetEncoding();
-                    //extraoptions.Append($"--input-encoding={txtFileEncoding.Item1}");
-                }
-                break;
+            //extraoptions.Append("--pdf-input-profile=default");
         }
 
         // Supports {srcfilepath} {destfilepath} variables , {extraoptions} optional and it must be at the end

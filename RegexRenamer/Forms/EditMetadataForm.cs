@@ -318,10 +318,13 @@ public partial class EditMetadataForm : Form
                         UserConfig.Inst.Meta.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
                         UserConfig.Inst.Meta.UpdateRecursively = chkApplyRecursively.Checked;
 
-                        var fileExt = file.Item1.Extension.ToLowerInvariant();
+                        var fileExt = file.Item1.Extension;
                         var toolName = fileExt == ".pdf" ? UserConfig.Inst.Meta.PreferredPDFTool : UserConfig.Inst.Meta.PreferredEBookTool;
 
-                        if (fileExt != ".pdf" && fileExt != ".epub" && fileExt != ".kepub" && fileExt != ".azw")
+                        if (string.Compare(fileExt, ".pdf", StringComparison.OrdinalIgnoreCase) != 0 &&
+                            string.Compare(fileExt, ".epub", StringComparison.OrdinalIgnoreCase) != 0 &&
+                            string.Compare(fileExt, ".kepub", StringComparison.OrdinalIgnoreCase) != 0 &&
+                            string.Compare(fileExt, ".azw", StringComparison.OrdinalIgnoreCase) != 0)
                         {
                             // unsupported file type
                             continue;
@@ -381,10 +384,13 @@ public partial class EditMetadataForm : Form
                         UserConfig.Inst.Meta.PreferredPDFTool = cmbPDFToolsList.SelectedItem as string;
                         UserConfig.Inst.Meta.UpdateRecursively = chkApplyRecursively.Checked;
 
-                        var fileExt = file.Item1.Extension.ToLowerInvariant();
-                        var toolName = fileExt == ".pdf" ? UserConfig.Inst.Meta.PreferredPDFTool : UserConfig.Inst.Meta.PreferredEBookTool;
+                        var fileExt = file.Item1.Extension;
+                        var toolName = string.Equals(fileExt, ".pdf", StringComparison.OrdinalIgnoreCase) ? UserConfig.Inst.Meta.PreferredPDFTool : UserConfig.Inst.Meta.PreferredEBookTool;
 
-                        if (fileExt != ".pdf" && fileExt != ".epub" && fileExt != ".kepub" && fileExt != ".azw")
+                        if (!string.Equals(fileExt, ".pdf", StringComparison.OrdinalIgnoreCase) &&
+                            !string.Equals(fileExt, ".epub", StringComparison.OrdinalIgnoreCase) &&
+                            !string.Equals(fileExt, ".kepub", StringComparison.OrdinalIgnoreCase) &&
+                            !string.Equals(fileExt, ".azw", StringComparison.OrdinalIgnoreCase))
                         {
                             // unsupported file type
                             continue;

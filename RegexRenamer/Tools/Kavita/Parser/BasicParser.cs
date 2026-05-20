@@ -94,7 +94,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         }
 
         // Pdfs may have .pdf in the series name, remove that
-        if (Parser.IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
+        if (Parser.IsPdf(filePath) && ret.Series.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
         {
             ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
         }

@@ -336,7 +336,7 @@ namespace EpubSharp
 
             var htmlFiles = book.Format.Opf.Manifest.Items
                 .Where(item => ContentType.MimeTypeToContentType.ContainsKey(item.MediaType) && ContentType.MimeTypeToContentType[item.MediaType] == EpubContentType.Xhtml11)
-                .ToDictionary(item => item.Id, item => item.Href);
+                .ToDictionary(item => item.Id, item => item.Href, StringComparer.OrdinalIgnoreCase);
 
             foreach (var item in book.Format.Opf.Spine.ItemRefs)
             {
