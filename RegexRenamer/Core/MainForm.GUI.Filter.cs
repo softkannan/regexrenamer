@@ -26,9 +26,9 @@ namespace RegexRenamer
 
             foreach (var hint in UserConfig.Inst.SortHints)
             {
-                if (!cmbSort.Items.Contains(hint.Name))
+                if (!cmbSortHint.Items.Contains(hint.Name))
                 {
-                    cmbSort.Items.Add(hint.Name);
+                    cmbSortHint.Items.Add(hint.Name);
                 }
             }
             cmbFilter.SelectedIndex = 0;

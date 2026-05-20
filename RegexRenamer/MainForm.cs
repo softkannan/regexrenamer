@@ -50,7 +50,7 @@ namespace RegexRenamer
 
         private string _activeFilter = "*.*";  // current filter
         private FilesStore _fileStore = new FilesStore();  // files in activePath displayed in filelist
-        private readonly List<Models.FileViewRowData> _fileViewRows = new();
+        private List<Models.FileViewRowData> _fileViewRows = new();
 
         private readonly ValidationService _validationService = new();
         private readonly RenameService _renameService = new();
@@ -265,6 +265,8 @@ namespace RegexRenamer
         // load settings, update folder tree view
         private void MainForm_Load(object sender, EventArgs e)
         {
+            ApplyGridThemeColors();
+
             // disable help menuitems if files are missing
             if (!File.Exists(Path.Combine(Application.StartupPath, "RegexRenamer.chm")))
             {

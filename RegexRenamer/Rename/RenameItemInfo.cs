@@ -55,6 +55,13 @@ namespace RegexRenamer.Rename
             FileModifiedStr = di.LastWriteTime.ToString("MM/dd/yyyy hh:mm:ss tt");
         }
 
+        public FileModificationInfo(DateTimeOffset lastWriteTimeUtc)
+        {
+            // Normalize to local time for display purposes 
+            FileModified = lastWriteTimeUtc.ToLocalTime().DateTime;
+            FileModifiedStr = FileModified.ToString("MM/dd/yyyy hh:mm:ss tt");
+        }
+
         public int CompareTo(FileModificationInfo other)
         {
             if (other == null) return 1;
@@ -82,66 +89,56 @@ namespace RegexRenamer.Rename
     {
         private const int MaxStackAllocSize = 256; // Max filename length we expect to handle without heap allocation
 
-        public string Filename { get; init; }   // [subdir\]filename.txt
-        public string Basename { get; init; }   // [subdir\]filename
-        public string Foldername { get; init; } // c:\..\[subdir\]
-        public string Extension { get; init; }  // .txt
-        public string Fullpath { get; init; }   // c:\..\[subdir\]filename.txt
-        public bool IsFolder { get; init; }
-        public bool Hidden { get; init; }       // true if hidden file
-        public bool PreserveExt { get; init; }  // true if 'Preserve file extension' checked
+        public readonly string Filename;   // [subdir\]filename.txt
+        public readonly string Basename;   // [subdir\]filename
+        public readonly string Foldername; // c:\..\[subdir\]
+        public readonly string Extension;  // .txt
+        public readonly bool IsFolder;     // true if folder, false if file
+        public readonly bool Hidden;       // true if hidden file
+        public readonly bool PreserveExt;  // true if 'Preserve file extension' checked
+        public readonly string Name;       // either filename or basename, depending on preserveext
 
-        public FileModificationInfo FileModified { get; init; }
-        public FileSizeInfo Size { get; init; }
-
-        // either filename or basename, depending on preserveext
-        public string Name { get; init; }
-        // if preserveext, append extension
-        public string PreviewExt { get; init; }
-        // if preserveext, append extension
-        public string PreviewFullPath { get; init; }
+        public readonly FileModificationInfo FileModified; // last modified date/time
+        public readonly FileSizeInfo Size;                 // file size (0 for folders)
 
         public DynamicRenameItemInfo Context { get; init; }
 
-        public RenameItemInfo(FileInfo fi, bool hidden, bool preserveext)
-        {
-            Filename = fi.Name;
-            Basename = fi.Name.Substring(0, fi.Name.Length - fi.Extension.Length);
-            Extension = fi.Extension;
-            Fullpath = fi.FullName;
-            Foldername = Path.GetDirectoryName(fi.FullName) + Path.DirectorySeparatorChar;
-            Hidden = hidden;
-            PreserveExt = preserveext;
-            IsFolder = false;
-            FileModified = new FileModificationInfo(fi);
-            Size = new FileSizeInfo(fi);
+        // On Demand Calculated Properties
 
-            Context = new DynamicRenameItemInfo();
-            Context.Preview = fi.Name;
-            Context.Matched = false;
-            Context.Selected = false;
-
-            if (PreserveExt)
+        // c:\..\[subdir\]filename.txt
+        private string _fullpath = null;
+        public string Fullpath { 
+            get
             {
-                Name = Basename;
-                PreviewExt = Context.Preview + Extension;
-                PreviewFullPath = Foldername + Context.Preview + Extension;
-            }
-            else
-            {
-                Name = Filename;
-                PreviewExt = Context.Preview;
-                PreviewFullPath = Foldername + Context.Preview;
+                if (_fullpath == null)
+                {
+                    _fullpath = string.Concat(Foldername, Path.DirectorySeparatorChar, Filename);
+                }
+                return _fullpath;
             }
         }
+
+        // if preserveext, append extension
+        private string _previewExt = null;
+        public string PreviewExt { 
+            get
+            {
+                if (_previewExt == null)
+                {
+                    _previewExt = PreserveExt ? Context.Preview + Extension : Context.Preview;
+                }
+                return _previewExt;
+            }
+        }
+
+        
 
         public RenameItemInfo(DirectoryInfo di, bool hidden, bool preserveext)
         {
             Filename = di.Name;
             Basename = di.Name;
-            Extension = "";
-            Fullpath = di.FullName;
-            Foldername = "";
+            Extension = string.Empty;
+            Foldername = string.Empty;
             Hidden = hidden;
             PreserveExt = preserveext;
             IsFolder = true;
@@ -153,28 +150,70 @@ namespace RegexRenamer.Rename
             Context.Matched = false;
             Context.Selected = false;
 
-            if (PreserveExt)
-            {
-                PreviewExt = Context.Preview + Extension;
-                Name = Basename;
-                PreviewFullPath = Foldername + Context.Preview + Extension;
-            }
-            else
-            {
-                Name = Filename;
-                PreviewExt = Context.Preview;
-                PreviewFullPath = Foldername + Context.Preview;
-            }
+            Name = PreserveExt ? Basename : Filename;
+        }
+
+        public RenameItemInfo(FileInfo fi, bool hidden, bool preserveext)
+        {
+            Filename = fi.Name;
+            Basename = fi.Name.Substring(0, fi.Name.Length - fi.Extension.Length);
+            Extension = fi.Extension;
+            Foldername = fi.Directory.ToString();
+            Hidden = hidden;
+            PreserveExt = preserveext;
+            IsFolder = false;
+            FileModified = new FileModificationInfo(fi);
+            Size = new FileSizeInfo(fi);
+
+            Context = new DynamicRenameItemInfo();
+            Context.Preview = fi.Name;
+            Context.Matched = false;
+            Context.Selected = false;
+
+            Name = PreserveExt ? Basename : Filename;
         }
 
         public RenameItemInfo(ref FileSystemEntry entry, bool preserveext)
         {
             ReadOnlySpan<char> nameSpan = entry.FileName;
+            string cleanName, extension;
+            if (entry.IsDirectory)
+            {
+                cleanName = entry.FileName.ToString();
+                extension = string.Empty;
+            }
+            else
+            {
+                GetCleanNameAndExt(nameSpan, out cleanName, out extension);
+            }
+
+            // For directories, Filename is just the clean name. For files, it's clean name + extension.
+            Filename = entry.IsDirectory ? cleanName : string.Concat(cleanName, extension);
+            // For files, Basename is the clean name without extension. For directories, it's the same as Filename.
+            Basename = cleanName;
+            // folders will have empty extension
+            Extension = extension;
+            // For directories, Foldername is empty. For files, it's the normalized parent directory path.
+            Foldername = entry.IsDirectory ? string.Empty : entry.Directory.NormalizeToC();
+            Hidden = entry.IsHidden;
+            PreserveExt = preserveext;
+            IsFolder = entry.IsDirectory;
+            FileModified = new FileModificationInfo(entry.LastWriteTimeUtc);
+            Size = new FileSizeInfo(entry.Length);
+
+            Context = new DynamicRenameItemInfo();
+            Context.Preview = Filename;
+            Context.Matched = false;
+            Context.Selected = false;
+
+            Name = PreserveExt ? Basename : Filename;
+        }
+
+        private static void GetCleanNameAndExt(ReadOnlySpan<char> nameSpan, out string cleanName, out string extension)
+        {
             int lastDot = nameSpan.LastIndexOf('.');
-
-            string cleanName = string.Empty;
-            string extension = string.Empty;
-
+            cleanName = string.Empty;
+            extension = string.Empty;
             // Check if an extension actually exists (guarding against '.gitignore' or no extension)
             if (lastDot > 0)
             {
@@ -222,35 +261,6 @@ namespace RegexRenamer.Rename
                     cleanName = nameSpan.ToString().Normalize(NormalizationForm.FormC);
                 }
                 extension = string.Empty;
-            }
-
-            Filename = cleanName + extension;
-            Basename = cleanName;
-            Extension = extension;
-            Fullpath = entry.ToSpecifiedFullPath().ToString();
-            Foldername = Path.GetDirectoryName(Fullpath) + Path.DirectorySeparatorChar;
-            Hidden = entry.IsHidden;
-            PreserveExt = preserveext;
-            IsFolder = entry.IsDirectory;
-            FileModified = new FileModificationInfo(new FileInfo(Fullpath));
-            Size = new FileSizeInfo(entry.Length);
-
-            Context = new DynamicRenameItemInfo();
-            Context.Preview = Filename;
-            Context.Matched = false;
-            Context.Selected = false;
-
-            if (PreserveExt)
-            {
-                Name = Basename;
-                PreviewExt = Context.Preview + Extension;
-                PreviewFullPath = Foldername + Context.Preview + Extension;
-            }
-            else
-            {
-                Name = Filename;
-                PreviewExt = Context.Preview;
-                PreviewFullPath = Foldername + Context.Preview;
             }
         }
     }

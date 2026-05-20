@@ -302,7 +302,7 @@ public static class RenamePreviewExtensions
         var kavitaRoot = pThis.KavitaRoot;
         kavitaRoot ??= Directory.GetDirectoryRoot(match.Fullpath);
 
-        var parseInfo = parser.ParseFile(match.PreviewFullPath, kavitaRoot, kavitaRoot, pThis.KavitaLibType, pThis.UseMetadata);
+        var parseInfo = parser.ParseFile(match.Fullpath, kavitaRoot, kavitaRoot, pThis.KavitaLibType, pThis.UseMetadata);
         match.Context.ParseInfo = parseInfo;
 
         //var comicInfo = parser.GetComicInfo(match.PreviewFullPath, true); //, kavithaRoot, libType);

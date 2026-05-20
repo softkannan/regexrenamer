@@ -1,5 +1,4 @@
 using Config;
-using System.ComponentModel;
 using RegexRenamer.Controls.FolderTreeViewCtrl;
 using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Forms;
@@ -11,6 +10,7 @@ using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Windows.Storage;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace RegexRenamer
 {
@@ -29,8 +30,49 @@ namespace RegexRenamer
         private ContextMenuStrip cmFileView;
         private DataGridIconCache _fileViewIconCache = new DataGridIconCache();
 
-
+        // Initialize file list view and context menu, and wire up event handlers for virtual mode, context menu, selection, sorting, and shortcuts.
         #region Context Menu Builder and Initializer
+        private void InitializeFileListView()
+        {
+            CreateFileViewContextMenu();
+
+            dgvFiles.VirtualMode = true;
+            dgvFiles.CellValueNeeded += dgvFiles_CellValueNeeded;
+            dgvFiles.CellValuePushed += dgvFiles_CellValuePushed;
+            dgvFiles.CellFormatting += dgvFiles_CellFormatting;
+
+            dgvFiles.ContextMenuStrip = cmFileView;
+            dgvFiles.CellBeginEdit += dgvFiles_CellBeginEdit;
+            dgvFiles.CellDoubleClick += dgvFiles_CellDoubleClick;
+            dgvFiles.CellEndEdit += dgvFiles_CellEndEdit;
+            dgvFiles.CellMouseEnter += dgvFiles_CellMouseEnter;
+            dgvFiles.CellMouseLeave += dgvFiles_CellMouseLeave;
+            dgvFiles.CellValidating += dgvFiles_CellValidating;
+            dgvFiles.SelectionChanged += dgvFiles_SelectionChanged;
+            dgvFiles.KeyUp += dgvFiles_KeyUp;
+            dgvFiles.Leave += dgvFiles_Leave;
+
+            dgvFiles.SortCompare += dgvFiles_SortCompare;
+            dgvFiles.ColumnHeaderMouseClick += dgvFiles_ColumnHeaderMouseClick;
+
+            colModified.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            colFileSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+
+            // Capture designer widths as minimum widths for every column
+            foreach (DataGridViewColumn col in dgvFiles.Columns)
+            {
+                col.MinimumWidth = col.Width;
+            }
+
+            dgvFiles.ColumnWidthChanged += (_, args) =>
+            {
+                if (args.Column == colFilename || args.Column == colPreview)
+                    _userResizedColumns = true;
+            };
+            dgvFiles.SizeChanged += (_, _) => DistributeColumnWidths();
+            DistributeColumnWidths();
+        }
+
         private void CreateFileViewContextMenu()
         {
             cmFileView = new System.Windows.Forms.ContextMenuStrip(components);
@@ -145,49 +187,9 @@ namespace RegexRenamer
             
         }
 
-        private void InitializeFileListView()
-        {
-            CreateFileViewContextMenu();
-
-            dgvFiles.VirtualMode = true;
-            dgvFiles.CellValueNeeded += dgvFiles_CellValueNeeded;
-            dgvFiles.CellValuePushed += dgvFiles_CellValuePushed;
-            dgvFiles.CellFormatting += dgvFiles_CellFormatting;
-
-            dgvFiles.ContextMenuStrip = cmFileView;
-            dgvFiles.CellBeginEdit += dgvFiles_CellBeginEdit;
-            dgvFiles.CellDoubleClick += dgvFiles_CellDoubleClick;
-            dgvFiles.CellEndEdit += dgvFiles_CellEndEdit;
-            dgvFiles.CellMouseEnter += dgvFiles_CellMouseEnter;
-            dgvFiles.CellMouseLeave += dgvFiles_CellMouseLeave;
-            dgvFiles.CellValidating += dgvFiles_CellValidating;
-            dgvFiles.SelectionChanged += dgvFiles_SelectionChanged;
-            dgvFiles.KeyUp += dgvFiles_KeyUp;
-            dgvFiles.Leave += dgvFiles_Leave;
-
-            dgvFiles.SortCompare += dgvFiles_SortCompare;
-            dgvFiles.ColumnHeaderMouseClick += dgvFiles_ColumnHeaderMouseClick;
-
-            colModified.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            colFileSize.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-
-            // Capture designer widths as minimum widths for every column
-            foreach (DataGridViewColumn col in dgvFiles.Columns)
-            {
-                col.MinimumWidth = col.Width;
-            }
-
-            dgvFiles.ColumnWidthChanged += (_, args) =>
-            {
-                if (args.Column == colFilename || args.Column == colPreview)
-                    _userResizedColumns = true;
-            };
-            dgvFiles.SizeChanged += (_, _) => DistributeColumnWidths();
-            DistributeColumnWidths();
-        }
-
         #endregion
 
+        // dynamic column width management
         #region Dynamic Column Width Distribution
 
         private bool _userResizedColumns;
@@ -253,12 +255,11 @@ namespace RegexRenamer
             _userResizedColumns = false;
             DistributeColumnWidths();
         }
-
         #endregion
 
-        
+        // Sorting handlers
         #region DataGrid and Sorting Handlers
-
+        // called when changing active path to reset column text alignment based on new sort match (since sort matches can have different alignments)
         private void UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment alignment)
         {
             if (_activePath == null) return;
@@ -267,17 +268,19 @@ namespace RegexRenamer
            // colPreview.DefaultCellStyle.Alignment = alignment;
         }
 
-        
 
+        // called during sorting to compare two cells. We provide custom sort logic here for the Filename column (to convert to sort text based on the active sort match)
+        // and for the File Size and Modified columns (to sort by actual file size and modified date instead of their string representations).
+        // For other columns, we fall back to default string comparison.
         private void dgvFiles_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
-            if ((!string.IsNullOrWhiteSpace(cmbSort.Text)) && _activeSortMatch != null)
+            if ((!string.IsNullOrWhiteSpace(cmbSortHint.Text)) && _activeSortStringProvider != null)
             {
                 // reverse sort for other columns
                 var val1 = e.CellValue1?.ToString() ?? "";
                 var val2 = e.CellValue2?.ToString() ?? "";
-                val1 = val1.ConvertToSortText(_activeSortMatch);
-                val2 = val2.ConvertToSortText(_activeSortMatch);
+                val1 = val1.ConvertToSortText(_activeSortStringProvider);
+                val2 = val2.ConvertToSortText(_activeSortStringProvider);
                 e.SortResult = string.Compare(val1, val2);
                 e.Handled = true; // Indicate that sorting is handled
             }
@@ -303,7 +306,8 @@ namespace RegexRenamer
                 }
             }
         }
-
+        // called when user clicks column header. We sort the backing list of FileViewRowData objects and refresh the grid (instead of using built-in sorting)
+        // to maintain correct indexing to the active files list and allow for custom sort text conversion.
         private void dgvFiles_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             DataGridViewColumn clickedColumn = dgvFiles.Columns[e.ColumnIndex];
@@ -316,20 +320,26 @@ namespace RegexRenamer
         }
         #endregion
 
+        // virtual mode handlers
         #region VirtualMode Event Handlers
 
+        // called when the grid needs a cell value.
+        // We pull from the backing list of FileViewRowData objects, which in turn reference the active files list for dynamic values like filename and preview.
         private void dgvFiles_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= _fileViewRows.Count) return;
-            e.Value = _fileViewRows[e.RowIndex].CellValues[e.ColumnIndex];
+            e.Value = GetCellValue(_fileViewRows[e.RowIndex], e.ColumnIndex);
         }
-
+        // called when the user edits a cell and the grid needs to push the value back to the backing list.
+        // We update the FileViewRowData, which will persist through sorting and is used for dynamic values like preview error tags and forecolors.
         private void dgvFiles_CellValuePushed(object sender, DataGridViewCellValueEventArgs e)
         {
-            if (e.RowIndex < 0 || e.RowIndex >= _fileViewRows.Count) return;
-            _fileViewRows[e.RowIndex].CellValues[e.ColumnIndex] = e.Value;
+            // Ignore edits since we handle single file renames separately in CellValidating to allow for cancellation and validation error messages.
+            // This event would only be triggered for edits if the user presses F2 to edit a cell, which we disable when not in single file rename mode.
+            //if (e.RowIndex < 0 || e.RowIndex >= _fileViewRows.Count) return;
+            //_fileViewRows[e.RowIndex].CellValues[e.ColumnIndex] = e.Value;
         }
-
+        // called when a cell is being rendered. We set dynamic forecolors here based on the backing FileViewRowData.
         private void dgvFiles_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= _fileViewRows.Count) return;
@@ -345,13 +355,13 @@ namespace RegexRenamer
             }
         }
 
-        /// <summary>Gets the active file index for the given display row index.</summary>
-        private int GetActiveFileIndex(int rowIndex) => _fileViewRows[rowIndex].ActiveFileIndex;
-
+        // helper to get active file index from row index (since the grid is virtual and doesn't directly bind to the active files list)
+        private int GetFileStoreIndex(int rowIndex) => _fileViewRows[rowIndex].FileStoreIndex;
+        // track current sort for toggling and visual indicators
         private SortOrder _currentSortOrder = SortOrder.Ascending;
+        // Track the current sort column to allow toggling sort order and applying visual indicators in the UI (e.g. sort glyphs in the column header).
         private DataGridViewColumn _currentSortColumn;
-
-        /// <summary>Sorts the backing list and refreshes the grid.</summary>
+        // helper to sort the backing list and refresh the grid
         private void SortFileViewRows(DataGridViewColumn column, ListSortDirection direction)
         {
             if (column == null || _fileViewRows.Count == 0) return;
@@ -363,20 +373,20 @@ namespace RegexRenamer
             int sign = direction == ListSortDirection.Ascending ? 1 : -1;
 
             // Hoist invariant checks outside the per-comparison lambda
-            bool useCustomSort = !string.IsNullOrWhiteSpace(cmbSort.Text) && _activeSortMatch != null;
+            bool useCustomSort = !string.IsNullOrWhiteSpace(_activeSortHintName) && _activeSortStringProvider != null;
             bool isFileSizeColumn = column == colFileSize;
             bool isModifiedColumn = column == colModified;
-            var sortMatch = _activeSortMatch;
+            var sortStringConverter = _activeSortStringProvider;
 
             _fileViewRows.Sort((a, b) =>
             {
-                object val1 = a.CellValues[colIndex];
-                object val2 = b.CellValues[colIndex];
+                object val1 = GetCellValue(a, colIndex, false);
+                object val2 = GetCellValue(b, colIndex, false);
 
                 if (useCustomSort)
                 {
-                    string s1 = (val1?.ToString() ?? "").ConvertToSortText(sortMatch);
-                    string s2 = (val2?.ToString() ?? "").ConvertToSortText(sortMatch);
+                    string s1 = (val1?.ToString() ?? "").ConvertToSortText(sortStringConverter);
+                    string s2 = (val2?.ToString() ?? "").ConvertToSortText(sortStringConverter);
                     return sign * string.Compare(s1, s2);
                 }
 
@@ -395,10 +405,11 @@ namespace RegexRenamer
         }
 
         #endregion
-
-        // FILE LIST
+        
+        // Shortcut Keys for file operations
+        #region Shortcut Keys for File Operations
         // F5 = refresh
-        #region Files List DataGridView Methods
+        // called on key up in the files grid for shortcuts like refresh, rename, copy/paste, delete
         private void dgvFiles_KeyUp(object sender, KeyEventArgs e)
         {
             if (!EnableUpdates) return;
@@ -407,18 +418,18 @@ namespace RegexRenamer
             {
                 RefreshView(UpdateStage.FileList);
             }
-            if(e.KeyCode == Keys.F2)
+            if (e.KeyCode == Keys.F2)
             {
                 dgvFiles.BeginEdit(false);
             }
-            else if(e.KeyCode == Keys.C && (e.Modifiers & Keys.Control) == Keys.Control)
+            else if (e.KeyCode == Keys.C && (e.Modifiers & Keys.Control) == Keys.Control)
             {
-                List<RenameItemInfo> selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex);
+                var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
                 selectedFiles.CopyFilesToClipboad();
             }
             else if (e.KeyCode == Keys.X && (e.Modifiers & Keys.Control) == Keys.Control)
             {
-                List<RenameItemInfo> selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex);
+                var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
                 selectedFiles.CopyFilesToClipboad(true);
             }
             else if (e.KeyCode == Keys.V && (e.Modifiers & Keys.Control) == Keys.Control)
@@ -426,35 +437,45 @@ namespace RegexRenamer
                 _activePath.ClipboardPasteFiles();
                 RefreshView(UpdateStage.FileList);
             }
-            else if(e.KeyCode == Keys.Delete)
+            else if (e.KeyCode == Keys.Delete)
             {
-                var selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex).Select(item => item.Fullpath).ToList();
-                var selectedIndex = dgvFiles.SelectedRows[0].Index;
-                PInvoke.FileOperationAPI.SendToRecycleBin(selectedFiles);
+                var (selectedFiles, minIndex) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
+                var filePaths = selectedFiles.Select(item => item.Fullpath).ToList();
+                PInvoke.FileOperationAPI.SendToRecycleBin(filePaths);
                 RefreshView(UpdateStage.FileList);
-                if (dgvFiles.Rows.Count > selectedIndex)
+                var selectedIndex = Math.Min(minIndex, dgvFiles.Rows.Count - 1);
+                dgvFiles.Rows[selectedIndex].Selected = true;
+                // if the selected row is now out of view after deletion, scroll into view
+                if (dgvFiles.Rows[selectedIndex]?.Displayed == false)
                 {
-                    selectedIndex = selectedIndex == 0 ? 0 : selectedIndex - 1;
-                    dgvFiles.Rows[selectedIndex].Selected = true;
                     //scroll into view
                     dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
                 }
             }
         }
+        #endregion
 
+        // single file rename handlers
+        // this is only time we push value from the grid to the backing list, since for other edits (e.g. bulk rename, metadata edit)
+        // we update the backing list directly and just refresh the grid to pull the new values
+        #region Single File Rename Handlers
         // rename single file
         bool single_file_rename_editing = false;
+        // called when user begins editing a cell. We set a flag to indicate that we're in the middle of a single file rename,
+        // which will trigger our rename logic in CellValidating and prevent recursion and other unwanted behavior.
         private void dgvFiles_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             if (!EnableUpdates) e.Cancel = true;
 
             single_file_rename_editing = true;
         }
+        // called when user finishes editing a cell. We reset the single file rename flag here to allow for other types of edits and to prevent unwanted behavior in other event handlers.
+        // perform single file rename on CellValidating (instead of CellEndEdit) to allow cancellation and prevent losing focus from validation error MessageBox
         private void dgvFiles_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
             if (!single_file_rename_editing) return;
 
-            int afi = GetActiveFileIndex(e.RowIndex);
+            int afi = GetFileStoreIndex(e.RowIndex);
             string newFilename = (string)e.FormattedValue;
             string prevFilename = _fileStore.Files[afi].Name;
 
@@ -466,7 +487,7 @@ namespace RegexRenamer
             }
 
             // get new name/path
-            if (itmOptionsPreserveExt.Checked)
+            if (_currentInput.PreserveExtension)
             {
                 newFilename += _fileStore.Files[afi].Extension;
             }
@@ -488,6 +509,7 @@ namespace RegexRenamer
                 return;
             }
 
+            // warn if filename now starts with space or dot (since that can cause issues with other programs, even though it's technically allowed)
             Regex regex = new Regex("^[ .]");
             if (regex.IsMatch(newFilename) && !regex.IsMatch(_fileStore.Files[afi].Filename))  // now starts with [ .]
             {
@@ -519,18 +541,19 @@ namespace RegexRenamer
                 return;
             }
 
-            // update icon (if file)
+            // update icon if extension changed (folders won't have icon change)
             FileInfo fi = new FileInfo(newFullpath);
             if (!RenameFolders && fi.Extension != _fileStore.Files[afi].Extension)
             {
                 // update datagrid icon
-                try  // add image (keyed by extension)
+                try  
                 {
-                    _fileViewRows[e.RowIndex].CellValues[0] = _fileViewIconCache.GetIcon(fi);
+                    // add image (keyed by extension)
+                    _fileViewRows[e.RowIndex].FileIcon = _fileViewIconCache.GetIcon(fi);
                 }
                 catch  // default = no image
                 {
-                    _fileViewRows[e.RowIndex].CellValues[0] = new Bitmap(1, 1);
+                    _fileViewRows[e.RowIndex].FileIcon = null;
                 }
             }
 
@@ -566,19 +589,23 @@ namespace RegexRenamer
             single_file_rename_editing = false;  // prevent recursion: dgvFiles.Sort() in UpdatePreview() causes dgvFiles.CellValidating
             RefreshView(UpdateStage.Preview);
         }
+        // called when user finishes editing a cell. We reset the single file rename flag here to allow for other types of edits and to prevent unwanted behavior in other event handlers.
         private void dgvFiles_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             single_file_rename_editing = false;
         }
+        #endregion
 
         // double-click = open file
+        #region Double click handlers
+        // called when user double-clicks a cell. We attempt to launch the file with the default associated program. If that fails, we show an error message.
         private async void dgvFiles_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (!EnableUpdates) return;
 
             try
             {
-                var filePath = _fileStore.Files[GetActiveFileIndex(e.RowIndex)].Fullpath;
+                var filePath = _fileStore.Files[GetFileStoreIndex(e.RowIndex)].Fullpath;
                 var result = await EBookHelper.LaunchEBookAsync(filePath);
                 if(!result)
                 {
@@ -592,8 +619,11 @@ namespace RegexRenamer
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        #endregion
 
-        // hide selection when leaving
+        // selection handlers
+        #region Selection and Info Update Handlers
+        // called when the grid loses focus. We clear selection here to hide the blue highlight, which can be visually distracting when the user is focused on another part of the UI (e.g. folder tree). We only do this if we're not in the middle of a rename selection (since that would cause unwanted deselection while trying to rename multiple files).
         private void dgvFiles_Leave(object sender, EventArgs e)
         {
             if (!_renameSelectionOnly)
@@ -601,8 +631,23 @@ namespace RegexRenamer
                 dgvFiles.ClearSelection();
             }
         }
+        // called when the selection changes. We refresh the view to reflect the new selection.
+        private void dgvFiles_SelectionChanged(object sender, EventArgs e)
+        {
+            RefreshView(UpdateStage.Selection);
+        }
+        // helper to update file info label based on the first selected file (since multiple selection may have different file sizes, we just show the first one's size)
+        private void UpdateFileInfo(RenameItemInfo firstSelection)
+        {
+            var humanVal = firstSelection.GetHumanReadableBytes();
+            lblInfoFileSize.Text = $"File Size: {humanVal}";
+        }
+        #endregion
 
+        // tooltips management
+        #region Tooltips management
         // error tooltips for lvwFiles subitems
+        // called when the mouse enters a cell. We show a tooltip if there is a preview error for the cell.
         private void dgvFiles_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -611,26 +656,16 @@ namespace RegexRenamer
 
             ttPreviewError.SetToolTip(dgvFiles, WrapText(_fileViewRows[e.RowIndex].PreviewErrorTag, 50));
         }
+        // called when the mouse leaves a cell. We hide the tooltip.
         private void dgvFiles_CellMouseLeave(object sender, DataGridViewCellEventArgs e)
         {
             ttPreviewError.SetToolTip(dgvFiles, null);
         }
 
-        // selected rows
-        private void dgvFiles_SelectionChanged(object sender, EventArgs e)
-        {
-            RefreshView(UpdateStage.Selection);
-        }
-
-        private void UpdateFileInfo(RenameItemInfo firstSelection)
-        {
-            var humanVal = firstSelection.GetHumanReadableBytes();
-            lblInfoFileSize.Text = $"File Size: {humanVal}";
-        }
         #endregion
 
+        // file operations from context menu
         #region File View context menu handlers
-
         private async void TranslateFileNameFileViewToolStripMenuItemGui_Click(object sender, EventArgs e)
         {
             try
@@ -641,7 +676,7 @@ namespace RegexRenamer
                     return;
                 }
 
-                var selectedItems = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex);
+                var (selectedItems, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
                 if (selectedItems == null)
                     return;
 
@@ -690,7 +725,7 @@ namespace RegexRenamer
                     return;
                 }
 
-                var selectedItems = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex);
+                var (selectedItems, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
                 if (selectedItems == null)
                     return;
 
@@ -728,7 +763,8 @@ namespace RegexRenamer
         {
             try
             {
-                var filePath = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex).Select(item => item.Fullpath).FirstOrDefault();
+                var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
+                var filePath = selectedFiles.Select(item => item.Fullpath).FirstOrDefault();
                 var result = await EBookHelper.EditEBookAsync(filePath);
                 if (!result)
                 {
@@ -747,14 +783,16 @@ namespace RegexRenamer
             if (dgvFiles.SelectedRows.Count == 0)
                 return;
 
-            var selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex).Select( item => item.Fullpath).ToList();
-            var selectedIndex = dgvFiles.SelectedRows[0].Index;
-            PInvoke.FileOperationAPI.SendToRecycleBin(selectedFiles);
+            var (selectedFiles, minIndex) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
+            var filePaths = selectedFiles.Select(item => item.Fullpath).ToList();
+            PInvoke.FileOperationAPI.SendToRecycleBin(filePaths);
             RefreshView(UpdateStage.FileList);
-            if(dgvFiles.Rows.Count > selectedIndex)
+            var selectedIndex = Math.Min(minIndex, dgvFiles.Rows.Count - 1);
+            dgvFiles.Rows[selectedIndex].Selected = true;
+            // if the selected row is now out of view after deletion, scroll into view
+            if (dgvFiles.Rows[selectedIndex]?.Displayed == false)
             {
-                selectedIndex = selectedIndex == 0 ? 0 : selectedIndex - 1;
-                dgvFiles.Rows[selectedIndex].Selected = true;
+                //scroll into view
                 dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
             }
         }
@@ -767,19 +805,19 @@ namespace RegexRenamer
 
         private void cutFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<RenameItemInfo> selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex);
+            var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
             selectedFiles.CopyFilesToClipboad(true);
         }
 
         private void copyFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<RenameItemInfo> selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex);
+            var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
             selectedFiles.CopyFilesToClipboad();
         }
 
         private void copyPathFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<RenameItemInfo> selectedFiles = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetActiveFileIndex);
+            var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
             selectedFiles.CopyFilesPathToClipboad();
         }
 
@@ -789,7 +827,7 @@ namespace RegexRenamer
         }
         private void explorerFileViewContextMenuToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetActiveFileIndex);
+            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetFileStoreIndex);
             //ctxMenu.ShowContextMenu(new []{ dirInfo }, this.PointToScreen(Cursor.Position));
             _shellCtxMenu.ShowContextMenu(selectedFiles.ToArray(), Cursor.Position);
             cmFolderView.Tag = null;
@@ -797,7 +835,7 @@ namespace RegexRenamer
 
         private void editMetadataFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetActiveFileIndex);
+            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetFileStoreIndex);
             using (EditMetadataForm metaEditForm = new EditMetadataForm(selectedFiles,"Modify Metadata", "Edit",
                 itmOptionsPreserveExt.Checked))
             {
@@ -807,7 +845,7 @@ namespace RegexRenamer
 
         private void toolsFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetActiveFileIndex);
+            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetFileStoreIndex);
             using (FileToolsForm convertForm = new FileToolsForm("",selectedFiles, "File Tools", ""))
             {
                 convertForm.ShowDialog();

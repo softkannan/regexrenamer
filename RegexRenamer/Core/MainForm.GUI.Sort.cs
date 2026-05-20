@@ -13,18 +13,22 @@ namespace RegexRenamer
 {
     public partial class MainForm
     {
-        private SortMatchItem _activeSortMatch = null;         // regex for sorting (null if not sorting by regex)
-        private string _activeSortMatchText = "";    // current sort regex text (for restoring on cancel)
+        // Sort
+        // active sort provider (null for default)
+        private SortStringProvider _activeSortStringProvider = null;
+        // active sort hint name
+        private string _activeSortHintName = "";    // current sort regex text (for restoring on cancel)
+        // flag for valid sort regex
         private bool _validSortMatch = true;         // sort regex is valid
 
         private void InitializeSort()
         {
-            cmbSort.SelectedIndex = 0;
+            cmbSortHint.SelectedIndex = 0;
 
-            cmbSort.TextChanged += cmbSort_TextChanged;
-            cmbSort.KeyDown += cmbSort_KeyDown;
-            cmbSort.Leave += cmbSort_Leave;
-            cmbSort.SelectedValueChanged += cmbSort_SelectedValueChanged;
+            cmbSortHint.TextChanged += cmbSort_TextChanged;
+            cmbSortHint.KeyDown += cmbSort_KeyDown;
+            cmbSortHint.Leave += cmbSort_Leave;
+            cmbSortHint.SelectedValueChanged += cmbSort_SelectedValueChanged;
         }
 
 
@@ -52,13 +56,13 @@ namespace RegexRenamer
             else if (e.KeyCode == Keys.Escape)  // revert
             {
                 EnableUpdates = false;
-                cmbSort.Text = _activeSortMatchText;
+                cmbSortHint.Text = _activeSortHintName;
                 EnableUpdates = true;
 
                 _validSortMatch = true;
-                cmbSort.BackColor = SystemColors.Window;
-                toolTip.Hide(cmbSort);
-                cmbSort.SelectionStart = _activeSortMatchText.Length;
+                cmbSortHint.BackColor = SystemColors.Window;
+                toolTip.Hide(cmbSortHint);
+                cmbSortHint.SelectionStart = _activeSortHintName.Length;
 
                 e.SuppressKeyPress = true;  // prevent beep
             }
@@ -66,48 +70,48 @@ namespace RegexRenamer
         private void cmbSort_Leave(object sender, EventArgs e)
         {
             EnableUpdates = false;
-            cmbSort.Text = _activeSortMatchText;
+            cmbSortHint.Text = _activeSortHintName;
             EnableUpdates = true;
 
             _validSortMatch = true;
-            cmbSort.BackColor = SystemColors.Window;
-            toolTip.Hide(cmbSort);
+            cmbSortHint.BackColor = SystemColors.Window;
+            toolTip.Hide(cmbSortHint);
         }
 
         private void ApplySort()
         {
             if (!EnableUpdates || !_validSortMatch) return;
 
-            _activeSortMatchText = cmbSort.Text;
-            if (string.IsNullOrWhiteSpace(_activeSortMatchText))
+            _activeSortHintName = cmbSortHint.Text;
+            if (string.IsNullOrWhiteSpace(_activeSortHintName))
             {
-                _activeSortMatch = null;
+                _activeSortStringProvider = null;
             }
             else
             {
                 try
                 {
-                    var foundConfig = UserConfig.Inst.SortHints.FirstOrDefault(hint => hint.Name == _activeSortMatchText);
+                    var foundConfig = UserConfig.Inst.SortHints.FirstOrDefault(hint => hint.Name == _activeSortHintName);
                     if (foundConfig != null)
                     {
-                        _activeSortMatch = new SortMatchItem(foundConfig);
+                        _activeSortStringProvider = new SortStringProvider(foundConfig);
                     }
                     else
                     {
-                        _activeSortMatch = new SortMatchItem(_activeSortMatchText);
+                        _activeSortStringProvider = new SortStringProvider(_activeSortHintName);
                     }
-                    cmbSort.BackColor = SystemColors.Window;
-                    toolTip.Hide(cmbSort);
+                    cmbSortHint.BackColor = SystemColors.Window;
+                    toolTip.Hide(cmbSortHint);
                 }
                 catch (Exception ex)
                 {
-                    _activeSortMatch = null;
-                    cmbSort.BackColor = Color.LightPink;
-                    toolTip.Show("Invalid regex: " + ex.Message, cmbSort);
+                    _activeSortStringProvider = null;
+                    cmbSortHint.BackColor = Color.LightPink;
+                    toolTip.Show("Invalid regex: " + ex.Message, cmbSortHint);
                 }
             }
 
-            if ((!string.IsNullOrWhiteSpace(cmbSort.Text)) && _activeSortMatch != null && cmbSort.Text != "Default")
+            if ((!string.IsNullOrWhiteSpace(cmbSortHint.Text)) && _activeSortStringProvider != null && cmbSortHint.Text != "Default")
             {
                 UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment.MiddleRight);
             }

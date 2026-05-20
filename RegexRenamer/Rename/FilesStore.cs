@@ -81,7 +81,8 @@ namespace RegexRenamer.Rename
             _searchInFolders = searchInFolders;
             _searchForFolders = searchForFolders;
             if (searchForFolders) {
-                BuildFoldersStore();
+                //BuildFoldersStore();
+                BuildFoldersStoreFast();
             }
             else {
                 //BuildFilesStore();
@@ -101,7 +102,60 @@ namespace RegexRenamer.Rename
             if (count < 0 || idx + count > _files.Count) throw new ArgumentOutOfRangeException(nameof(count));
             _files.RemoveRange(idx, count);
         }
+        private void BuildFoldersStoreFast()
+        {
+            var filter = _globInfo.CreateGlobFilter();
+            DirectoryInfo activeDir = new DirectoryInfo(_globInfo.RootPath);
+            var options = new EnumerationOptions
+            {
+                IgnoreInaccessible = true,
+                RecurseSubdirectories = _searchInFolders,
+            };
+            var enumerator = new FileSystemEnumerable<RenameItemInfo>(
+                activeDir.FullName,
+                (ref FileSystemEntry entry) =>
+                {
+                    if ((entry.Attributes & FileAttributes.Directory) == 0)
+                        return null;
 
+                    Stats.IncrementTotal();
+
+                    // ignore if filtered out
+                    if (filter != null && filter.IsMatch(entry.FileName) == _globInfo.IsExclude)
+                    {
+                        var fileName = entry.FileName.NormalizeToC();
+                        if (!_inActiveFiles.ContainsKey(fileName))
+                            _inActiveFiles.Add(fileName, InactiveReason.Filtered);
+                        Stats.IncrementFiltered();
+                        return null;
+                    }
+
+                    // ignore if hidden and not showing hidden files
+                    bool hidden = entry.IsHidden;
+                    if (hidden) Stats.IncrementHidden();
+                    if (!_globInfo.ShowHidden && hidden)
+                    {
+                        var fileName = entry.FileName.NormalizeToC();
+                        if (!_inActiveFiles.ContainsKey(fileName))
+                            _inActiveFiles.Add(fileName, InactiveReason.Hidden);
+                        return null;
+                    }
+
+                    return new RenameItemInfo(ref entry, _globInfo.PreserveExt);
+                },
+                options
+            );
+
+            // 2. Perform exactly ONE I/O pass
+            foreach (var file in enumerator)
+            {
+
+                if (file == null)
+                    continue;
+
+                _files.Add(file);
+            }
+        }
         private void BuildFoldersStore()
         {
             var filter = _globInfo.CreateGlobFilter();

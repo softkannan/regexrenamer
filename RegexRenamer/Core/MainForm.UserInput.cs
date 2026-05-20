@@ -33,7 +33,7 @@ public partial class MainForm
             FilterIsGlob = rbFilterGlob.Checked,
             IncludeSubfolders = chkIncludeSubfolder.Checked,
 
-            SortExpression = cmbSort.Text,
+            SortExpression = cmbSortHint.Text,
 
             Numbering = new AutoNumberingInfo
             {
@@ -98,7 +98,7 @@ public partial class MainForm
         chkIncludeSubfolder.Checked = model.IncludeSubfolders;
 
         // Sort
-        cmbSort.Text = model.SortExpression;
+        cmbSortHint.Text = model.SortExpression;
 
         // Numbering
         txtNumberingStart.Text = model.Numbering.NumberingStart;

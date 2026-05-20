@@ -26,14 +26,14 @@ namespace RegexRenamer
                 strFilename,
                 strFile,
                 _fileViewRows.Count,
-                dfi => _fileViewRows[dfi].ActiveFileIndex);
+                dfi => _fileViewRows[dfi].FileStoreIndex);
 
             // single pass: apply error tags and update column colours
             bool isRenameInPlace = _currentInput.Output == OutputMode.RenameInPlace;
             for (int dfi = 0; dfi < _fileViewRows.Count; dfi++)
             {
                 var rowData = _fileViewRows[dfi];
-                int afi = rowData.ActiveFileIndex;
+                int afi = rowData.FileStoreIndex;
                 var file = _fileStore.Files[afi];
 
                 // error tag
@@ -129,18 +129,18 @@ namespace RegexRenamer
         {
             if (!EnableUpdates) return;
 
-            string errorMessage = _validationService.ValidateRegex(cmbSort.Text);
+            string errorMessage = _validationService.ValidateRegex(cmbSortHint.Text);
 
             if (errorMessage == null)
             {
-                cmbSort.BackColor = SystemColors.Window;
-                toolTip.Hide(cmbSort);
+                cmbSortHint.BackColor = SystemColors.Window;
+                toolTip.Hide(cmbSortHint);
                 _validSortMatch = true;
             }
             else
             {
-                cmbSort.BackColor = Color.MistyRose;
-                toolTip.Show(errorMessage, cmbSort, 0, cmbSort.Height);
+                cmbSortHint.BackColor = Color.MistyRose;
+                toolTip.Show(errorMessage, cmbSortHint, 0, cmbSortHint.Height);
                 _validSortMatch = false;
             }
         }

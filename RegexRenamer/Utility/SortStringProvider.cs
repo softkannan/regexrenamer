@@ -22,7 +22,7 @@ namespace RegexRenamer.Utility
         public string ReplacePattern { get; set; }
     }
 
-    public class SortMatchItem
+    public class SortStringProvider
     {
         public string MatchText { get; private set; }
         public string ReplacePattern { get; private set; }
@@ -50,7 +50,7 @@ namespace RegexRenamer.Utility
             }
         }
 
-        public SortMatchItem(SortItem config)
+        public SortStringProvider(SortItem config)
         {
             MatchText = config.Pattern.Trim();
             ReplacePattern = config.ReplacePattern?.Trim();
@@ -73,11 +73,16 @@ namespace RegexRenamer.Utility
             }
         }
 
-        public SortMatchItem(string matchText)
+        public SortStringProvider(string matchText, string replacePattern = "")
         {
-            MatchText = matchText.Trim();
-            ReplacePattern = "";
-            UpdateType("");
+            MatchText = matchText?.Trim() ?? string.Empty;
+            var name = string.Empty;
+            if(string.IsNullOrEmpty(MatchText))
+                name = "Default";
+            ReplacePattern = replacePattern?.Trim() ?? string.Empty;
+            if(string.IsNullOrEmpty(ReplacePattern))
+                name = "Default";
+            UpdateType(name);
         }
     }
 }

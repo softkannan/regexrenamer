@@ -25,7 +25,7 @@ namespace RegexRenamer.Utility
         //    return string.Concat(textElements);
         //}
 
-        public static string ConvertToSortText(this string input, SortMatchItem sortMatch)
+        public static string ConvertToSortText(this string input, SortStringProvider sortMatch)
         {
             SortType type = sortMatch == null ? SortType.Alphabetical : sortMatch.Type;
 

@@ -1,5 +1,5 @@
-using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using Kavita;
+using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Models;
 using RegexRenamer.Native;
 using RegexRenamer.Rename;
@@ -16,6 +16,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace RegexRenamer;
 
@@ -101,47 +102,28 @@ public partial class MainForm
 
         this.Cursor = Cursors.AppStarting;
 
+        // build file list based on current path and filter
         GlobInfo globInfo = new GlobInfo(_currentInput.ActivePath, _activeFilter, _currentInput.FilterExclude, _currentInput.ShowHiddenFiles, _currentInput.PreserveExtension, _currentInput.FilterIsGlob);
         _fileStore = new FilesStore(globInfo, _currentInput.RenameFolders, _currentInput.IncludeSubfolders);
 
         // create datagridview items w/ filename
         int expectedCount = Math.Min(_fileStore.Files.Count, FilesStore.MAX_FILES);
-        _fileViewRows.Capacity = Math.Max(_fileViewRows.Capacity, expectedCount);
-        for (int idx = 0; idx < _fileStore.Files.Count; idx++)
+        if (_fileStore.Files.Count > FilesStore.MAX_FILES)
         {
-            if (idx >= FilesStore.MAX_FILES)  // reached limit
-            {
-                dgvFiles.Tag = _fileStore.Files.Count - idx;  // num files ignored, will display warning dialog after preview is updated
-                _fileStore.TrimFiles(idx, _fileStore.Files.Count - FilesStore.MAX_FILES);
-                break;
-            }
-
-            // add new row data
-            var rowData = new Models.FileViewRowData { ActiveFileIndex = idx };
-            rowData.CellValues[1] = _fileStore.Files[idx].Name;
-
-            // add image (keyed by extension)
-#if !DEBUG
-    try  
-    {
-#endif
-            rowData.CellValues[0] = _fileViewIconCache.GetIcon(_fileStore.Files[idx]);
-
-#if !DEBUG
-    }
-    catch  // default: no image
-    {
-      rowData.CellValues[0] = new Bitmap( 1, 1 );
-    }
-#endif
-            _fileViewRows.Add(rowData);
+            dgvFiles.Tag = _fileStore.Files.Count - FilesStore.MAX_FILES;  // num files ignored, will display warning dialog after preview is updated)
+            _fileStore.TrimFiles(FilesStore.MAX_FILES, _fileStore.Files.Count - FilesStore.MAX_FILES);
+        }
+        var list = new List<Models.FileViewRowData>(expectedCount);
+        for (int idx = 0; idx < expectedCount; idx++)
+        {
+            list.Add(new Models.FileViewRowData(idx));
         }
 
+        _fileViewRows = list;
         dgvFiles.RowCount = _fileViewRows.Count;
 
         _fileStore.Stats.SetShown(_fileViewRows.Count);
         UpdateFileStats();
-        ApplyGridThemeColors();
         UpdateSelection();
         UpdatePreview();
     }
@@ -168,7 +150,7 @@ public partial class MainForm
         _fileStore.BuildPreview(_currentInput.MatchPattern, _currentInput.ReplacePattern, _currentInput.Numbering, _currentInput.ChangeCase, _currentInput.Kavita, _currentInput.Modifiers);
 
         // write the preview data to the datagridview
-        WriteToDataGrid(_fileStore.Files);
+        //WriteToDataGrid(_fileStore.Files);
 
         // do preview filename validation
         UpdateValidation();
@@ -198,36 +180,57 @@ public partial class MainForm
         PreviewNeedsUpdate = false;
     }
     
-
-    private void WriteToDataGrid(IReadOnlyList<RenameItemInfo> listOfItems)
+    private object GetCellValue(FileViewRowData rowData, int columnIndex, bool forDisplay = true)
     {
-        // update file list
-        for (int dfi = 0; dfi < _fileViewRows.Count; dfi++)
+        if (rowData == null)
+            return null;
+        int afi = rowData.FileStoreIndex;
+        switch (columnIndex)
         {
-            var rowData = _fileViewRows[dfi];
-            int afi = rowData.ActiveFileIndex;
-            // column 0 is file icon, column 1 is filename and column 2 is preview filename
-            int colStart = 2;
-            rowData.CellValues[colStart++] = listOfItems[afi].Context.Preview;
-
-            colStart = 3;  // reset to column 3 for extra info
-            if (chkShowInfo.Checked)
-            {
-                rowData.CellValues[colStart++] = listOfItems[afi].Extension;
-                rowData.CellValues[colStart++] = listOfItems[afi].Size;
-                rowData.CellValues[colStart++] = listOfItems[afi].FileModified;
-            }
-
-            colStart = 6; //reset to column 6 for kavita info
-            if (listOfItems[afi].Context.ParseInfo != null)
-            {
-                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Title;
-                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Series;
-                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Volumes;
-                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Chapters;
-                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.Edition;
-                rowData.CellValues[colStart++] = listOfItems[afi].Context.ParseInfo.IsSpecial ? "true" : "false";
-            }
+            case 0:
+                {
+                    if (rowData.FileIcon == null)
+                    {
+#if !DEBUG
+                            try  
+                            {
+#endif
+                        // add image (keyed by extension)
+                        rowData.FileIcon = _fileViewIconCache.GetIcon(_fileStore.Files[afi]);
+#if !DEBUG
+                            }
+                            catch  // default: no image
+                            {
+                              rowData.FileIcon = new Bitmap( 1, 1 );
+                            }
+#endif
+                    }
+                    return rowData.FileIcon;
+                }
+            case 1:
+                return _fileStore.Files[afi].Name;
+            case 2:
+                return _fileStore.Files[afi].Context.Preview;
+            case 3:
+                return chkShowInfo.Checked ? _fileStore.Files[afi].Extension : null;
+            case 4:
+                return chkShowInfo.Checked ? _fileStore.Files[afi].Size : null;
+            case 5:
+                return chkShowInfo.Checked ? _fileStore.Files[afi].FileModified : null;
+            case 6:
+                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Title : null;
+            case 7:
+                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Series : null;
+            case 8:
+                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Volumes : null;
+            case 9:
+                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Chapters : null;
+            case 10:
+                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Edition : null;
+            case 11:
+                return _fileStore.Files[afi].Context.ParseInfo != null ? (_fileStore.Files[afi].Context.ParseInfo.IsSpecial ? "true" : "false") : null;
+            default:
+                return null;
         }
     }
 
@@ -246,7 +249,7 @@ public partial class MainForm
         {
             if (row.Index < 0 || row.Index >= _fileViewRows.Count) continue;
 
-            int afi = _fileViewRows[row.Index].ActiveFileIndex;
+            int afi = _fileViewRows[row.Index].FileStoreIndex;
             _fileStore.Files[afi].Context.Selected = true;
             firstSelection ??= _fileStore.Files[afi];
         }
@@ -254,6 +257,7 @@ public partial class MainForm
         if (firstSelection != null)
             UpdateFileInfo(firstSelection);
     }
+    
 
     // background worker
     private void bgwRename_DoWork(object sender, DoWorkEventArgs e)

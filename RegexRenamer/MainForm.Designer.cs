@@ -80,7 +80,7 @@ namespace RegexRenamer
             chkShowInfo = new System.Windows.Forms.CheckBox();
             chkRenameSelectionOnly = new System.Windows.Forms.CheckBox();
             cmbFilter = new RegexRenamer.Controls.MyComboBox();
-            cmbSort = new RegexRenamer.Controls.MyComboBox();
+            cmbSortHint = new RegexRenamer.Controls.MyComboBox();
             tsMenu = new System.Windows.Forms.ToolStrip();
             mnuChangeCase = new System.Windows.Forms.ToolStripDropDownButton();
             itmChangeCaseNoChange = new System.Windows.Forms.ToolStripMenuItem();
@@ -493,15 +493,15 @@ namespace RegexRenamer
             // 
             // cmbSort
             // 
-            cmbSort.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            cmbSort.AutoCompleteCustomSource.AddRange(new string[] { "(.+)", "(.+)(/d+)" });
-            cmbSort.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            cmbSort.Location = new System.Drawing.Point(1227, 67);
-            cmbSort.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            cmbSort.Name = "cmbSort";
-            cmbSort.Size = new System.Drawing.Size(253, 23);
-            cmbSort.TabIndex = 12;
-            toolTip.SetToolTip(cmbSort, "Shift+rightclick for a menu of regex elements");
+            cmbSortHint.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            cmbSortHint.AutoCompleteCustomSource.AddRange(new string[] { "(.+)", "(.+)(/d+)" });
+            cmbSortHint.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            cmbSortHint.Location = new System.Drawing.Point(1227, 67);
+            cmbSortHint.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            cmbSortHint.Name = "cmbSort";
+            cmbSortHint.Size = new System.Drawing.Size(253, 23);
+            cmbSortHint.TabIndex = 12;
+            toolTip.SetToolTip(cmbSortHint, "Shift+rightclick for a menu of regex elements");
             // 
             // tsMenu
             // 
@@ -930,7 +930,7 @@ namespace RegexRenamer
             // 
             groupBoxTop.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             groupBoxTop.Controls.Add(lblInfoFileSize);
-            groupBoxTop.Controls.Add(cmbSort);
+            groupBoxTop.Controls.Add(cmbSortHint);
             groupBoxTop.Controls.Add(chkIncludeSubfolder);
             groupBoxTop.Controls.Add(cmbFilter);
             groupBoxTop.Controls.Add(rbFilterRegex);
@@ -1238,7 +1238,7 @@ namespace RegexRenamer
         private System.Windows.Forms.CheckBox chkRenameSelectionOnly;
         private System.Windows.Forms.CheckBox chkIncludeSubfolder;
         private Controls.MyComboBox cmbFilter;
-        private Controls.MyComboBox cmbSort;
+        private Controls.MyComboBox cmbSortHint;
         private System.Windows.Forms.Label lblSort;
         private System.Windows.Forms.Label lblFilter;
         private System.Windows.Forms.DataGridViewImageColumn colIcon;

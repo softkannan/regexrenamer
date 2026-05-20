@@ -1,4 +1,5 @@
-﻿using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
+﻿using Interop.Shell32;
+using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Rename;
 using System;
 using System.Collections.Generic;
@@ -17,24 +18,20 @@ namespace RegexRenamer.Utility
     {
         private Dictionary<string, Icon> _extIcons { get; set; } = new Dictionary<string, Icon>(StringComparer.InvariantCultureIgnoreCase);
         private List<Icon> _dynamicIcons = new List<Icon>();
+        private HashSet<string> _dynamicIconFileTypes = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) { ".exe", ".lnk", ".url", ".ico", ".cpl", ".msc" };
 
         public Icon GetIcon(FileInfo fileInfo)
         {
-            return GetIcon(fileInfo.FullName, fileInfo.Extension, (fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory);
-        }
-
-        private Icon GetIcon(string fullpath, string fileExt, bool isFolder)
-        {
+            var isFolder = (fileInfo.Attributes & FileAttributes.Directory) == FileAttributes.Directory;
             if (isFolder)
             {
                 return FileIconAPI.GetDefaultFolderIcon(false);
             }
-
+            var fileExt = fileInfo.Extension;
             // shortcut, don't key by extension as each may have different icon
-            if (string.Compare(fileExt, ".lnk", StringComparison.InvariantCultureIgnoreCase) == 0) 
+            if (string.Compare(fileExt, ".lnk", StringComparison.InvariantCultureIgnoreCase) == 0)
             {
-                var lnkIcon = FileIconAPI.GetIcon(fullpath, false);
-                _dynamicIcons.Add(lnkIcon);
+                var lnkIcon = FileIconAPI.GetIcon(fileInfo.FullName, false);
                 return lnkIcon;
             }
 
@@ -44,15 +41,39 @@ namespace RegexRenamer.Utility
             }
             else
             {
-                icon = FileIconAPI.GetIcon(fullpath, false);
+                icon = FileIconAPI.GetIcon(fileInfo.FullName, false);
                 _extIcons[fileExt] = icon;
                 return icon;
             }
         }
 
+
         public Icon GetIcon(RenameItemInfo fileInfo)
         {
-            return GetIcon(fileInfo.Fullpath, fileInfo.Extension, fileInfo.IsFolder);
+            if (fileInfo.IsFolder   )
+            {
+                return FileIconAPI.GetDefaultFolderIcon(false);
+            }
+
+            var fileExt = fileInfo.Extension;
+
+            // shortcut, don't key .lnk files by extension as each may have different icon
+            if (_dynamicIconFileTypes.Contains(fileExt))
+            {
+                var lnkIcon = FileIconAPI.GetIcon(fileInfo.Fullpath, false);
+                return lnkIcon;
+            }
+
+            if (_extIcons.TryGetValue(fileExt, out var icon))
+            {
+                return icon;
+            }
+            else
+            {
+                icon = FileIconAPI.GetIcon(fileInfo.Fullpath, false);
+                _extIcons[fileExt] = icon;
+                return icon;
+            }
         }
 
         public void ClearDynamicIcons()
@@ -96,17 +117,18 @@ namespace RegexRenamer.Utility
             return source ?? Enumerable.Empty<T>();
         }
 
-
-        public static List<RenameItemInfo> GetSelectedFileItems(this DataGridView pThis, IReadOnlyList<RenameItemInfo> activeFiles, Func<int, int> activeFileIndexMapper = null)
+        public static (List<RenameItemInfo> selectedFiles, int minIndex) GetSelectedFileItems(this DataGridView pThis, IReadOnlyList<RenameItemInfo> activeFiles, Func<int, int> activeFileIndexMapper = null)
         {
             List<RenameItemInfo> selectedFiles = new List<RenameItemInfo>(pThis.SelectedRows.Count);
+            int minIndex = int.MaxValue;
             foreach (DataGridViewRow row in pThis.SelectedRows)
             {
+                minIndex = Math.Min(minIndex, row.Index);
                 int afi = activeFileIndexMapper != null ? activeFileIndexMapper(row.Index) : (int)row.Tag;
                 selectedFiles.Add(activeFiles[afi]);
             }
 
-            return selectedFiles;
+            return (selectedFiles, minIndex);
         }
         public static string GetHumanReadableBytes(this RenameItemInfo pThis)
         {

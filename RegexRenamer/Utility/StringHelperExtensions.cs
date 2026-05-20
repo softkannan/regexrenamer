@@ -14,14 +14,14 @@ namespace RegexRenamer.Utility
             StringInfo stringInfo = new StringInfo(input);
             int length = stringInfo.LengthInTextElements;
             string[] textElements = new string[length];
-
-            for (int i = 0; i < length; i++)
+            int end = length - 1;
+            for (int idx = 0; idx < length; idx++)
             {
-                textElements[i] = stringInfo.SubstringByTextElements(i, 1);
+                textElements[end - idx] = stringInfo.SubstringByTextElements(idx, 1);
             }
 
-            Array.Reverse(textElements);
             return string.Concat(textElements);
         }
+        
     }
 }
