@@ -102,6 +102,12 @@ namespace RegexRenamer.Rename
             if (count < 0 || idx + count > _files.Count) throw new ArgumentOutOfRangeException(nameof(count));
             _files.RemoveRange(idx, count);
         }
+
+        public void RemoveAt(int idx)
+        {
+            if (idx < 0 || idx >= _files.Count) throw new ArgumentOutOfRangeException(nameof(idx));
+            _files.RemoveAt(idx);
+        }
         private void BuildFoldersStoreFast()
         {
             var filter = _globInfo.CreateGlobFilter();

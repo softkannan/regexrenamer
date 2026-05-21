@@ -68,7 +68,7 @@ public static class RenamePreviewExtensions
                 case ChangeCaseOption.Lowercase:
                     return _ti.ToLower(match.Groups[1].Value);
                 case ChangeCaseOption.Titlecase:
-                    return _ti.ToTitleCase(match.Groups[1].Value);
+                    return _ti.ToTitleCase(match.Groups[1].Value.ToLowerInvariant());
                 case ChangeCaseOption.CleanName:
                     return match.Groups[1].Value.ToCleanFileName();
                 case ChangeCaseOption.NoChange:

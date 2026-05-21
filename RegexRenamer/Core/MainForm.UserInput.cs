@@ -204,10 +204,12 @@ public partial class MainForm
     /// </summary>
     private static UpdateStage ComputeRequiredStage(UserInputModel current, UserInputModel previous)
     {
-        // --- Changes that require a full file list rebuild ---
+        // --- Changes that require a full refresh of everything ---
 
         if (!string.Equals(current.ActivePath, previous.ActivePath, StringComparison.OrdinalIgnoreCase))
-            return UpdateStage.FileList;
+            return UpdateStage.FullRefresh;
+
+        // --- Changes that require a full file list rebuild ---
 
         if (!string.Equals(current.FilterPattern, previous.FilterPattern, StringComparison.OrdinalIgnoreCase))
             return UpdateStage.FileList;

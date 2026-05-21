@@ -117,19 +117,7 @@ namespace RegexRenamer.Utility
             return source ?? Enumerable.Empty<T>();
         }
 
-        public static (List<RenameItemInfo> selectedFiles, int minIndex) GetSelectedFileItems(this DataGridView pThis, IReadOnlyList<RenameItemInfo> activeFiles, Func<int, int> activeFileIndexMapper = null)
-        {
-            List<RenameItemInfo> selectedFiles = new List<RenameItemInfo>(pThis.SelectedRows.Count);
-            int minIndex = int.MaxValue;
-            foreach (DataGridViewRow row in pThis.SelectedRows)
-            {
-                minIndex = Math.Min(minIndex, row.Index);
-                int afi = activeFileIndexMapper != null ? activeFileIndexMapper(row.Index) : (int)row.Tag;
-                selectedFiles.Add(activeFiles[afi]);
-            }
-
-            return (selectedFiles, minIndex);
-        }
+        
         public static string GetHumanReadableBytes(this RenameItemInfo pThis)
         {
             if (pThis == null) return string.Empty;

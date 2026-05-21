@@ -2,6 +2,7 @@ using Config;
 using RegexRenamer.Controls.FolderTreeViewCtrl;
 using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Forms;
+using RegexRenamer.Models;
 using RegexRenamer.Native;
 using RegexRenamer.Rename;
 using RegexRenamer.Tools.EBookPDFTools;
@@ -318,6 +319,7 @@ namespace RegexRenamer
 
             SortFileViewRows(clickedColumn, direction);
         }
+
         #endregion
 
         // virtual mode handlers
@@ -416,7 +418,16 @@ namespace RegexRenamer
 
             if (e.KeyCode == Keys.F5)
             {
+                int selectedIndex = dgvFiles.SelectedRows.Count > 0 ? dgvFiles.SelectedRows[0].Index : 0;
                 RefreshView(UpdateStage.FileList);
+                selectedIndex = Math.Min(selectedIndex, dgvFiles.Rows.Count - 1);
+                dgvFiles.Rows[selectedIndex].Selected = true;
+                // if the selected row is now out of view after deletion, scroll into view
+                if (dgvFiles.Rows[selectedIndex]?.Displayed == false)
+                {
+                    //scroll into view
+                    dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
+                }
             }
             if (e.KeyCode == Keys.F2)
             {
@@ -424,12 +435,12 @@ namespace RegexRenamer
             }
             else if (e.KeyCode == Keys.C && (e.Modifiers & Keys.Control) == Keys.Control)
             {
-                var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
+                var selectedFiles = GetSelectedFileItems();
                 selectedFiles.CopyFilesToClipboad();
             }
             else if (e.KeyCode == Keys.X && (e.Modifiers & Keys.Control) == Keys.Control)
             {
-                var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
+                var selectedFiles = GetSelectedFileItems();
                 selectedFiles.CopyFilesToClipboad(true);
             }
             else if (e.KeyCode == Keys.V && (e.Modifiers & Keys.Control) == Keys.Control)
@@ -439,18 +450,54 @@ namespace RegexRenamer
             }
             else if (e.KeyCode == Keys.Delete)
             {
-                var (selectedFiles, minIndex) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
-                var filePaths = selectedFiles.Select(item => item.Fullpath).ToList();
-                PInvoke.FileOperationAPI.SendToRecycleBin(filePaths);
-                RefreshView(UpdateStage.FileList);
-                var selectedIndex = Math.Min(minIndex, dgvFiles.Rows.Count - 1);
-                dgvFiles.Rows[selectedIndex].Selected = true;
-                // if the selected row is now out of view after deletion, scroll into view
-                if (dgvFiles.Rows[selectedIndex]?.Displayed == false)
-                {
-                    //scroll into view
-                    dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
-                }
+                DeleteFilesSelection();
+            }
+        }
+
+        private (List<RenameItemInfo> selectedFiles, int minIndex) GetSelectedRenameFileRows()
+        {
+            List<RenameItemInfo> selectedFiles = new(dgvFiles.SelectedRows.Count);
+            int minIndex = int.MaxValue;
+            foreach (DataGridViewRow row in dgvFiles.SelectedRows)
+            {
+                minIndex = Math.Min(minIndex, row.Index);
+                var rowData = _fileViewRows[row.Index];
+                selectedFiles.Add(_fileStore.Files[rowData.FileStoreIndex]);  
+            }
+            return (selectedFiles, minIndex);
+        }
+
+        private List<RenameItemInfo> GetSelectedFileItems()
+        {
+            List<RenameItemInfo> selectedFiles = new(dgvFiles.SelectedRows.Count);
+            foreach (DataGridViewRow row in dgvFiles.SelectedRows)
+            {
+                var rowData = _fileViewRows[row.Index];
+                selectedFiles.Add(_fileStore.Files[rowData.FileStoreIndex]);
+            }
+            return selectedFiles;
+        }
+
+        private RenameItemInfo GetFirstSelectedFileItem()
+        {
+            if (dgvFiles.SelectedRows.Count == 0) return null;
+            var rowData = _fileViewRows[dgvFiles.SelectedRows[0].Index];
+            return _fileStore.Files[rowData.FileStoreIndex];
+        }
+
+        private void DeleteFilesSelection()
+        {
+            var (selectedFiles, minIndex) = GetSelectedRenameFileRows();
+            var filePaths = selectedFiles.Select(item => item.Fullpath).ToList();
+            PInvoke.FileOperationAPI.SendToRecycleBin(filePaths);
+            RefreshView(UpdateStage.FileList);
+            var selectedIndex = Math.Min(minIndex, dgvFiles.Rows.Count - 1);
+            dgvFiles.Rows[selectedIndex].Selected = true;
+            // if the selected row is now out of view after deletion, scroll into view
+            if (dgvFiles.Rows[selectedIndex]?.Displayed == false)
+            {
+                //scroll into view
+                dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
             }
         }
         #endregion
@@ -587,7 +634,10 @@ namespace RegexRenamer
 
             // update preview
             single_file_rename_editing = false;  // prevent recursion: dgvFiles.Sort() in UpdatePreview() causes dgvFiles.CellValidating
-            RefreshView(UpdateStage.Preview);
+
+            dgvFiles.InvalidateRow(e.RowIndex);
+            //RefreshView(UpdateStage.Preview);
+            dgvFiles.EndEdit();
         }
         // called when user finishes editing a cell. We reset the single file rename flag here to allow for other types of edits and to prevent unwanted behavior in other event handlers.
         private void dgvFiles_CellEndEdit(object sender, DataGridViewCellEventArgs e)
@@ -676,11 +726,11 @@ namespace RegexRenamer
                     return;
                 }
 
-                var (selectedItems, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
-                if (selectedItems == null)
+                var selectedFiles = GetSelectedFileItems();
+                if (selectedFiles == null)
                     return;
 
-                selectedItems.CopyNamesToClipboad();
+                selectedFiles.CopyNamesToClipboad();
                 if (UserConfig.Inst.Translator.WebEngine == WebEngineType.PuppeteerSharp)
                 {
                     var puppeteerHandler = new PuppeteerHandler();
@@ -695,16 +745,16 @@ namespace RegexRenamer
                     }
                 }
                 var newNames = ClipboardExtensions.GetNamesFromClipboard();
-                if (newNames.Count != selectedItems.Count)
+                if (newNames.Count != selectedFiles.Count)
                 {
                     MessageBox.Show("The number of translated names does not match the number of selected files.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                for(int idx = 0; idx < selectedItems.Count; idx++)
+                for(int idx = 0; idx < selectedFiles.Count; idx++)
                 {
-                    selectedItems[idx].Context.Preview = newNames[idx];
-                    selectedItems[idx].Context.Skip = true;
+                    selectedFiles[idx].Context.Preview = newNames[idx];
+                    selectedFiles[idx].Context.Skip = true;
                 }
                 RefreshView(UpdateStage.Preview);
             }
@@ -725,11 +775,11 @@ namespace RegexRenamer
                     return;
                 }
 
-                var (selectedItems, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
-                if (selectedItems == null)
+                var selectedFiles = GetSelectedFileItems();
+                if (selectedFiles == null)
                     return;
 
-                foreach (var fileItem in selectedItems)
+                foreach (var fileItem in selectedFiles)
                 {
                     fileItem.Context.Skip = false;
                     if (fileItem != null)
@@ -763,8 +813,8 @@ namespace RegexRenamer
         {
             try
             {
-                var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
-                var filePath = selectedFiles.Select(item => item.Fullpath).FirstOrDefault();
+                var selectedFile = GetFirstSelectedFileItem();
+                var filePath = selectedFile?.Fullpath;
                 var result = await EBookHelper.EditEBookAsync(filePath);
                 if (!result)
                 {
@@ -783,18 +833,7 @@ namespace RegexRenamer
             if (dgvFiles.SelectedRows.Count == 0)
                 return;
 
-            var (selectedFiles, minIndex) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
-            var filePaths = selectedFiles.Select(item => item.Fullpath).ToList();
-            PInvoke.FileOperationAPI.SendToRecycleBin(filePaths);
-            RefreshView(UpdateStage.FileList);
-            var selectedIndex = Math.Min(minIndex, dgvFiles.Rows.Count - 1);
-            dgvFiles.Rows[selectedIndex].Selected = true;
-            // if the selected row is now out of view after deletion, scroll into view
-            if (dgvFiles.Rows[selectedIndex]?.Displayed == false)
-            {
-                //scroll into view
-                dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
-            }
+            DeleteFilesSelection();
         }
 
         private void pasteFileViewToolStripMenuItem_Click(object sender, EventArgs e)
@@ -805,19 +844,19 @@ namespace RegexRenamer
 
         private void cutFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
+            var selectedFiles = GetSelectedFileItems();
             selectedFiles.CopyFilesToClipboad(true);
         }
 
         private void copyFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
+            var selectedFiles = GetSelectedFileItems();
             selectedFiles.CopyFilesToClipboad();
         }
 
         private void copyPathFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var (selectedFiles, _) = dgvFiles.GetSelectedFileItems(_fileStore.Files, GetFileStoreIndex);
+            var selectedFiles = GetSelectedFileItems();
             selectedFiles.CopyFilesPathToClipboad();
         }
 

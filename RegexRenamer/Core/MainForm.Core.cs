@@ -29,9 +29,7 @@ public enum UpdateStage
     Preview = 1 << 1,
     Validation = 1 << 2,
     Selection = 1 << 3,
-
-    /// <summary>Full cascade: FileList → Preview → Validation → Selection.</summary>
-    All = FileList | Preview | Validation | Selection,
+    FullRefresh = 1 << 4,
 }
 
 public partial class MainForm
@@ -45,6 +43,35 @@ public partial class MainForm
         bgwRename.RunWorkerCompleted += bgwRename_RunWorkerCompleted;
     }
 
+    private void BuildFileViewRows()
+    {
+        // create datagridview items w/ filename
+        int expectedCount = Math.Min(_fileStore.Files.Count, FilesStore.MAX_FILES);
+        if (_fileStore.Files.Count > FilesStore.MAX_FILES)
+        {
+            dgvFiles.Tag = _fileStore.Files.Count - FilesStore.MAX_FILES;  // num files ignored, will display warning dialog after preview is updated)
+            _fileStore.TrimFiles(FilesStore.MAX_FILES, _fileStore.Files.Count - FilesStore.MAX_FILES);
+        }
+        var list = new List<Models.FileViewRowData>(expectedCount);
+        for (int idx = 0; idx < expectedCount; idx++)
+        {
+            list.Add(new Models.FileViewRowData(idx));
+        }
+        _fileViewRows = list;
+        dgvFiles.RowCount = _fileViewRows.Count;
+    }
+
+    private ChangeCaseOption GetChangeCaseInfo()
+    {
+        if (itmChangeCaseNoChange.Checked) return ChangeCaseOption.NoChange;
+        else if (itmChangeCaseUppercase.Checked) return ChangeCaseOption.Uppercase;
+        else if (itmChangeCaseLowercase.Checked) return ChangeCaseOption.Lowercase;
+        else if (itmChangeCaseTitlecase.Checked) return ChangeCaseOption.Titlecase;
+        else if (itmChangeCaseCleanName.Checked) return ChangeCaseOption.CleanName;
+        else return ChangeCaseOption.NoChange;
+    }
+
+
     /// <summary>
     /// Unified refresh entry point. Executes the requested stages in cascade order.
     /// Stages that depend on earlier ones (e.g., Preview depends on FileList) are
@@ -53,6 +80,12 @@ public partial class MainForm
     private void RefreshView(UpdateStage stages)
     {
         if (!EnableUpdates) return;
+
+        if(stages.HasFlag(UpdateStage.FullRefresh))
+        {
+            FullRefresh();
+            return; // FullRefresh already cascades into FileList → Preview → Validation → Selection
+        }
 
         if (stages.HasFlag(UpdateStage.FileList))
         {
@@ -71,6 +104,19 @@ public partial class MainForm
 
         if (stages.HasFlag(UpdateStage.Selection))
             UpdateSelection();
+    }
+
+    private void FullRefresh()
+    {
+        if (!EnableUpdates) return;
+        // Snapshot current user input for business logic
+        _currentInput = GetUserInput();
+
+        _currentSortColumn = null;
+        _currentSortOrder = SortOrder.None;
+
+        // update directory tree/filenames/previews/validation/selection
+        UpdateFileList();
     }
 
     // update directory tree/filenames/previews/validation (each cascades into the one below)
@@ -106,38 +152,14 @@ public partial class MainForm
         GlobInfo globInfo = new GlobInfo(_currentInput.ActivePath, _activeFilter, _currentInput.FilterExclude, _currentInput.ShowHiddenFiles, _currentInput.PreserveExtension, _currentInput.FilterIsGlob);
         _fileStore = new FilesStore(globInfo, _currentInput.RenameFolders, _currentInput.IncludeSubfolders);
 
-        // create datagridview items w/ filename
-        int expectedCount = Math.Min(_fileStore.Files.Count, FilesStore.MAX_FILES);
-        if (_fileStore.Files.Count > FilesStore.MAX_FILES)
-        {
-            dgvFiles.Tag = _fileStore.Files.Count - FilesStore.MAX_FILES;  // num files ignored, will display warning dialog after preview is updated)
-            _fileStore.TrimFiles(FilesStore.MAX_FILES, _fileStore.Files.Count - FilesStore.MAX_FILES);
-        }
-        var list = new List<Models.FileViewRowData>(expectedCount);
-        for (int idx = 0; idx < expectedCount; idx++)
-        {
-            list.Add(new Models.FileViewRowData(idx));
-        }
-
-        _fileViewRows = list;
-        dgvFiles.RowCount = _fileViewRows.Count;
-
+        BuildFileViewRows();
         _fileStore.Stats.SetShown(_fileViewRows.Count);
         UpdateFileStats();
         UpdateSelection();
         UpdatePreview();
     }
 
-    private ChangeCaseOption GetChangeCaseInfo()
-    {
-        if (itmChangeCaseNoChange.Checked) return ChangeCaseOption.NoChange;
-        else if (itmChangeCaseUppercase.Checked) return ChangeCaseOption.Uppercase;
-        else if (itmChangeCaseLowercase.Checked) return ChangeCaseOption.Lowercase;
-        else if (itmChangeCaseTitlecase.Checked) return ChangeCaseOption.Titlecase;
-        else if (itmChangeCaseCleanName.Checked) return ChangeCaseOption.CleanName;
-        else return ChangeCaseOption.NoChange;
-    }
-
+    
     private void UpdatePreview()
     {
         if (!EnableUpdates || !_validMatch) return;
@@ -149,15 +171,15 @@ public partial class MainForm
 
         _fileStore.BuildPreview(_currentInput.MatchPattern, _currentInput.ReplacePattern, _currentInput.Numbering, _currentInput.ChangeCase, _currentInput.Kavita, _currentInput.Modifiers);
 
-        // write the preview data to the datagridview
-        //WriteToDataGrid(_fileStore.Files);
-
         // do preview filename validation
         UpdateValidation();
 
         // redraw
-        SortFileViewRows(dgvFiles.SortedColumn ?? colFilename,
-                         dgvFiles.SortOrder == SortOrder.Descending ? ListSortDirection.Descending : ListSortDirection.Ascending);
+        if (_currentSortOrder != SortOrder.None)
+        {
+            SortFileViewRows(_currentSortColumn ?? colFilename,
+                             _currentSortOrder == SortOrder.Descending ? ListSortDirection.Descending : ListSortDirection.Ascending);
+        }
 
         this.Cursor = Cursors.Default;
 

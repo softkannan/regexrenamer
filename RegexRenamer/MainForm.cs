@@ -255,7 +255,7 @@ namespace RegexRenamer
             EnableUpdates = false;
             tvwFolders.UpdateFolderTree(_activePath);
             EnableUpdates = true;
-            UpdateFileList();
+            UpdateUserInputValues();
         }
 
         #region Event Handlers
@@ -285,6 +285,8 @@ namespace RegexRenamer
             // load settings & regex history from registry
             LoadSettings();
             LoadRegexHistory();
+
+            RefreshView(UpdateStage.FullRefresh);
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -335,17 +337,17 @@ namespace RegexRenamer
         private void cbModifierI_CheckedChanged(object sender, EventArgs e)
         {
             cbModifierI.Refresh();
-            UpdatePreview();
+            UpdateUserInputValues();
         }
         private void cbModifierG_CheckedChanged(object sender, EventArgs e)
         {
             cbModifierG.Refresh();
-            UpdatePreview();
+            UpdateUserInputValues();
         }
         private void cbModifierX_CheckedChanged(object sender, EventArgs e)
         {
             cbModifierX.Refresh();
-            UpdatePreview();
+            UpdateUserInputValues();
         }
 
 
