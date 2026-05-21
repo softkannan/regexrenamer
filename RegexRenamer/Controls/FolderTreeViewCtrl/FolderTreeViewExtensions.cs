@@ -1,6 +1,7 @@
 ﻿using Interop.Shell32;
 using PInvoke;
 using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
+using RegexRenamer.Rename;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,11 @@ public static class FolderTreeViewExtensions
         var folderItem = node.Tag as FolderItem;
         if (folderItem != null)
         {
-            var parentDir = Directory.GetParent(folderItem.Path);
+            var parentDir = FastPath.GetParentDirectory(folderItem.Path);
+            if(string.IsNullOrEmpty(parentDir))
+            {
+                return ret; // can't rename root items like "This PC", "Network", etc.
+            }
             var newPath = $"{parentDir}\\{newLabel}";
             FileOperationAPI.RenameFolder(folderItem.Path, newPath);
             ret = newPath;
@@ -45,7 +50,7 @@ public static class FolderTreeViewExtensions
     {
         FolderItem folderItem = tn.Tag as FolderItem;
         var folderPath = folderItem?.Path;
-        return Directory.Exists(folderPath) ? folderPath : "";
+        return FastPath.DirectoryExists(folderPath) ? folderPath : "";
     }
 
     public static FolderItem GetShellFolderItem(this string path, string fileName)

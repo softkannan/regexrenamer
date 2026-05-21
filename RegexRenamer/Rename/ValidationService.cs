@@ -131,7 +131,7 @@ internal sealed class ValidationService
             if (normPath.Length > 3)
                 normPath = normPath.TrimEnd('\\');
 
-            if (!Directory.Exists(normPath))
+            if (!FastPath.DirectoryExists(normPath))
             {
                 return "Path does not exist.";
             }
@@ -252,7 +252,7 @@ internal sealed class ValidationService
                 if (fileCount < 2000)
                 {
                     string previewFullpath = Path.Combine(outputPath, files[afi].PreviewExt);
-                    if (input.RenameFolders ? File.Exists(previewFullpath) : Directory.Exists(previewFullpath))
+                    if (input.RenameFolders ? FastPath.FileExists(previewFullpath) : FastPath.DirectoryExists(previewFullpath))
                     {
                         result.FileErrors[afi] = "The " + strFilename + " '" + files[afi].PreviewExt
                                                + "' conflicts with a " + (input.RenameFolders ? "file" : "folder")
@@ -264,7 +264,7 @@ internal sealed class ValidationService
             else // destination is other directory
             {
                 string previewFullpath = Path.Combine(outputPath, files[afi].PreviewExt);
-                if (input.RenameFolders ? Directory.Exists(previewFullpath) : File.Exists(previewFullpath))
+                if (input.RenameFolders ? FastPath.DirectoryExists(previewFullpath) : FastPath.FileExists(previewFullpath))
                 {
                     result.FileErrors[afi] = "The " + strFilename + " '"
                                            + Path.GetFileName(files[afi].PreviewExt)
@@ -272,7 +272,7 @@ internal sealed class ValidationService
                     continue;
                 }
 
-                if (input.RenameFolders ? File.Exists(previewFullpath) : Directory.Exists(previewFullpath))
+                if (input.RenameFolders ? FastPath.FileExists(previewFullpath) : FastPath.DirectoryExists(previewFullpath))
                 {
                     result.FileErrors[afi] = "The " + strFilename + " '"
                                            + Path.GetFileName(files[afi].PreviewExt) + "' conflicts with a "
@@ -285,14 +285,14 @@ internal sealed class ValidationService
             if (input.Output == OutputMode.BackupTo)
             {
                 string previewFullpath = Path.Combine(input.MoveCopyPath, files[afi].Filename);
-                if (File.Exists(previewFullpath))
+                if (FastPath.FileExists(previewFullpath))
                 {
                     result.FileErrors[afi] = "The original filename '" + files[afi].Filename
                                            + "' already exists in the selected backup folder.";
                     continue;
                 }
 
-                if (Directory.Exists(previewFullpath))
+                if (FastPath.DirectoryExists(previewFullpath))
                 {
                     result.FileErrors[afi] = "The original filename '" + files[afi].Filename
                                            + "' conflicts with a folder in the selected backup path.";
@@ -358,7 +358,7 @@ internal sealed class ValidationService
             return new PreRenameCheckResult { ErrorMessage = "There are no " + strFile + "s to rename." };
 
         // move/copy path doesn't exist
-        if (input.Output != OutputMode.RenameInPlace && !Directory.Exists(input.MoveCopyPath))
+        if (input.Output != OutputMode.RenameInPlace && !FastPath.DirectoryExists(input.MoveCopyPath))
         {
             string label = input.Output switch
             {

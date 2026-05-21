@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using RegexRenamer.Rename;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,11 +41,11 @@ public class ResolveValue
                 expandedValue.IndexOf(@".") != 0 &&
                 expandedValue.IndexOf(@"..") != 0)
             {
-                if (Directory.Exists(expandedValue))
+                if (FastPath.DirectoryExists(expandedValue))
                 {
                     return expandedValue;
                 }
-                if (File.Exists(expandedValue))
+                if (FastPath.FileExists(expandedValue))
                 {
                     return expandedValue;
                 }
@@ -53,11 +54,11 @@ public class ResolveValue
             try
             {
                 string relativePath = Path.GetFullPath(Path.Combine(WorkingDir, expandedValue));
-                if (Directory.Exists(relativePath))
+                if (FastPath.DirectoryExists(relativePath))
                 {
                     return relativePath;
                 }
-                if (File.Exists(relativePath))
+                if (FastPath.FileExists(relativePath))
                 {
                     return relativePath;
                 }

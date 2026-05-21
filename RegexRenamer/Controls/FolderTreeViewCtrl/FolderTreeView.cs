@@ -34,11 +34,13 @@
  */
 using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Native;
+using RegexRenamer.Rename;
 using System;
 using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.IO.Enumeration;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Forms;
@@ -164,8 +166,6 @@ public class FolderTreeView : TreeView
 
     #region FolderTreeView Properties & Methods
 
-    
-
     public string GetSelectedNodePath()
     {
         return SelectedNode.FolderTreeNodeToDirectory();
@@ -184,14 +184,14 @@ public class FolderTreeView : TreeView
         try
         {
             _isUpdating = true;
-            if (Directory.Exists(folderPath)) // don't bother drilling unless the directory exists
+            if (FastPath.DirectoryExists(folderPath)) // don't bother drilling unless the directory exists
             {
                 BeginUpdate();
                 // if there's a trailing \ on the folderPath, remove it unless it's a drive letter
                 if (folderPath.Length > 3 && folderPath.LastIndexOf("\\") == folderPath.Length - 1)
                     folderPath = folderPath.Substring(0, folderPath.Length - 1);
                 //Start drilling the tree
-                DrillTree(Nodes[0].Nodes, folderPath.ToUpper(cultureInfo), ref folderFound);
+                DrillTree(Nodes[0].Nodes, folderPath, ref folderFound);
                 EndUpdate();
             }
             if (!folderFound)
@@ -213,8 +213,8 @@ public class FolderTreeView : TreeView
             if (!folderFound)
             {
                 SelectedNode = tn;
-                string tnPath = tn.FolderTreeNodeToDirectory().ToUpper(cultureInfo);
-                if (path == tnPath && !folderFound)
+                string tnPath = tn.FolderTreeNodeToDirectory();
+                if (path.Equals(tnPath, StringComparison.OrdinalIgnoreCase) && !folderFound)
                 {
                     SelectedNode = tn;
                     tn.EnsureVisible();
@@ -333,7 +333,7 @@ public class FolderTreeView : TreeView
             BeginUpdate();
 
             // get selected path (regardless whether it exists)
-            if (SelectedNode != null && !Directory.Exists(activePath))
+            if (SelectedNode != null && !FastPath.DirectoryExists(activePath))
             {
                 activePath = ForceGetSelectedNodePath();
             }
@@ -349,16 +349,15 @@ public class FolderTreeView : TreeView
             InitFolderTreeView();
 
             // get active path
-            while (!Directory.Exists(activePath))  // if doesn't exist, walk tree backwards
+            while (!FastPath.DirectoryExists(activePath))  // if doesn't exist, walk tree backwards
             {
-                DirectoryInfo di = null;
-                try { di = Directory.GetParent(activePath); } catch { }
-                if (di == null) break;
-
-                activePath = di.FullName;
+                var parentDir = FastPath.GetParentDirectory(activePath);
+                if (string.IsNullOrEmpty(parentDir))
+                    break;
+                activePath = parentDir;
             }
 
-            if (!Directory.Exists(activePath))  // still not found, default to system drive
+            if (!FastPath.DirectoryExists(activePath))  // still not found, default to system drive
             {
                 activePath = Environment.SystemDirectory;
             }

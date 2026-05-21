@@ -348,11 +348,11 @@ namespace RegexRenamer
                 // update folder tree in case user created new folder within fbdNetwork
                 if (!_activePath.StartsWith(fbdMoveCopy.SelectedPath))
                 {
-                    DirectoryInfo parent = Directory.GetParent(fbdMoveCopy.SelectedPath);
-                    if (parent != null)
+                    string parent = FastPath.GetParentDirectory(fbdMoveCopy.SelectedPath);
+                    if (!string.IsNullOrEmpty(parent))
                     {
                         EnableUpdates = false;
-                        tvwFolders.RefreshNode(parent.FullName);  // may DrillToFolder()
+                        tvwFolders.RefreshNode(parent);  // may DrillToFolder()
                         EnableUpdates = true;
                     }
                 }

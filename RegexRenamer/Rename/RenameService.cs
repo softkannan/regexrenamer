@@ -72,7 +72,7 @@ internal sealed class RenameService
             if (files[afi].Context.Preview.Contains("\\"))
             {
                 string newDirectory = Path.GetDirectoryName(newFullpath);
-                if (!Directory.Exists(newDirectory))
+                if (!FastPath.DirectoryExists(newDirectory))
                 {
                     try
                     {

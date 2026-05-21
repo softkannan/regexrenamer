@@ -1,6 +1,7 @@
 using RegexRenamer.Controls.FolderTreeViewCtrl;
 using RegexRenamer.Forms;
 using RegexRenamer.Native;
+using RegexRenamer.Rename;
 using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
@@ -167,7 +168,7 @@ namespace RegexRenamer
             (TreeNode clickNode , Point location) = ((TreeNode , Point)) cmFolderView.Tag;
             var destPath = clickNode.TreeNodeToPath();
 
-            if (Directory.Exists(destPath))
+            if (FastPath.DirectoryExists(destPath))
             {
                 var newFolderPath = $"{destPath}\\New Folder";
                 Directory.CreateDirectory(newFolderPath);
@@ -179,7 +180,6 @@ namespace RegexRenamer
         private void copyPathFolderViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!EnableUpdates || cmFolderView.Tag == null) return;
-
             Clipboard.SetText(_activePath);
             cmFolderView.Tag = null;
         }
@@ -260,36 +260,26 @@ namespace RegexRenamer
         {
             if (!EnableUpdates) return;
 
-
             // show dialog
-
             if (_activePath.StartsWith("\\\\"))
                 fbdNetwork.SelectedPath = _activePath;
 
             if (fbdNetwork.ShowDialog() == DialogResult.Cancel) return;
 
-
             // get new path
-
             string newPath;
             try { newPath = fbdNetwork.SelectedPath; }
             catch { return; }  // invalid path
 
-
             // make sure exists
-
-            if (!Directory.Exists(newPath)) return;
-
+            if (!FastPath.DirectoryExists(newPath)) return;
 
             // select My Network Places
-
             EnableUpdates = false;
             tvwFolders.SelectedNode = (TreeNode)tvwFolders.Tag;
             EnableUpdates = true;
 
-
             // update filelist
-
             _activePath = newPath;
             UpdateUserInputValues();
         }

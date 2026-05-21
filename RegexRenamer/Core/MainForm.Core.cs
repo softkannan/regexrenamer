@@ -282,10 +282,8 @@ public partial class MainForm
         if (e.Error != null)
             throw e.Error;
 
-
         // get result
         RenameResult result = (RenameResult)e.Result;
-
 
         // if necessary, refresh nodes in folder tree
         if (_currentInput.RenameFolders)
@@ -302,10 +300,8 @@ public partial class MainForm
                 tvwFolders.RefreshNode(_currentInput.MoveCopyPath);
         }
 
-
         // update stats
         _countFilesRenamed += result.FilesRenamed;
-
 
         // swap rename/cancel buttons
         btnCancel.Visible = false;
@@ -314,17 +310,14 @@ public partial class MainForm
         btnRename.Enabled = true;
         btnCancel.Text = "&Cancel";  // reset text
 
-
         // hide progress bar
         progressBar.Visible = false;
         tsOptions.Visible = lblNumMatched.Visible = lblNumConflict.Visible = true;
         UnFocusAll();
 
-
         // show error dialog if any errors occured
         if (result.AnyErrors)
             result.ShowErrorDialog(strFile);
-
 
         if (!result.AnyErrors && !result.Cancelled)
         {
@@ -335,7 +328,6 @@ public partial class MainForm
             cmbReplace.AddUniqueItem(regexReplace);
             SaveRegexHistory();
         }
-
 
         // reactivate form & refresh filelist
         SetFormActive(true);

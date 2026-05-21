@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kavita.ParserImpl;
+using RegexRenamer.Rename;
 
 
 namespace Kavita; 
@@ -74,7 +75,7 @@ public class DirectoryService : IDirectoryService
         string searchPatternExpression = "",
         SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
-        if (!Directory.Exists(path)) return new List<string>();
+        if (!FastPath.DirectoryExists(path)) return new List<string>();
         var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase, Parser.RegexTimeout);
 
         return Directory.EnumerateFiles(path, "*", searchOption)
@@ -144,7 +145,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
-        if (!Directory.Exists(path)) return new List<string>();
+        if (!FastPath.DirectoryExists(path)) return new List<string>();
 
         if (fileNameRegex != string.Empty)
         {
@@ -248,7 +249,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public bool IsDirectoryEmpty(string path)
     {
-        return Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
+        return FastPath.DirectoryExists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
     }
 
     public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
@@ -258,7 +259,7 @@ public class DirectoryService : IDirectoryService
             return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
         }
 
-        return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
+        return !FastPath.DirectoryExists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
     }
 
     /// <summary>
@@ -297,7 +298,7 @@ public class DirectoryService : IDirectoryService
     /// <param name="directoryPath"></param>
     public void ClearAndDeleteDirectory(string directoryPath)
     {
-        if (!Directory.Exists(directoryPath)) return;
+        if (!FastPath.DirectoryExists(directoryPath)) return;
 
         var di = new DirectoryInfo(directoryPath);
 
@@ -352,7 +353,7 @@ public class DirectoryService : IDirectoryService
             {
                 currentFile = file;
 
-                if (!File.Exists(file))
+                if (!FastPath.FileExists(file))
                 {
                     //_logger.LogError("Unable to copy {File} to {DirectoryPath} as it doesn't exist", file, directoryPath);
                     continue;
@@ -391,7 +392,7 @@ public class DirectoryService : IDirectoryService
             {
                 currentFile = file;
 
-                if (!File.Exists(file))
+                if (!FastPath.FileExists(file))
                 {
                     //_logger.LogError("Unable to copy {File} to {DirectoryPath} as it doesn't exist", file, directoryPath);
                     continue;
@@ -457,7 +458,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public byte[] ReadFileAsync(string path)
     {
-        if (!File.Exists(path)) return Array.Empty<byte>();
+        if (!FastPath.FileExists(path)) return Array.Empty<byte>();
         return File.ReadAllBytes(path);
     }
 
@@ -504,7 +505,7 @@ public class DirectoryService : IDirectoryService
     /// <returns>List of directory paths, empty if path doesn't exist</returns>
     public IEnumerable<string> GetDirectories(string folderPath)
     {
-        if (!Directory.Exists(folderPath)) return new List<string>();
+        if (!FastPath.DirectoryExists(folderPath)) return new List<string>();
         return Directory.GetDirectories(folderPath)
             .Where(path => ExcludeDirectories.Matches(path).Count == 0);
     }
@@ -531,7 +532,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public IEnumerable<string> GetAllDirectories(string folderPath)
     {
-        if (!Directory.Exists(folderPath)) return new List<string>();
+        if (!FastPath.DirectoryExists(folderPath)) return new List<string>();
         var directories = new List<string>();
 
         var foundDirs = GetDirectories(folderPath);
@@ -553,7 +554,7 @@ public class DirectoryService : IDirectoryService
     {
         try
         {
-            return Parser.NormalizePath(Directory.GetParent(fileOrFolder)?.FullName);
+            return Parser.NormalizePath(FastPath.GetParentDirectory(fileOrFolder));
         }
         catch (Exception)
         {
@@ -617,7 +618,7 @@ public class DirectoryService : IDirectoryService
     /// <returns>Max Last Write Time</returns>
     public DateTime GetLastWriteTime(string folderPath)
     {
-        if (!Directory.Exists(folderPath)) throw new IOException($"{folderPath} does not exist");
+        if (!FastPath.DirectoryExists(folderPath)) throw new IOException($"{folderPath} does not exist");
         var fileEntries = Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories);
         if (fileEntries.Length == 0) return DateTime.MaxValue;
         return fileEntries.Max(path => File.GetLastWriteTime(path));
@@ -630,7 +631,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public GlobMatcher CreateMatcherFromFile(string filePath)
     {
-        if (!File.Exists(filePath))
+        if (!FastPath.FileExists(filePath))
         {
             return null;
         }
@@ -853,7 +854,7 @@ public class DirectoryService : IDirectoryService
     /// <param name="directoryName">Fully qualified Directory name</param>
     public void Flatten(string directoryName)
     {
-        if (string.IsNullOrEmpty(directoryName) || !Directory.Exists(directoryName)) return;
+        if (string.IsNullOrEmpty(directoryName) || !FastPath.DirectoryExists(directoryName)) return;
 
         var directory = new DirectoryInfo(directoryName);
 
@@ -899,7 +900,7 @@ public class DirectoryService : IDirectoryService
                 // We need to rename the files so that after flattening, they are in the order we found them
                 var newName = $"{paddedIndex}_{Parser.PadZeros(fileIndex + string.Empty)}{file.Extension}";
                 var newPath = Path.Combine(root.FullName, newName);
-                if (!File.Exists(newPath)) file.MoveTo(newPath);
+                if (!FastPath.FileExists(newPath)) file.MoveTo(newPath);
                 fileIndex++;
             }
 
