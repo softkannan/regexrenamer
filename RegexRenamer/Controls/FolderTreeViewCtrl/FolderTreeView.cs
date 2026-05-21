@@ -321,6 +321,8 @@ public class FolderTreeView : TreeView
 
     #endregion
 
+    // Refreshes the entire tree and attempts to re-select the specified path.
+    // If recursive is false, will not attempt to update if already in the process of updating, otherwise will force update.
     public void UpdateFolderTree(string activePath, bool recursive = false)
     {
         if (_isUpdating && recursive == false) return;

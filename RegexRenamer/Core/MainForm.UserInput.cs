@@ -194,7 +194,7 @@ public partial class MainForm
         _currentInput = currentInput;
 
         if (requiredStage != UpdateStage.None)
-            RefreshView(requiredStage);
+            RefreshFileListView(requiredStage);
     }
 
     /// <summary>

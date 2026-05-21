@@ -61,17 +61,17 @@ internal sealed class ValidationService
 
         // invalid character
         string[] parts = allowRenSub ? testFilename.Split('\\') : [testFilename];
-        for (int i = 0; i < parts.Length; i++)
+        for (int cIdx = 0; cIdx < parts.Length; cIdx++)
         {
             match = allowRenSub
-                ? s_regInvalidCharsAllowPath.Match(parts[i])
-                : s_regInvalidChars.Match(parts[i]);
+                ? s_regInvalidCharsAllowPath.Match(parts[cIdx])
+                : s_regInvalidChars.Match(parts[cIdx]);
 
             if (match.Success)
-                if (parts.Length > 1 && i != parts.Length - 1)
-                    return "The subfolder '" + parts[i] + "' contains an invalid character: '" + match.Groups[0].Value + "'.";
+                if (parts.Length > 1 && cIdx != parts.Length - 1)
+                    return $"The subfolder '{parts[cIdx]}' contains an invalid character: '{match.Groups[0].Value}'.";
                 else
-                    return "The " + strFilename + " '" + parts[i] + "' contains an invalid character: '" + match.Groups[0].Value + "'.";
+                    return $"The {strFilename} '{parts[cIdx]}' contains an invalid character: '{match.Groups[0].Value}'.";
         }
 
         // starts with "\"
@@ -79,7 +79,7 @@ internal sealed class ValidationService
             if (parts.Length > 2)
                 return "The subfolder cannot begin with '\\'.";
             else
-                return "The " + strFilename + " cannot begin with a backslash.";
+                return $"The {strFilename} cannot begin with a backslash.";
 
         // element is empty
         for (int i = 0; i < parts.Length; i++)
@@ -88,7 +88,7 @@ internal sealed class ValidationService
                 if (i != parts.Length - 1)
                     return "Duplicate path seperator";
                 else
-                    return "The " + strFilename + " cannot end with a backslash.";
+                    return $"The {strFilename} cannot end with a backslash.";
         }
 
         // element is [ .]+ (eg, "/../", "/ /", ...)
@@ -97,9 +97,9 @@ internal sealed class ValidationService
             match = s_regOnlyDotSpace.Match(parts[i]);
             if (match.Success)
                 if (i != parts.Length - 1)
-                    return "Invalid subfolder: '" + parts[i] + "'.";
+                    return $"Invalid subfolder: '{parts[i]}'.";
                 else
-                    return "Invalid " + strFilename + ": '" + parts[i] + "'.";
+                    return $"Invalid {strFilename}: '{parts[i]}'.";
         }
 
         // element ends with [ .]+
@@ -108,9 +108,9 @@ internal sealed class ValidationService
             match = s_regEndsInDotSpace.Match(parts[i]);
             if (match.Success)
                 if (i != parts.Length - 1)
-                    return "The subfolder '" + parts[i] + "' ends with invalid character(s): '" + match.Groups[0].Value + "'.";
+                    return $"The subfolder '{parts[i]}' ends with invalid character(s): '{match.Groups[0].Value}'.";
                 else
-                    return "The " + strFilename + " '" + parts[i] + "' ends with invalid character(s): '" + match.Groups[0].Value + "'.";
+                    return $"The {strFilename} '{parts[i]}' ends with invalid character(s): '{match.Groups[0].Value}'.";
         }
 
         return null;
@@ -157,24 +157,22 @@ internal sealed class ValidationService
     /// <param name="getActiveFileIndex">Function mapping display-row index to active-file index.</param>
     /// <returns>Validation result with per-file errors and aggregate counts.</returns>
     public ValidationResult ValidatePreview(
-        IReadOnlyList<RenameItemInfo> files,
+        IReadOnlyList<FileViewRowData> files,
         IReadOnlyDictionary<string, InactiveReason> inactiveFiles,
         UserInputModel input,
         string strFilename,
-        string strFile,
-        int fileCount,
-        Func<int, int> getActiveFileIndex)
+        string strFile)
     {
         ValidationResult result = new();
-        bool[] hasError = new bool[fileCount];
+        bool[] hasError = new bool[files.Count];
         Dictionary<string, List<int>> hashPreview = new(StringComparer.OrdinalIgnoreCase);
 
-        // generate hash of preview filenames
-        for (int dfi = 0; dfi < fileCount; dfi++)
+        // build preview hash map for conflict detection / newname hashmap for quick lookup when checking against each other
+        for (int dfi = 0; dfi < files.Count; dfi++)
         {
-            int afi = getActiveFileIndex(dfi);
-            string preview = files[afi].PreviewExt;
-
+            var rowData = files[dfi];
+            var file = rowData.FileInfo;
+            string preview = file.PreviewExt;
             if (!hashPreview.ContainsKey(preview))
                 hashPreview.Add(preview, []);
             hashPreview[preview].Add(dfi);
@@ -186,124 +184,117 @@ internal sealed class ValidationService
             outputPath = input.MoveCopyPath;
 
         // check for errors
-        for (int dfi = 0; dfi < fileCount; dfi++)
+        for(int dfi = 0;dfi < files.Count; dfi++)
         {
-            int afi = getActiveFileIndex(dfi);
-            string preview = files[afi].PreviewExt;
+            var rowData = files[dfi];
+            var file = rowData.FileInfo;
+            string preview = file.PreviewExt;
 
+            // skip files that are already in error to avoid duplicate errors and reduce noise
             if (hasError[dfi]) continue;
 
+            // skip files that are not being renamed
             if (input.Output == OutputMode.RenameInPlace)
             {
-                if (files[afi].Name == files[afi].Context.Preview) continue;
+                if (file.Name == file.Context.Preview) continue;
             }
             else
             {
-                if (!files[afi].Context.Matched) continue;
+                if (!file.Context.Matched) continue;
             }
 
-            // valid filename check
-            string validFilenameErrmsg = ValidateFilename(files[afi].PreviewExt, false, strFilename);
+            // validate filename for invalid characters and patterns
+            string validFilenameErrmsg = ValidateFilename(file.PreviewExt, false, strFilename);
             if (validFilenameErrmsg != null)
             {
-                result.FileErrors[afi] = validFilenameErrmsg;
+                result.FileErrors[dfi] = validFilenameErrmsg;
                 continue;
             }
 
-            // dupe filename conflicts
-            if (!files[afi].Context.Preview.Contains("\\")
+            // check against conflicts within preview / new names (this is case insensitive check)
+            if (hashPreview[preview].Count > 1)
+            {
+                foreach (int dfi2 in hashPreview[preview])
+                {
+                    if (hasError[dfi2])
+                        continue;
+                    else
+                        hasError[dfi2] = true;
+
+                    result.FileErrors[dfi2] = $"The {strFilename} '{files[dfi2].FileInfo.PreviewExt}' conflicts with another '{strFile}' in the preview column. Conflict between row {dfi} and row {dfi2}.";
+                }
+                continue;
+            }
+
+            // check against existing files in the file system
+            if (!file.Context.Preview.Contains("\\")
                 && (input.Output == OutputMode.RenameInPlace || input.Output == OutputMode.BackupTo))
             {
-                // check against active files
-                if (hashPreview[preview].Count > 1)
-                {
-                    foreach (int dfi2 in hashPreview[preview])
-                    {
-                        if (hasError[dfi2])
-                            continue;
-                        else
-                            hasError[dfi2] = true;
-
-                        int afi2 = getActiveFileIndex(dfi2);
-                        result.FileErrors[afi2] = "The " + strFilename + " '" + files[afi2].PreviewExt
-                                                + "' conflicts with another " + strFile + " in the preview column.";
-                    }
-                    continue;
-                }
-
-                // check against inactive files
+                // check against real inactive files / not matched files in the current directory / not shown due to filter
                 if (inactiveFiles.ContainsKey(preview))
                 {
                     switch (inactiveFiles[preview])
                     {
                         case InactiveReason.Filtered:
-                            result.FileErrors[afi] = "The " + strFilename + " '" + files[afi].PreviewExt
-                                                   + "' already exists in this directory but is currently filtered out.";
+                            result.FileErrors[dfi] = $"The {strFilename} '{file.PreviewExt}' already exists in this directory but is currently filtered out.";
                             break;
                         case InactiveReason.Hidden:
-                            result.FileErrors[afi] = "The " + strFilename + " '" + files[afi].PreviewExt
-                                                   + "' already exists in this directory as a hidden " + strFile + ".";
+                            result.FileErrors[dfi] = $"The {strFilename} '{file.PreviewExt}' already exists in this directory as a hidden {strFile}.";
                             break;
                     }
                     continue;
                 }
 
                 // file-folder conflicts
-                if (fileCount < 2000)
+                if (files.Count < 2000)
                 {
-                    string previewFullpath = Path.Combine(outputPath, files[afi].PreviewExt);
+                    string previewFullpath = Path.Combine(outputPath, file.PreviewExt);
                     if (input.RenameFolders ? FastPath.FileExists(previewFullpath) : FastPath.DirectoryExists(previewFullpath))
                     {
-                        result.FileErrors[afi] = "The " + strFilename + " '" + files[afi].PreviewExt
-                                               + "' conflicts with a " + (input.RenameFolders ? "file" : "folder")
-                                               + " in the current path.";
+                        result.FileErrors[dfi] = $"The {strFilename} '{file.PreviewExt}' conflicts with a { (input.RenameFolders ? "file" : "folder") } in the current path.";
                         continue;
                     }
                 }
             }
-            else // destination is other directory
+            // destination is other directory
+            else
             {
-                string previewFullpath = Path.Combine(outputPath, files[afi].PreviewExt);
+                string previewFullpath = Path.Combine(outputPath, file.PreviewExt);
                 if (input.RenameFolders ? FastPath.DirectoryExists(previewFullpath) : FastPath.FileExists(previewFullpath))
                 {
-                    result.FileErrors[afi] = "The " + strFilename + " '"
-                                           + Path.GetFileName(files[afi].PreviewExt)
-                                           + "' already exists in the destination folder.";
+                    result.FileErrors[dfi] = $"The {strFilename} '{file.PreviewExt}' already exists in the destination folder.";
                     continue;
                 }
 
                 if (input.RenameFolders ? FastPath.FileExists(previewFullpath) : FastPath.DirectoryExists(previewFullpath))
                 {
-                    result.FileErrors[afi] = "The " + strFilename + " '"
-                                           + Path.GetFileName(files[afi].PreviewExt) + "' conflicts with a "
-                                           + (input.RenameFolders ? "file" : "folder") + " in the destination path.";
+                    result.FileErrors[dfi] = $"The {strFilename} '{file.PreviewExt}' conflicts with a { (input.RenameFolders ? "file" : "folder") } in the destination path.";
                     continue;
                 }
             }
-
             // backup path original name conflict
             if (input.Output == OutputMode.BackupTo)
             {
-                string previewFullpath = Path.Combine(input.MoveCopyPath, files[afi].Filename);
+                string previewFullpath = Path.Combine(input.MoveCopyPath, file.Filename);
                 if (FastPath.FileExists(previewFullpath))
                 {
-                    result.FileErrors[afi] = "The original filename '" + files[afi].Filename
-                                           + "' already exists in the selected backup folder.";
+                    result.FileErrors[dfi] = $"The original filename '{file.Filename}' already exists in the selected backup folder.";
                     continue;
                 }
 
                 if (FastPath.DirectoryExists(previewFullpath))
                 {
-                    result.FileErrors[afi] = "The original filename '" + files[afi].Filename
-                                           + "' conflicts with a folder in the selected backup path.";
+                    result.FileErrors[dfi] = $"The original filename '{file.Filename}' conflicts with a folder in the selected backup path.";
                     continue;
                 }
             }
         }
 
         // compute counts
-        for (int idx = 0; idx < files.Count; idx++)
-            if (files[idx].Context.Matched) result.MatchedCount++;
+        foreach (var rowData in files)
+        {
+            if (rowData.FileInfo.Context.Matched) result.MatchedCount++;
+        }
 
         result.ConflictCount = result.FileErrors.Count;
 
@@ -355,7 +346,7 @@ internal sealed class ValidationService
         }
 
         if (filesToRename == 0)
-            return new PreRenameCheckResult { ErrorMessage = "There are no " + strFile + "s to rename." };
+            return new PreRenameCheckResult { ErrorMessage = $"There are no {strFile}s to rename." };
 
         // move/copy path doesn't exist
         if (input.Output != OutputMode.RenameInPlace && !FastPath.DirectoryExists(input.MoveCopyPath))
@@ -367,7 +358,7 @@ internal sealed class ValidationService
                 OutputMode.BackupTo => "Backup to",
                 _ => "Output"
             };
-            return new PreRenameCheckResult { ErrorMessage = "'" + label + "' folder '" + input.MoveCopyPath + "' is not a valid path." };
+            return new PreRenameCheckResult { ErrorMessage = $"'{label}' folder '{input.MoveCopyPath}' is not a valid path." };
         }
 
         // move/copy path same as activePath
@@ -380,7 +371,7 @@ internal sealed class ValidationService
                 OutputMode.BackupTo => "Backup to",
                 _ => "Output"
             };
-            return new PreRenameCheckResult { ErrorMessage = "'" + label + "' folder is the same as the currently selected folder." };
+            return new PreRenameCheckResult { ErrorMessage = $"'{label}' folder is the same as the currently selected folder." };
         }
 
         // check for filenames starting with space or dot

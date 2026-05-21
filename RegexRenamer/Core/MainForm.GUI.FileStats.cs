@@ -19,7 +19,6 @@ namespace RegexRenamer
         }
 
         // misc helper methods
-
         private void ResetFields()
         {
             EnableUpdates = false;

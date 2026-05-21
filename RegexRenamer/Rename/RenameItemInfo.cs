@@ -80,9 +80,16 @@ namespace RegexRenamer.Rename
         public bool Matched;      // true if matches current regex
         public bool Skip;         // true if marked to skip (not renamed)
         public bool Selected;     // true if row is currently selected
+        private readonly bool PreserveExt;  // true if 'Preserve file extension' checked
+
 
         public ComicInfo ComicInfo;
         public ParserInfo ParseInfo;
+
+        public DynamicRenameItemInfo(bool preserveExt = false)
+        {
+            PreserveExt = preserveExt;
+        }
     }
 
     public class RenameItemInfo
@@ -119,19 +126,13 @@ namespace RegexRenamer.Rename
         }
 
         // if preserveext, append extension
-        private string _previewExt = null;
         public string PreviewExt { 
             get
             {
-                if (_previewExt == null)
-                {
-                    _previewExt = PreserveExt ? Context.Preview + Extension : Context.Preview;
-                }
-                return _previewExt;
+                // value must be calculated on demand since Context.Preview can change with each regex input, and we want to avoid unnecessary string concatenation when preserveext is false
+                return PreserveExt ? Context.Preview + Extension : Context.Preview;
             }
         }
-
-        
 
         public RenameItemInfo(DirectoryInfo di, bool hidden, bool preserveext)
         {
@@ -140,12 +141,11 @@ namespace RegexRenamer.Rename
             Extension = string.Empty;
             Foldername = string.Empty;
             Hidden = hidden;
-            PreserveExt = preserveext;
             IsFolder = true;
             FileModified = new FileModificationInfo(di);
             Size = new FileSizeInfo(0);
 
-            Context = new DynamicRenameItemInfo();
+            Context = new DynamicRenameItemInfo(preserveext);
             Context.Preview = di.Name;
             Context.Matched = false;
             Context.Selected = false;
@@ -165,7 +165,7 @@ namespace RegexRenamer.Rename
             FileModified = new FileModificationInfo(fi);
             Size = new FileSizeInfo(fi);
 
-            Context = new DynamicRenameItemInfo();
+            Context = new DynamicRenameItemInfo(preserveext);
             Context.Preview = fi.Name;
             Context.Matched = false;
             Context.Selected = false;

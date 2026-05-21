@@ -36,9 +36,7 @@ namespace RegexRenamer
                 EnableUpdates = true;
             }
 
-
             // parse int, check valid range
-
             if (!Int32.TryParse(textBox.Text, out num))
                 error = true;
             else if (textBox == txtNumberingStart && num < 0)
@@ -50,9 +48,7 @@ namespace RegexRenamer
             else if (textBox == txtNumberingReset && num < 0)
                 error = true;
 
-
             // or, check for letter(s)
-
             if (textBox == txtNumberingStart)
             {
                 if (Regex.IsMatch(textBox.Text, @"^([a-z]+|[A-Z]+)$"))
@@ -66,17 +62,13 @@ namespace RegexRenamer
                 }
             }
 
-
             // set bg colour
-
             if (error)
                 textBox.BackColor = Color.MistyRose;
             else
                 textBox.BackColor = SystemColors.Window;
 
-
             // if all valid, update preview
-
             textBox.Tag = !error;
             _validNumber = (bool)mnuNumbering.DropDownItems[0].Tag
                         && (bool)mnuNumbering.DropDownItems[1].Tag

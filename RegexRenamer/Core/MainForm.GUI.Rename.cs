@@ -78,8 +78,7 @@ namespace RegexRenamer
 
             if (cmbReplace.Focused || cbModifierI.Focused || cbModifierG.Focused || cbModifierX.Focused) return;
 
-            if (PreviewNeedsUpdate)
-                UpdateUserInputValues();
+            UpdateUserInputValues();
         }
         private void cmbReplace_TextChanged(object sender, EventArgs e)
         {
@@ -92,8 +91,7 @@ namespace RegexRenamer
         {
             if (cmbMatch.Focused || cbModifierI.Focused || cbModifierG.Focused || cbModifierX.Focused) return;
 
-            if (PreviewNeedsUpdate)
-                UpdateUserInputValues();
+            UpdateUserInputValues();
         }
 
         // parse combobox history string
@@ -134,7 +132,7 @@ namespace RegexRenamer
 
             if (e.KeyCode == Keys.Enter && !itmOptionsRealtimePreview.Checked)  // enter (when no realtime preview) = gen preview
             {
-                if (_validMatch && PreviewNeedsUpdate)
+                if (_validMatch)
                 {
                     UpdateUserInputValues();
                     e.SuppressKeyPress = true;
@@ -171,7 +169,7 @@ namespace RegexRenamer
         {
             if (e.KeyCode == Keys.Enter && !itmOptionsRealtimePreview.Checked)  // enter (when no realtime preview) = gen preview
             {
-                if (_validMatch && PreviewNeedsUpdate)
+                if (_validMatch)
                 {
                     UpdateUserInputValues();
                     e.SuppressKeyPress = true;
@@ -245,14 +243,12 @@ namespace RegexRenamer
 
         private void PerformRename()
         {
-            // Snapshot current user input for business logic
-            _currentInput = GetUserInput();
-
             // run pre-rename validation via service
             var fileErrors = _lastValidationResult?.FileErrors ?? [];
             var checkResult = _validationService.CheckBeforeRename(
                 _fileStore.Files, _currentInput, _validMatch, fileErrors, strFile, strFilename);
 
+            // show error if cannot proceed
             if (!checkResult.CanProceed)
             {
                 MessageBox.Show(checkResult.ErrorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -292,10 +288,8 @@ namespace RegexRenamer
             progressBar.Visible = true;
             progressBar.Focus();
 
-
             // semi-disable form during rename
             SetFormActive(false);
-
 
             // perform rename operation in background thread
             bgwRename.RunWorkerAsync(checkResult.FilesToRename);

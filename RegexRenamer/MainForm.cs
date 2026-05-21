@@ -246,11 +246,12 @@ namespace RegexRenamer
 
         }
 
-      
+
 
         #endregion
 
-        public void UpdateFolderTree()
+        // refresh folder tree and file list (called after renaming, changing folder, etc.)
+        public void RefreshFolderTree()
         {
             EnableUpdates = false;
             tvwFolders.UpdateFolderTree(_activePath);
@@ -285,14 +286,16 @@ namespace RegexRenamer
             // load settings & regex history from registry
             LoadSettings();
             LoadRegexHistory();
-
-            RefreshView(UpdateStage.FullRefresh);
+            
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
         {
             // popluate folder tree and file list
-            UpdateFolderTree();
+            RefreshFolderTree();
+            UpdateUserInputValues();
+
+            RefreshFileListView(UpdateStage.FullRefresh);
             dgvFiles.ClearSelection();
 
             // focus folder list

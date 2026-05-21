@@ -172,7 +172,8 @@ namespace RegexRenamer
             {
                 var newFolderPath = $"{destPath}\\New Folder";
                 Directory.CreateDirectory(newFolderPath);
-                UpdateFolderTree();
+                // refresh tree and select new folder
+                RefreshFolderTree();
             }
             cmFolderView.Tag = null;
         }
@@ -208,7 +209,8 @@ namespace RegexRenamer
             (TreeNode clickNode , Point location) = ((TreeNode , Point)) cmFolderView.Tag;
             var destPath = clickNode.TreeNodeToPath();
             destPath.ClipboardPasteFiles();
-            UpdateFolderTree();
+            // refresh tree and select pasted files/folders
+            RefreshFolderTree();
             cmFolderView.Tag = null;
         }
 
@@ -219,7 +221,8 @@ namespace RegexRenamer
             (TreeNode clickNode, Point location) = ((TreeNode, Point))cmFolderView.Tag;
             var destPath = clickNode.TreeNodeToPath();
             PInvoke.FileOperationAPI.SendToRecycleBin(destPath);
-            UpdateFolderTree();
+            // refresh folder tree
+            RefreshFolderTree();
             cmFolderView.Tag = null;
         }
 
@@ -244,7 +247,7 @@ namespace RegexRenamer
         }
         private void editFolderViewMetadataFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedFiles = dgvFiles.GetAllFileInfo(_fileStore.Files, GetFileStoreIndex);
+            var selectedFiles = dgvFiles.GetAllFileInfo(_fileViewRows);
             using (EditMetadataForm editMetaForm = new EditMetadataForm(_activePath, 
                 _activeFilter, "Modify Metadata", "Edit", itmOptionsPreserveExt.Checked))
             {
@@ -319,7 +322,8 @@ namespace RegexRenamer
             {
                 _activePath = newPath;   
             }
-            UpdateFolderTree();
+            // refresh tree and select renamed folder
+            RefreshFolderTree();
         }
         private void tvwFolders_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -337,7 +341,8 @@ namespace RegexRenamer
         {
             if (e.KeyCode == Keys.F5)  // refresh directory tree
             {
-                UpdateFolderTree();
+                // refresh tree and try to select previously selected folder
+                RefreshFolderTree();
             }
         }
         #endregion

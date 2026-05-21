@@ -69,7 +69,6 @@ namespace RegexRenamer
 
 
             // set button text to bold if an option selected
-
             if (noneKavitaMenuItem.Checked)
             {
                 mnuKavitaCheck.Font = new Font("Tahoma", 8.25F);
@@ -97,7 +96,6 @@ namespace RegexRenamer
                     _kavitaPreviewLibType = LibraryType.Book;
                 }
             }
-
 
             // update preview
             ResetColumnDistribution();

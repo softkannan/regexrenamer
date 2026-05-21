@@ -139,6 +139,7 @@ namespace RegexRenamer
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
             colIcon = new System.Windows.Forms.DataGridViewImageColumn();
+            colSNO = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colPreview = new System.Windows.Forms.DataGridViewTextBoxColumn();
             colExt = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -491,14 +492,14 @@ namespace RegexRenamer
             cmbFilter.Text = "*.*";
             toolTip.SetToolTip(cmbFilter, "Shift+rightclick for a menu of regex elements");
             // 
-            // cmbSort
+            // cmbSortHint
             // 
             cmbSortHint.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             cmbSortHint.AutoCompleteCustomSource.AddRange(new string[] { "(.+)", "(.+)(/d+)" });
             cmbSortHint.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             cmbSortHint.Location = new System.Drawing.Point(1227, 67);
             cmbSortHint.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            cmbSortHint.Name = "cmbSort";
+            cmbSortHint.Name = "cmbSortHint";
             cmbSortHint.Size = new System.Drawing.Size(253, 23);
             cmbSortHint.TabIndex = 12;
             toolTip.SetToolTip(cmbSortHint, "Shift+rightclick for a menu of regex elements");
@@ -747,7 +748,7 @@ namespace RegexRenamer
             dgvFiles.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
             dgvFiles.ColumnHeadersHeight = 30;
             dgvFiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIcon, colFilename, colPreview, colExt, colFileSize, colModified, colTitle, colSeries, colVolume, colChapter, colEdition, colSpecial });
+            dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { colIcon, colSNO, colFilename, colPreview, colExt, colFileSize, colModified, colTitle, colSeries, colVolume, colChapter, colEdition, colSpecial });
             dgvFiles.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             dgvFiles.GridColor = System.Drawing.SystemColors.Control;
             dgvFiles.Location = new System.Drawing.Point(6, 15);
@@ -856,48 +857,48 @@ namespace RegexRenamer
             // 
             itmHelpContents.Name = "itmHelpContents";
             itmHelpContents.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            itmHelpContents.Size = new System.Drawing.Size(212, 22);
+            itmHelpContents.Size = new System.Drawing.Size(211, 22);
             itmHelpContents.Text = "Contents";
             // 
             // itmHelpRegexReference
             // 
             itmHelpRegexReference.Name = "itmHelpRegexReference";
             itmHelpRegexReference.ShortcutKeys = System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F1;
-            itmHelpRegexReference.Size = new System.Drawing.Size(212, 22);
+            itmHelpRegexReference.Size = new System.Drawing.Size(211, 22);
             itmHelpRegexReference.Text = "Regex Reference";
             // 
             // itmHelpSep1
             // 
             itmHelpSep1.Name = "itmHelpSep1";
-            itmHelpSep1.Size = new System.Drawing.Size(209, 6);
+            itmHelpSep1.Size = new System.Drawing.Size(208, 6);
             // 
             // itmHelpEmailAuthor
             // 
             itmHelpEmailAuthor.Name = "itmHelpEmailAuthor";
-            itmHelpEmailAuthor.Size = new System.Drawing.Size(212, 22);
+            itmHelpEmailAuthor.Size = new System.Drawing.Size(211, 22);
             itmHelpEmailAuthor.Text = "Email the author";
             // 
             // itmHelpReportBug
             // 
             itmHelpReportBug.Name = "itmHelpReportBug";
-            itmHelpReportBug.Size = new System.Drawing.Size(212, 22);
+            itmHelpReportBug.Size = new System.Drawing.Size(211, 22);
             itmHelpReportBug.Text = "Report a bug";
             // 
             // itmHelpHomepage
             // 
             itmHelpHomepage.Name = "itmHelpHomepage";
-            itmHelpHomepage.Size = new System.Drawing.Size(212, 22);
+            itmHelpHomepage.Size = new System.Drawing.Size(211, 22);
             itmHelpHomepage.Text = "Homepage";
             // 
             // itmHelpSep2
             // 
             itmHelpSep2.Name = "itmHelpSep2";
-            itmHelpSep2.Size = new System.Drawing.Size(209, 6);
+            itmHelpSep2.Size = new System.Drawing.Size(208, 6);
             // 
             // itmHelpAbout
             // 
             itmHelpAbout.Name = "itmHelpAbout";
-            itmHelpAbout.Size = new System.Drawing.Size(212, 22);
+            itmHelpAbout.Size = new System.Drawing.Size(211, 22);
             itmHelpAbout.Text = "About RegexRenamer";
             // 
             // progressBar
@@ -1014,6 +1015,12 @@ namespace RegexRenamer
             colIcon.ReadOnly = true;
             colIcon.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             colIcon.Width = 20;
+            // 
+            // colSNO
+            // 
+            colSNO.HeaderText = "SNo";
+            colSNO.Name = "colSNO";
+            colSNO.Width = 36;
             // 
             // colFilename
             // 
@@ -1242,6 +1249,7 @@ namespace RegexRenamer
         private System.Windows.Forms.Label lblSort;
         private System.Windows.Forms.Label lblFilter;
         private System.Windows.Forms.DataGridViewImageColumn colIcon;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colSNO;
         private System.Windows.Forms.DataGridViewTextBoxColumn colFilename;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPreview;
         private System.Windows.Forms.DataGridViewTextBoxColumn colExt;

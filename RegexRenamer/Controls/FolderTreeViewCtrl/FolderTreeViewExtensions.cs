@@ -77,8 +77,9 @@ public static class FolderTreeViewExtensions
         if (tn.Nodes.Count == 1 && tn.Nodes[0].Tag.ToString() == DUMMYNODE)
         {
             tn.Nodes.Clear();
-            FolderItem folderItem = (FolderItem)tn.Tag;
-            Folder folder = (Folder)folderItem.GetFolder;
+            FolderItem folderItem = tn.Tag as FolderItem;
+            Folder folder = folderItem?.GetFolder as Folder;
+            if (folder == null) return;
             foreach (FolderItem item in folder.Items())
             {
                 //if (item.IsFileSystem && item.IsFolder && !item.IsBrowsable)
@@ -176,8 +177,9 @@ public static class FolderTreeViewExtensions
 
     private static void FillSubDirectories(TreeNode tn, FolderTreeViewImageList imageList, bool getIcons)
     {
-        FolderItem folderItem = (FolderItem)tn.Tag;
-        Folder folder = (Folder)folderItem.GetFolder;
+        FolderItem folderItem = tn.Tag as FolderItem;
+        Folder folder = folderItem?.GetFolder as Folder;
+        if (folder == null) return;
 
         foreach (FolderItem item in folder.Items())
         {
@@ -198,7 +200,7 @@ public static class FolderTreeViewExtensions
             // create dummy nodes for any subfolders that have further subfolders
             FolderItem folderItem = tn.Tag as FolderItem;
             Folder folder = folderItem?.GetFolder as Folder;
-            if(folder == null) { return; }
+            if(folder == null) return;
             bool hasFolders = false;
             foreach (FolderItem item in folder.Items())
             {

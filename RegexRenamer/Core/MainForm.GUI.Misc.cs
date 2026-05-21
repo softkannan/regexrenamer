@@ -78,12 +78,6 @@ namespace RegexRenamer
         private void itmOptionsPreserveExt_Click(object sender, EventArgs e)
         {
             this.Update();
-
-            //// update activeFiles
-            //for (int afi = 0; afi < _fileStore.Files.Count; afi++)
-            //    _fileStore.Files[afi].PreserveExt = itmOptionsPreserveExt.Checked;
-
-            // update preview column
             UpdateUserInputValues();
         }
         private void itmOptionsAllowRenSub_Click(object sender, EventArgs e)

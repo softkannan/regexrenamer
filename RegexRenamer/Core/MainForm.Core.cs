@@ -24,7 +24,7 @@ namespace RegexRenamer;
 [Flags]
 public enum UpdateStage
 {
-    None = 0,
+    None,
     FileList = 1 << 0,
     Preview = 1 << 1,
     Validation = 1 << 2,
@@ -55,7 +55,7 @@ public partial class MainForm
         var list = new List<Models.FileViewRowData>(expectedCount);
         for (int idx = 0; idx < expectedCount; idx++)
         {
-            list.Add(new Models.FileViewRowData(idx));
+            list.Add(new Models.FileViewRowData(_fileStore.Files[idx], idx, idx));
         }
         _fileViewRows = list;
         dgvFiles.RowCount = _fileViewRows.Count;
@@ -71,13 +71,12 @@ public partial class MainForm
         else return ChangeCaseOption.NoChange;
     }
 
-
     /// <summary>
     /// Unified refresh entry point. Executes the requested stages in cascade order.
     /// Stages that depend on earlier ones (e.g., Preview depends on FileList) are
     /// automatically included when a higher-level stage is requested.
     /// </summary>
-    private void RefreshView(UpdateStage stages)
+    private void RefreshFileListView(UpdateStage stages)
     {
         if (!EnableUpdates) return;
 
@@ -109,8 +108,6 @@ public partial class MainForm
     private void FullRefresh()
     {
         if (!EnableUpdates) return;
-        // Snapshot current user input for business logic
-        _currentInput = GetUserInput();
 
         _currentSortColumn = null;
         _currentSortOrder = SortOrder.None;
@@ -125,7 +122,7 @@ public partial class MainForm
         if (!EnableUpdates) return;
 
         // Snapshot current user input for business logic
-        _currentInput = GetUserInput();
+        //_currentInput = GetUserInput();
 
         dgvFiles.Tag = 0;  // reset files ignored
         dgvFiles.RowCount = 0;
@@ -164,9 +161,6 @@ public partial class MainForm
     {
         if (!EnableUpdates || !_validMatch) return;
 
-        // Snapshot current user input for business logic
-        _currentInput = GetUserInput();
-
         this.Cursor = Cursors.AppStarting;
 
         _fileStore.BuildPreview(_currentInput.MatchPattern, _currentInput.ReplacePattern, _currentInput.Numbering, _currentInput.ChangeCase, _currentInput.Kavita, _currentInput.Modifiers);
@@ -199,17 +193,38 @@ public partial class MainForm
         if (!_currentInput.RenameSelectionOnly)
             dgvFiles.ClearSelection();
 
-        PreviewNeedsUpdate = false;
+        dgvFiles.Invalidate();
     }
-    
+
+    private enum ColumnIndex
+    {
+        Icon,
+        Sno,
+        Filename,
+        Preview,
+        Extension,
+        Size,
+        ModifiedDate,
+        Title,
+        Series,
+        Volumes,
+        Chapters,
+        Edition,
+        IsSpecial
+    }
+
     private object GetCellValue(FileViewRowData rowData, int columnIndex, bool forDisplay = true)
     {
         if (rowData == null)
             return null;
-        int afi = rowData.FileStoreIndex;
+        var fileInfo = rowData.FileInfo;
+        if (fileInfo == null)
+            return null;
         switch (columnIndex)
         {
-            case 0:
+            case (int)ColumnIndex.Sno:
+                return forDisplay ? (rowData.FileStoreIndex + 1).ToString() : rowData.FileStoreIndex;
+            case (int)ColumnIndex.Icon:
                 {
                     if (rowData.FileIcon == null)
                     {
@@ -218,7 +233,7 @@ public partial class MainForm
                         {
 #endif
                             // add image (keyed by extension)
-                            rowData.FileIcon = _fileViewIconCache.GetIcon(_fileStore.Files[afi]);
+                            rowData.FileIcon = _fileViewIconCache.GetIcon(fileInfo);
 #if !DEBUG
                         }
                         catch  // default: no image
@@ -229,28 +244,28 @@ public partial class MainForm
                     }
                     return rowData.FileIcon;
                 }
-            case 1:
-                return _fileStore.Files[afi].Name;
-            case 2:
-                return _fileStore.Files[afi].Context.Preview;
-            case 3:
-                return chkShowInfo.Checked ? _fileStore.Files[afi].Extension : null;
-            case 4:
-                return chkShowInfo.Checked ? _fileStore.Files[afi].Size : null;
-            case 5:
-                return chkShowInfo.Checked ? _fileStore.Files[afi].FileModified : null;
-            case 6:
-                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Title : null;
-            case 7:
-                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Series : null;
-            case 8:
-                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Volumes : null;
-            case 9:
-                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Chapters : null;
-            case 10:
-                return _fileStore.Files[afi].Context.ParseInfo != null ? _fileStore.Files[afi].Context.ParseInfo.Edition : null;
-            case 11:
-                return _fileStore.Files[afi].Context.ParseInfo != null ? (_fileStore.Files[afi].Context.ParseInfo.IsSpecial ? "true" : "false") : null;
+            case (int)ColumnIndex.Filename:
+                return fileInfo.Name;
+            case (int)ColumnIndex.Preview:
+                return fileInfo.Context.Preview;
+            case (int)ColumnIndex.Extension:
+                return chkShowInfo.Checked ? fileInfo.Extension : null;
+            case (int)ColumnIndex.Size:
+                return chkShowInfo.Checked ? fileInfo.Size : null;
+            case (int)ColumnIndex.ModifiedDate:
+                return chkShowInfo.Checked ? fileInfo.FileModified : null;
+            case (int)ColumnIndex.Title:
+                return fileInfo.Context.ParseInfo != null ? fileInfo.Context.ParseInfo.Title : null;
+            case (int)ColumnIndex.Series:
+                return fileInfo.Context.ParseInfo != null ? fileInfo.Context.ParseInfo.Series : null;
+            case (int)ColumnIndex.Volumes:
+                return fileInfo.Context.ParseInfo != null ? fileInfo.Context.ParseInfo.Volumes : null;
+            case (int)ColumnIndex.Chapters:
+                return fileInfo.Context.ParseInfo != null ? fileInfo.Context.ParseInfo.Chapters : null;
+            case (int)ColumnIndex.Edition:
+                return fileInfo.Context.ParseInfo != null ? fileInfo.Context.ParseInfo.Edition : null;
+            case (int)ColumnIndex.IsSpecial:
+                return fileInfo.Context.ParseInfo != null ? (fileInfo.Context.ParseInfo.IsSpecial ? "true" : "false") : null;
             default:
                 return null;
         }
@@ -271,9 +286,9 @@ public partial class MainForm
         {
             if (row.Index < 0 || row.Index >= _fileViewRows.Count) continue;
 
-            int afi = _fileViewRows[row.Index].FileStoreIndex;
-            _fileStore.Files[afi].Context.Selected = true;
-            firstSelection ??= _fileStore.Files[afi];
+            var fileInfo = _fileViewRows[row.Index].FileInfo;
+            fileInfo.Context.Selected = true;
+            firstSelection ??= fileInfo;
         }
 
         if (firstSelection != null)
@@ -353,7 +368,7 @@ public partial class MainForm
 
         // reactivate form & refresh filelist
         SetFormActive(true);
-        RefreshView(UpdateStage.FileList);
+        RefreshFileListView(UpdateStage.FileList);
         cmbMatch.Focus();
     }
 }

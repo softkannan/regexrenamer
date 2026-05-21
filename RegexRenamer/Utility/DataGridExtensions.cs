@@ -1,5 +1,6 @@
 ﻿using Interop.Shell32;
 using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
+using RegexRenamer.Models;
 using RegexRenamer.Rename;
 using System;
 using System.Collections.Generic;
@@ -128,13 +129,13 @@ namespace RegexRenamer.Utility
 
         
 
-        public static List<FileInfo> GetSelectedFileInfo(this DataGridView pThis, IReadOnlyList<RenameItemInfo> activeFiles, Func<int, int> activeFileIndexMapper = null)
+        internal static List<FileInfo> GetSelectedFileInfo(this DataGridView pThis, IReadOnlyList<FileViewRowData> activeFiles)
         {
             List<FileInfo> selectedFiles = new List<FileInfo>(pThis.SelectedRows.Count);
             foreach (DataGridViewRow row in pThis.SelectedRows)
             {
-                int afi = activeFileIndexMapper != null ? activeFileIndexMapper(row.Index) : (int)row.Tag;
-                selectedFiles.Add(new FileInfo(activeFiles[afi].Fullpath));
+                var rowData = activeFiles[row.Index];
+                selectedFiles.Add(new FileInfo(rowData.FileInfo.Fullpath));
             }
 
             return selectedFiles;
@@ -142,13 +143,13 @@ namespace RegexRenamer.Utility
 
        
 
-        public static List<FileInfo> GetAllFileInfo(this DataGridView pThis, IReadOnlyList<RenameItemInfo> activeFiles, Func<int, int> activeFileIndexMapper = null)
+        internal static List<FileInfo> GetAllFileInfo(this DataGridView pThis, IReadOnlyList<FileViewRowData> activeFiles)
         {
             List<FileInfo> selectedFiles = new List<FileInfo>();
             foreach (DataGridViewRow row in pThis.Rows)
             {
-                int afi = activeFileIndexMapper != null ? activeFileIndexMapper(row.Index) : (int)row.Tag;
-                selectedFiles.Add(new FileInfo(activeFiles[afi].Fullpath));
+                var rowData = activeFiles[row.Index];
+                selectedFiles.Add(new FileInfo(rowData.FileInfo.Fullpath));
             }
 
             return selectedFiles;

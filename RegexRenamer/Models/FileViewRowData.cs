@@ -1,3 +1,5 @@
+using RegexRenamer.Rename;
+using System;
 using System.Drawing;
 
 namespace RegexRenamer.Models;
@@ -7,14 +9,22 @@ namespace RegexRenamer.Models;
 /// </summary>
 internal class FileViewRowData
 {
-    // The number of columns in the dgvFiles DataGridView. This is used to size the CellValues array.
-    private const int ColumnCount = 12;
-    // Index into the files list (_fileStore.Files)
-    public readonly int FileStoreIndex;
+    public readonly int RowIndex;
+    public RenameItemInfo FileInfo {get; private set;}
 
-    public FileViewRowData(int fileIndex)
+    public void UpdateFileInfo(RenameItemInfo newInfo)
     {
-        FileStoreIndex = fileIndex;
+        ArgumentNullException.ThrowIfNull(newInfo);
+        FileInfo = newInfo;
+    }
+    // Used only by single rename operations.
+    public readonly int FileStoreIndex;
+    public FileViewRowData(RenameItemInfo renameInfo, int fileStoreIndex, int rowIndex)
+    {
+        ArgumentNullException.ThrowIfNull(renameInfo);
+        FileInfo = renameInfo;
+        FileStoreIndex = fileStoreIndex;
+        RowIndex = rowIndex;
     }
     // Icon for the file in the filename column (col 0).
     public Icon FileIcon { get; set; }

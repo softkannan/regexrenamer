@@ -20,24 +20,21 @@ namespace RegexRenamer
         {
             // delegate to ValidationService for pure logic
             _lastValidationResult = _validationService.ValidatePreview(
-                _fileStore.Files,
+                _fileViewRows,
                 _fileStore.InactiveFiles,
                 _currentInput,
                 strFilename,
-                strFile,
-                _fileViewRows.Count,
-                dfi => _fileViewRows[dfi].FileStoreIndex);
+                strFile);
 
             // single pass: apply error tags and update column colours
             bool isRenameInPlace = _currentInput.Output == OutputMode.RenameInPlace;
             for (int dfi = 0; dfi < _fileViewRows.Count; dfi++)
             {
                 var rowData = _fileViewRows[dfi];
-                int afi = rowData.FileStoreIndex;
-                var file = _fileStore.Files[afi];
+                var file = rowData.FileInfo;
 
                 // error tag
-                rowData.PreviewErrorTag = _lastValidationResult.FileErrors.TryGetValue(afi, out string error) ? error : null;
+                rowData.PreviewErrorTag = _lastValidationResult.FileErrors.TryGetValue(dfi, out string error) ? error : null;
 
                 // filename forecolor
                 if (file.Context.Matched)

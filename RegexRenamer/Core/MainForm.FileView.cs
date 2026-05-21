@@ -357,8 +357,6 @@ namespace RegexRenamer
             }
         }
 
-        // helper to get active file index from row index (since the grid is virtual and doesn't directly bind to the active files list)
-        private int GetFileStoreIndex(int rowIndex) => _fileViewRows[rowIndex].FileStoreIndex;
         // track current sort for toggling and visual indicators
         private SortOrder _currentSortOrder = SortOrder.Ascending;
         // Track the current sort column to allow toggling sort order and applying visual indicators in the UI (e.g. sort glyphs in the column header).
@@ -419,7 +417,7 @@ namespace RegexRenamer
             if (e.KeyCode == Keys.F5)
             {
                 int selectedIndex = dgvFiles.SelectedRows.Count > 0 ? dgvFiles.SelectedRows[0].Index : 0;
-                RefreshView(UpdateStage.FileList);
+                RefreshFileListView(UpdateStage.FileList);
                 selectedIndex = Math.Min(selectedIndex, dgvFiles.Rows.Count - 1);
                 dgvFiles.Rows[selectedIndex].Selected = true;
                 // if the selected row is now out of view after deletion, scroll into view
@@ -446,7 +444,7 @@ namespace RegexRenamer
             else if (e.KeyCode == Keys.V && (e.Modifiers & Keys.Control) == Keys.Control)
             {
                 _activePath.ClipboardPasteFiles();
-                RefreshView(UpdateStage.FileList);
+                RefreshFileListView(UpdateStage.FileList);
             }
             else if (e.KeyCode == Keys.Delete)
             {
@@ -462,7 +460,7 @@ namespace RegexRenamer
             {
                 minIndex = Math.Min(minIndex, row.Index);
                 var rowData = _fileViewRows[row.Index];
-                selectedFiles.Add(_fileStore.Files[rowData.FileStoreIndex]);  
+                selectedFiles.Add(rowData.FileInfo);  
             }
             return (selectedFiles, minIndex);
         }
@@ -473,7 +471,7 @@ namespace RegexRenamer
             foreach (DataGridViewRow row in dgvFiles.SelectedRows)
             {
                 var rowData = _fileViewRows[row.Index];
-                selectedFiles.Add(_fileStore.Files[rowData.FileStoreIndex]);
+                selectedFiles.Add(rowData.FileInfo);
             }
             return selectedFiles;
         }
@@ -482,7 +480,7 @@ namespace RegexRenamer
         {
             if (dgvFiles.SelectedRows.Count == 0) return null;
             var rowData = _fileViewRows[dgvFiles.SelectedRows[0].Index];
-            return _fileStore.Files[rowData.FileStoreIndex];
+            return rowData.FileInfo;
         }
 
         private void DeleteFilesSelection()
@@ -490,7 +488,7 @@ namespace RegexRenamer
             var (selectedFiles, minIndex) = GetSelectedRenameFileRows();
             var filePaths = selectedFiles.Select(item => item.Fullpath).ToList();
             PInvoke.FileOperationAPI.SendToRecycleBin(filePaths);
-            RefreshView(UpdateStage.FileList);
+            RefreshFileListView(UpdateStage.FileList);
             var selectedIndex = Math.Min(minIndex, dgvFiles.Rows.Count - 1);
             dgvFiles.Rows[selectedIndex].Selected = true;
             // if the selected row is now out of view after deletion, scroll into view
@@ -522,12 +520,13 @@ namespace RegexRenamer
         {
             if (!single_file_rename_editing) return;
 
-            int afi = GetFileStoreIndex(e.RowIndex);
+            var rowData = _fileViewRows[e.RowIndex];
+            var fileInfo = rowData.FileInfo;
             string newFilename = (string)e.FormattedValue;
-            string prevFilename = _fileStore.Files[afi].Name;
+            string prevFilename = fileInfo.Name;
 
             // cancel if new value empty or unchanged
-            if (string.IsNullOrEmpty(newFilename) || newFilename == _fileStore.Files[afi].Name)
+            if (string.IsNullOrEmpty(newFilename) || newFilename == fileInfo.Name)
             {
                 dgvFiles.CancelEdit();
                 return;
@@ -536,7 +535,7 @@ namespace RegexRenamer
             // get new name/path
             if (_currentInput.PreserveExtension)
             {
-                newFilename += _fileStore.Files[afi].Extension;
+                newFilename += fileInfo.Extension;
             }
 
             //Remove invalid characters from filename with empty string to get valid filename
@@ -558,7 +557,7 @@ namespace RegexRenamer
 
             // warn if filename now starts with space or dot (since that can cause issues with other programs, even though it's technically allowed)
             Regex regex = new Regex("^[ .]");
-            if (regex.IsMatch(newFilename) && !regex.IsMatch(_fileStore.Files[afi].Filename))  // now starts with [ .]
+            if (regex.IsMatch(newFilename) && !regex.IsMatch(fileInfo.Name))  // now starts with [ .]
             {
                 errorMessage = "This " + strFilename + " begins with a space or a dot. While this is technically possible, Windows\n"
                              + "normally won't let you do this as it may cause problems with other programs.\n"
@@ -577,9 +576,9 @@ namespace RegexRenamer
             try
             {
                 if (RenameFolders)
-                    Directory.Move(_fileStore.Files[afi].Fullpath, newFullpath);
+                    Directory.Move(fileInfo.Fullpath, newFullpath);
                 else
-                    File.Move(_fileStore.Files[afi].Fullpath, newFullpath);
+                    File.Move(fileInfo.Fullpath, newFullpath);
             }
             catch (Exception exception)
             {
@@ -590,7 +589,7 @@ namespace RegexRenamer
 
             // update icon if extension changed (folders won't have icon change)
             FileInfo fi = new FileInfo(newFullpath);
-            if (!RenameFolders && fi.Extension != _fileStore.Files[afi].Extension)
+            if (!RenameFolders && fi.Extension != fileInfo.Extension)
             {
                 // update datagrid icon
                 try  
@@ -607,11 +606,13 @@ namespace RegexRenamer
             // update RRItem
             if (RenameFolders)
             {
-                _fileStore.Update(afi, new RenameItemInfo(new DirectoryInfo(fi.FullName), _fileStore.Files[afi].Hidden, _fileStore.Files[afi].PreserveExt));
+                rowData.UpdateFileInfo(new RenameItemInfo(new DirectoryInfo(fi.FullName), fileInfo.Hidden, fileInfo.PreserveExt));
+                _fileStore.Update(rowData.FileStoreIndex, rowData.FileInfo);
             }
             else
             {
-                _fileStore.Update(afi, new RenameItemInfo(fi, _fileStore.Files[afi].Hidden, _fileStore.Files[afi].PreserveExt));
+                rowData.UpdateFileInfo(new RenameItemInfo(fi, fileInfo.Hidden, fileInfo.PreserveExt));
+                _fileStore.Update(rowData.FileStoreIndex, rowData.FileInfo);
             }
 
             // update folder tree (if folder)
@@ -621,8 +622,8 @@ namespace RegexRenamer
                 {
                     if (node.Text == prevFilename)
                     {
-                        node.Text = _fileStore.Files[afi].Name;
-                        node.Tag = _activePath.GetShellFolderItem(_fileStore.Files[afi].Filename);
+                        node.Text = fileInfo.Name;
+                        node.Tag = _activePath.GetShellFolderItem(fileInfo.Name);
                         break;
                     }
                 }
@@ -655,7 +656,8 @@ namespace RegexRenamer
 
             try
             {
-                var filePath = _fileStore.Files[GetFileStoreIndex(e.RowIndex)].Fullpath;
+                var rowData = _fileViewRows[e.RowIndex];
+                var filePath = rowData.FileInfo.Fullpath;
                 var result = await EBookHelper.LaunchEBookAsync(filePath);
                 if(!result)
                 {
@@ -684,7 +686,7 @@ namespace RegexRenamer
         // called when the selection changes. We refresh the view to reflect the new selection.
         private void dgvFiles_SelectionChanged(object sender, EventArgs e)
         {
-            RefreshView(UpdateStage.Selection);
+            RefreshFileListView(UpdateStage.Selection);
         }
         // helper to update file info label based on the first selected file (since multiple selection may have different file sizes, we just show the first one's size)
         private void UpdateFileInfo(RenameItemInfo firstSelection)
@@ -756,7 +758,7 @@ namespace RegexRenamer
                     selectedFiles[idx].Context.Preview = newNames[idx];
                     selectedFiles[idx].Context.Skip = true;
                 }
-                RefreshView(UpdateStage.Preview);
+                RefreshFileListView(UpdateStage.Preview);
             }
             catch (Exception ex)
             {
@@ -801,7 +803,7 @@ namespace RegexRenamer
                     }
                 }
 
-                RefreshView(UpdateStage.Preview);
+                RefreshFileListView(UpdateStage.Preview);
             }
             catch (Exception ex)
             {
@@ -839,7 +841,7 @@ namespace RegexRenamer
         private void pasteFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _activePath.ClipboardPasteFiles();
-            RefreshView(UpdateStage.FileList);
+            RefreshFileListView(UpdateStage.FileList);
         }
 
         private void cutFileViewToolStripMenuItem_Click(object sender, EventArgs e)
@@ -866,7 +868,7 @@ namespace RegexRenamer
         }
         private void explorerFileViewContextMenuToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetFileStoreIndex);
+            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileViewRows);
             //ctxMenu.ShowContextMenu(new []{ dirInfo }, this.PointToScreen(Cursor.Position));
             _shellCtxMenu.ShowContextMenu(selectedFiles.ToArray(), Cursor.Position);
             cmFolderView.Tag = null;
@@ -874,7 +876,7 @@ namespace RegexRenamer
 
         private void editMetadataFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetFileStoreIndex);
+            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileViewRows);
             using (EditMetadataForm metaEditForm = new EditMetadataForm(selectedFiles,"Modify Metadata", "Edit",
                 itmOptionsPreserveExt.Checked))
             {
@@ -884,7 +886,7 @@ namespace RegexRenamer
 
         private void toolsFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileStore.Files, GetFileStoreIndex);
+            var selectedFiles = dgvFiles.GetSelectedFileInfo(_fileViewRows);
             using (FileToolsForm convertForm = new FileToolsForm("",selectedFiles, "File Tools", ""))
             {
                 convertForm.ShowDialog();
