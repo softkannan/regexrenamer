@@ -192,17 +192,17 @@ public partial class MainForm
                     if (rowData.FileIcon == null)
                     {
 #if !DEBUG
-                            try  
-                            {
+                        try
+                        {
 #endif
-                        // add image (keyed by extension)
-                        rowData.FileIcon = _fileViewIconCache.GetIcon(_fileStore.Files[afi]);
+                            // add image (keyed by extension)
+                            rowData.FileIcon = _fileViewIconCache.GetIcon(_fileStore.Files[afi]);
 #if !DEBUG
-                            }
-                            catch  // default: no image
-                            {
-                              rowData.FileIcon = new Bitmap( 1, 1 );
-                            }
+                        }
+                        catch  // default: no image
+                        {
+                            rowData.FileIcon = null;
+                        }
 #endif
                     }
                     return rowData.FileIcon;
