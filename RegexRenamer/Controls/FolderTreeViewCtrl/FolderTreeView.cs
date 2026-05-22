@@ -198,7 +198,7 @@ public class FolderTreeView : TreeView
                 int endIndex = parts.Length - 1;
                 foreach (TreeNode tn in Nodes)
                 {
-                    if (string.Equals(tn.Text, parts[startIndex], StringComparison.OrdinalIgnoreCase))
+                    if (tn.Tag is ShellItemInfo itemInfo && string.Equals(itemInfo.Part, parts[startIndex], StringComparison.OrdinalIgnoreCase))
                     {
                         if (parts.Length > startIndex)
                         {
@@ -214,6 +214,10 @@ public class FolderTreeView : TreeView
                             folderFound = true;
                             break;
                         }
+                    }
+                    else
+                    {
+                        tn.Collapse();
                     }
                 }
                 EndUpdate();
@@ -235,7 +239,7 @@ public class FolderTreeView : TreeView
     {
         foreach (TreeNode tn in parentNode.Nodes)
         {
-            if (string.Equals(tn.Text, parts[startIndex], StringComparison.OrdinalIgnoreCase))
+            if (tn.Tag is ShellItemInfo itemInfo && string.Equals(itemInfo.Part, parts[startIndex], StringComparison.OrdinalIgnoreCase))
             {
                 if (endIndex > startIndex)
                 {

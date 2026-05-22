@@ -62,7 +62,7 @@ public static class FolderTreeViewExtensions
     {
         string fullPath = Path.Combine(path, fileName);
         return Directory.Exists(fullPath) || File.Exists(fullPath)
-            ? new ShellItemInfo(fullPath, fileName)
+            ? new ShellItemInfo(fullPath, fileName, fileName)
             : null;
     }
 
@@ -127,7 +127,7 @@ public static class FolderTreeViewExtensions
                 ? $"{drive.Name.TrimEnd('\\')}"
                 : $"{drive.VolumeLabel} ({drive.Name.TrimEnd('\\')})";
 
-            ShellItemInfo info = new(drive.RootDirectory.FullName, name);
+            ShellItemInfo info = new(drive.RootDirectory.FullName, name, drive.Name.TrimEnd('\\'));
             TreeNode tn = AddTreeNode(info, imageList);
             tree.Nodes.Add(tn);
             AddSubFolderDummyNode(tn, info.Path);
@@ -152,7 +152,7 @@ public static class FolderTreeViewExtensions
         foreach (string fullPath in enumerable)
         {
             string folderName = Path.GetFileName(fullPath);
-            ShellItemInfo info = new(fullPath, folderName);
+            ShellItemInfo info = new(fullPath, folderName, folderName);
             TreeNode ntn = AddTreeNode(info, imageList);
             parentNode.Nodes.Add(ntn);
             AddSubFolderDummyNode(ntn, fullPath);
