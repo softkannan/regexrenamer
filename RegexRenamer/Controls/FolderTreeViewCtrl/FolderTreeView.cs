@@ -32,6 +32,7 @@
   this ensures that the desktop node returns a file path.
  
  */
+using iText.Signatures.Validation.Lotl;
 using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Native;
 using RegexRenamer.Rename;
@@ -190,8 +191,31 @@ public class FolderTreeView : TreeView
                 // if there's a trailing \ on the folderPath, remove it unless it's a drive letter
                 if (folderPath.Length > 3 && folderPath.LastIndexOf("\\") == folderPath.Length - 1)
                     folderPath = folderPath.Substring(0, folderPath.Length - 1);
-                //Start drilling the tree
-                DrillTree(Nodes[0].Nodes, folderPath, ref folderFound);
+
+                var trimedPath = Path.GetFullPath(folderPath + "\\");
+                var parts = trimedPath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+                int startIndex = 0;
+                int endIndex = parts.Length - 1;
+                foreach (TreeNode tn in Nodes)
+                {
+                    if (string.Equals(tn.Text, parts[startIndex], StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (parts.Length > startIndex)
+                        {
+                            tn.Expand();
+                            //Start drilling the tree
+                            DrillTree(tn, parts, startIndex + 1, endIndex, ref folderFound);
+                            if (folderFound) break;
+                        }
+                        else
+                        {
+                            SelectedNode = tn;
+                            tn.EnsureVisible();
+                            folderFound = true;
+                            break;
+                        }
+                    }
+                }
                 EndUpdate();
             }
             if (!folderFound)
@@ -206,6 +230,59 @@ public class FolderTreeView : TreeView
         return folderFound;
     }
 
+
+    private void DrillTree(TreeNode parentNode, string[] parts, int startIndex, int endIndex, ref bool folderFound)
+    {
+        foreach (TreeNode tn in parentNode.Nodes)
+        {
+            if (string.Equals(tn.Text, parts[startIndex], StringComparison.OrdinalIgnoreCase))
+            {
+                if (endIndex > startIndex)
+                {
+                    tn.Expand();
+                    //Start drilling the tree
+                    DrillTree(tn, parts, startIndex + 1, endIndex, ref folderFound);
+                    if (folderFound) break;
+                }
+                else
+                {
+                    SelectedNode = tn;
+                    tn.EnsureVisible();
+                    folderFound = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    public bool BringToView_v1(string folderPath, bool recursive = false)
+    {
+        if (_isUpdating && recursive == false) return false;
+        bool folderFound = false;
+        try
+        {
+            _isUpdating = true;
+            if (FastPath.DirectoryExists(folderPath)) // don't bother drilling unless the directory exists
+            {
+                BeginUpdate();
+                // if there's a trailing \ on the folderPath, remove it unless it's a drive letter
+                if (folderPath.Length > 3 && folderPath.LastIndexOf("\\") == folderPath.Length - 1)
+                    folderPath = folderPath.Substring(0, folderPath.Length - 1);
+
+                DrillTree(Nodes, folderPath, ref folderFound);
+                EndUpdate();
+            }
+            if (!folderFound)
+            {
+                SelectedNode = Nodes[0];
+            }
+        }
+        finally
+        {
+            _isUpdating = false;
+        }
+        return folderFound;
+    }
     private void DrillTree(TreeNodeCollection tnc, string path, ref bool folderFound)
     {
         foreach (TreeNode tn in tnc)
