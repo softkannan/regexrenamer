@@ -325,14 +325,14 @@ namespace RegexRenamer
             {
                 // update dialog text
                 if (clickedMenuItem == itmOutputMoveTo)
-                    fbdMoveCopy.Description = "During the rename operation, " + strFile + "s that match the current regex will be "
-                                            + "moved to the selected folder and renamed (if necessary).";
+                    fbdMoveCopy.Description = $"During the rename operation, {strFile}s that match the current regex will be " +
+                        $"moved to the selected folder and renamed (if necessary).";
                 else if (clickedMenuItem == itmOutputCopyTo)
-                    fbdMoveCopy.Description = "During the rename operation, files that match the current regex will be "
-                                            + "copied to the selected folder and the copies renamed (if necessary).";
+                    fbdMoveCopy.Description = $"During the rename operation, {strFile}s that match the current regex will be " +
+                        $"copied to the selected folder and the copies renamed (if necessary).";
                 else if (clickedMenuItem == itmOutputBackupTo)
-                    fbdMoveCopy.Description = "During the rename operation, files that match the current regex will be "
-                                            + "copied to the selected folder and the originals renamed (if necessary).";
+                    fbdMoveCopy.Description = $"During the rename operation, {strFile}s that match the current regex will be " +
+                        $"copied to the selected folder and the originals renamed (if necessary).";
 
 
                 // show dialog, ignore if cancelled
