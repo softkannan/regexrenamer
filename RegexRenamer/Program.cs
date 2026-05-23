@@ -13,6 +13,7 @@
  */
 
 
+using RegexRenamer.Controls.FolderTreeViewCtrl;
 using System;
 using System.Security;
 using System.Threading;
@@ -54,8 +55,12 @@ static class Program
                     initPath = args[0];
             }
 
+        FolderTreeViewExtensions.SetProvider(Config.UserConfig.Inst.FolderTreeProvider);
+        //FolderTreeViewExtensions.SetProvider(FolderTreeProviderType.Fast);
+        // or
+        //FolderTreeViewExtensions.Provider = new MyCustomFolderTreeProvider();
 
-            Application.Run(new MainForm(initPath));
+        Application.Run(new MainForm(initPath));
 #if !DEBUG
         }
         catch (System.Security.SecurityException)

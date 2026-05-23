@@ -17,6 +17,7 @@ using RegexRenamer.Tools.EBookPDFTools;
 using RegexRenamer.Forms;
 using RegexRenamer.Tools.Translate;
 using RegexRenamer.Utility;
+using RegexRenamer.Controls.FolderTreeViewCtrl;
 
 namespace Config;
 
@@ -52,6 +53,8 @@ public class UserConfig
 
     public List<SortItem> SortHints { get; set; }
     public List<string> FilterHints { get; set; }
+
+    public FolderTreeProviderType FolderTreeProvider { get; set; } = FolderTreeProviderType.Fast;
     #endregion
 
 

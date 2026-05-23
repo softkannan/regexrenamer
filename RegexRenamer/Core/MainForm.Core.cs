@@ -1,4 +1,5 @@
 using Kavita;
+using RegexRenamer.Controls.FolderTreeViewCtrl;
 using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Models;
 using RegexRenamer.Native;
