@@ -80,6 +80,7 @@ namespace RegexRenamer
             cmFileView = new System.Windows.Forms.ContextMenuStrip(components);
             var editFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var launchEditorFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var launchNotepadFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var explorerFileViewContextMenuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var copyFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var copyPathFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -97,7 +98,7 @@ namespace RegexRenamer
             // 
             cmFileView.ImageScalingSize = new System.Drawing.Size(20, 20);
             cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { editFileViewToolStripMenuItem, 
-                launchEditorFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItem, translateFileNameGUIFileViewToolStripMenuItem,
+                launchEditorFileViewToolStripMenuItem, launchNotepadFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItem, translateFileNameGUIFileViewToolStripMenuItem,
                 explorerFileViewContextMenuToolStripMenuItem, copyFileViewToolStripMenuItem, copyPathFileViewToolStripMenuItem,
                 cutFileViewToolStripMenuItem, pasteFileViewToolStripMenuItem, deleteFileViewToolStripMenuItem, 
                 editMetadataFileViewToolStripMenuItem, eBookOperationsFileViewToolStripMenuItem, newFileFileViewToolStripMenuItem });
@@ -116,7 +117,14 @@ namespace RegexRenamer
             launchEditorFileViewToolStripMenuItem.Name = "launchEditorFileViewToolStripMenuItem";
             launchEditorFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             launchEditorFileViewToolStripMenuItem.Text = "Launch Editor";
-            launchEditorFileViewToolStripMenuItem.Click += launchEditorFileViewToolStripMenuItem_Click;
+            launchEditorFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "");
+            // 
+            // launchNotepadFileViewToolStripMenuItem
+            // 
+            launchNotepadFileViewToolStripMenuItem.Name = "launchNotepadFileViewToolStripMenuItem";
+            launchNotepadFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            launchNotepadFileViewToolStripMenuItem.Text = "Launch Notepad";
+            launchNotepadFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "Notepad++");
             // 
             // translateFileNameFileViewToolStripMenuItem
             // 
@@ -825,18 +833,39 @@ namespace RegexRenamer
             }
         }
 
-        private async void launchEditorFileViewToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void LaunchEditor(RenameItemInfo selectedFile, string editorName)
         {
             try
             {
-                var selectedFile = GetFirstSelectedFileItem();
-                var filePath = selectedFile?.Fullpath;
-                var result = await EBookHelper.EditEBookAsync(filePath);
-                if (!result)
+                if (string.IsNullOrEmpty(editorName))
                 {
-                    ProcessStartInfo startInfo = new ProcessStartInfo(filePath);
-                    startInfo.UseShellExecute = true;
-                    Process.Start(startInfo);
+                    var filePath = selectedFile?.Fullpath;
+                    var result = await EBookHelper.EditEBookAsync(filePath);
+                    if (!result)
+                    {
+                        ProcessStartInfo startInfo = new ProcessStartInfo(filePath);
+                        startInfo.UseShellExecute = true;
+                        Process.Start(startInfo);
+                    }
+                }
+                else
+                {
+                    var tool = UserConfig.Inst.AvailableTools.FirstOrDefault(t => t.Editor.Equals(editorName, StringComparison.OrdinalIgnoreCase));
+                    if (tool != null)
+                    {
+                        var filePath = selectedFile?.Fullpath;
+                        var processStartInfo = new ProcessStartInfo
+                        {
+                            FileName = tool.Path,
+                            Arguments = $"\"{filePath}\"",
+                            UseShellExecute = true
+                        };
+                        Process.Start(processStartInfo);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Editor '{editorName}' not found in available tools.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
             catch (Exception ex)
