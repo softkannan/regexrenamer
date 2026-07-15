@@ -216,13 +216,30 @@ public static partial class StringExtensions
         {
             str = str.Replace(c, ' ');
         }
-        char[] repeatingChars = {'-',' ','_'};
+        char[] repeatingChars = { '-', ' ', '_' };
         foreach (char c in repeatingChars)
         {
             str = str.RemoveRepeatingChars(c);
         }
         return str;
     }
+
+    public static string ToMarkdownSafeFileName(this string str)
+    {
+        str = str.Trim();
+        str = Uri.UnescapeDataString(str);
+        foreach (char c in Path.GetInvalidFileNameChars())
+        {
+            str = str.Replace(c, ' ');
+        }
+        char[] repeatingChars = { '-', ' ', '_' };
+        foreach (char c in repeatingChars)
+        {
+            str = str.RemoveRepeatingChars(c);
+        }
+        return str.Replace(' ', '-');
+    }
+
     public static string RemoveRepeatingChars(this string str,char onlyChar)
     {
         var strResult = new StringBuilder();

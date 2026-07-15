@@ -30,6 +30,7 @@ namespace RegexRenamer
     {
         private ContextMenuStrip cmFileView;
         private DataGridIconCache _fileViewIconCache = new DataGridIconCache();
+        private List<string> _recentFileNames = new List<string>();
 
         // Initialize file list view and context menu, and wire up event handlers for virtual mode, context menu, selection, sorting, and shortcuts.
         #region Context Menu Builder and Initializer
@@ -88,17 +89,18 @@ namespace RegexRenamer
             var editMetadataFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var eBookOperationsFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var translateFileNameFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            var translateFileNameFileViewToolStripMenuItemGui = new System.Windows.Forms.ToolStripMenuItem();
+            var translateFileNameGUIFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var newFileFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 
             // 
             // cmFileView
             // 
             cmFileView.ImageScalingSize = new System.Drawing.Size(20, 20);
             cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { editFileViewToolStripMenuItem, 
-                launchEditorFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItemGui,
+                launchEditorFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItem, translateFileNameGUIFileViewToolStripMenuItem,
                 explorerFileViewContextMenuToolStripMenuItem, copyFileViewToolStripMenuItem, copyPathFileViewToolStripMenuItem,
                 cutFileViewToolStripMenuItem, pasteFileViewToolStripMenuItem, deleteFileViewToolStripMenuItem, 
-                editMetadataFileViewToolStripMenuItem, eBookOperationsFileViewToolStripMenuItem });
+                editMetadataFileViewToolStripMenuItem, eBookOperationsFileViewToolStripMenuItem, newFileFileViewToolStripMenuItem });
             cmFileView.Name = "contextMenuStripFileView";
             cmFileView.Size = new System.Drawing.Size(195, 224);
             // 
@@ -125,10 +127,10 @@ namespace RegexRenamer
             // 
             // translateFileNameFileViewToolStripMenuItemGui
             // 
-            translateFileNameFileViewToolStripMenuItemGui.Name = "translateFileNameFileViewToolStripMenuItemGui";
-            translateFileNameFileViewToolStripMenuItemGui.Size = new System.Drawing.Size(194, 22);
-            translateFileNameFileViewToolStripMenuItemGui.Text = "Translate GUI";
-            translateFileNameFileViewToolStripMenuItemGui.Click += TranslateFileNameFileViewToolStripMenuItemGui_Click;
+            translateFileNameGUIFileViewToolStripMenuItem.Name = "translateFileNameFileViewToolStripMenuItemGui";
+            translateFileNameGUIFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            translateFileNameGUIFileViewToolStripMenuItem.Text = "Translate GUI";
+            translateFileNameGUIFileViewToolStripMenuItem.Click += TranslateFileNameFileViewToolStripMenuItemGui_Click;
             // 
             // explorerFileViewContextMenuToolStripMenuItem1
             // 
@@ -185,7 +187,19 @@ namespace RegexRenamer
             eBookOperationsFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             eBookOperationsFileViewToolStripMenuItem.Text = "Tools";
             eBookOperationsFileViewToolStripMenuItem.Click += toolsFileViewToolStripMenuItem_Click;
-            
+            //
+            // newFileFileViewToolStripMenuItem
+            //
+            newFileFileViewToolStripMenuItem.Name = "newFileFileViewToolStripMenuItem";
+            newFileFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            newFileFileViewToolStripMenuItem.Text = "New File";
+
+            foreach(var item in UserConfig.Inst.NewFileNames)
+            {
+                var newFileItem = new ToolStripMenuItem(item.DisplayName);
+                newFileItem.Click += (s, e) => CreateNewFile(item.FileName);
+                newFileFileViewToolStripMenuItem.DropDownItems.Add(newFileItem);
+            }
         }
 
         #endregion
@@ -890,6 +904,41 @@ namespace RegexRenamer
             using (FileToolsForm convertForm = new FileToolsForm("",selectedFiles, "File Tools", ""))
             {
                 convertForm.ShowDialog();
+            }
+        }
+
+        private void CreateNewFile(string filename)
+        {
+            if (string.IsNullOrWhiteSpace(filename)) return;
+
+            var targetFileName = "";
+            var fileNames = ClipboardExtensions.GetNamesFromClipboard();
+            if(fileNames.Count > 0)
+            {
+                targetFileName = Path.GetFileName(fileNames[0]);
+                targetFileName = Path.GetFileNameWithoutExtension(targetFileName);
+                targetFileName = targetFileName.ToMarkdownSafeFileName();
+                targetFileName = filename.Replace("{filename}", targetFileName);
+            }
+            else
+            {
+                targetFileName = filename.ToMarkdownSafeFileName();
+            }
+
+            string newFilePath = Path.Combine(_activePath, targetFileName);
+            if (File.Exists(newFilePath) || Directory.Exists(newFilePath))
+            {
+                MessageBox.Show("A file or folder with that name already exists.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            try
+            {
+                File.Create(newFilePath).Dispose(); // Create and close the file
+                RefreshFileListView(UpdateStage.FileList);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to create file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

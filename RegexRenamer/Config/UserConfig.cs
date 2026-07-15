@@ -1,6 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using LogEx;
+using Newtonsoft.Json;
+using RegexRenamer.Controls.FolderTreeViewCtrl;
+using RegexRenamer.Forms;
+using RegexRenamer.Models;
+using RegexRenamer.Tools.EBookPDFTools;
 using RegexRenamer.Tools.FindReplace;
-using LogEx;
+using RegexRenamer.Tools.Translate;
+using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Design;
@@ -13,11 +19,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-using RegexRenamer.Tools.EBookPDFTools;
-using RegexRenamer.Forms;
-using RegexRenamer.Tools.Translate;
-using RegexRenamer.Utility;
-using RegexRenamer.Controls.FolderTreeViewCtrl;
 
 namespace Config;
 
@@ -53,6 +54,8 @@ public class UserConfig
 
     public List<SortItem> SortHints { get; set; }
     public List<string> FilterHints { get; set; }
+
+    public List<NewFileInfo> NewFileNames {  get; set; } = new List<NewFileInfo>();
 
     public FolderTreeProviderType FolderTreeProvider { get; set; } = FolderTreeProviderType.Fast;
     #endregion
