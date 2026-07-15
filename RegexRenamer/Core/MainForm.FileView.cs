@@ -30,7 +30,7 @@ namespace RegexRenamer
     {
         private ContextMenuStrip cmFileView;
         private DataGridIconCache _fileViewIconCache = new DataGridIconCache();
-        private List<string> _recentFileNames = new List<string>();
+        private NewFileInfo _lastNewFileCreated = null;
 
         // Initialize file list view and context menu, and wire up event handlers for virtual mode, context menu, selection, sorting, and shortcuts.
         #region Context Menu Builder and Initializer
@@ -110,6 +110,7 @@ namespace RegexRenamer
             editFileViewToolStripMenuItem.Name = "editFileViewToolStripMenuItem";
             editFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             editFileViewToolStripMenuItem.Text = "Edit";
+            editFileViewToolStripMenuItem.ShortcutKeys = Keys.F2;
             editFileViewToolStripMenuItem.Click += editFileViewToolStripMenuItem_Click;
             // 
             // launchEditorFileViewToolStripMenuItem
@@ -117,6 +118,7 @@ namespace RegexRenamer
             launchEditorFileViewToolStripMenuItem.Name = "launchEditorFileViewToolStripMenuItem";
             launchEditorFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             launchEditorFileViewToolStripMenuItem.Text = "Launch Editor";
+            launchEditorFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
             launchEditorFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "");
             // 
             // launchNotepadFileViewToolStripMenuItem
@@ -124,6 +126,7 @@ namespace RegexRenamer
             launchNotepadFileViewToolStripMenuItem.Name = "launchNotepadFileViewToolStripMenuItem";
             launchNotepadFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             launchNotepadFileViewToolStripMenuItem.Text = "Launch Notepad";
+            launchNotepadFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.E;
             launchNotepadFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "Notepad++");
             // 
             // translateFileNameFileViewToolStripMenuItem
@@ -152,6 +155,7 @@ namespace RegexRenamer
             copyFileViewToolStripMenuItem.Name = "copyFileViewToolStripMenuItem";
             copyFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             copyFileViewToolStripMenuItem.Text = "Copy";
+            copyFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
             copyFileViewToolStripMenuItem.Click += copyFileViewToolStripMenuItem_Click;
             // 
             // copyPathFileViewToolStripMenuItem
@@ -166,6 +170,7 @@ namespace RegexRenamer
             cutFileViewToolStripMenuItem.Name = "cutFileViewToolStripMenuItem";
             cutFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             cutFileViewToolStripMenuItem.Text = "Cut";
+            cutFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
             cutFileViewToolStripMenuItem.Click += cutFileViewToolStripMenuItem_Click;
             // 
             // pasteFileViewToolStripMenuItem
@@ -173,6 +178,7 @@ namespace RegexRenamer
             pasteFileViewToolStripMenuItem.Name = "pasteFileViewToolStripMenuItem";
             pasteFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             pasteFileViewToolStripMenuItem.Text = "Paste";
+            pasteFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
             pasteFileViewToolStripMenuItem.Click += pasteFileViewToolStripMenuItem_Click;
             // 
             // deleteFileViewToolStripMenuItem
@@ -180,6 +186,7 @@ namespace RegexRenamer
             deleteFileViewToolStripMenuItem.Name = "deleteFileViewToolStripMenuItem";
             deleteFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             deleteFileViewToolStripMenuItem.Text = "Delete";
+            deleteFileViewToolStripMenuItem.ShortcutKeys = Keys.Delete;
             deleteFileViewToolStripMenuItem.Click += deleteFileViewToolStripMenuItem_Click;
             // 
             // editMetadataFileViewToolStripMenuItem1
@@ -202,10 +209,28 @@ namespace RegexRenamer
             newFileFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             newFileFileViewToolStripMenuItem.Text = "New File";
 
+            {
+                var newFileItem = new ToolStripMenuItem("Last File");
+                newFileItem.Click += (s, e) =>
+                {
+                    CreateNewFile(_lastNewFileCreated ?? UserConfig.Inst.NewFileNames.FirstOrDefault());
+                    if (_lastNewFileCreated == null)
+                    {
+                        _lastNewFileCreated = UserConfig.Inst.NewFileNames.FirstOrDefault();
+                    }
+                };
+                newFileItem.ShortcutKeys = Keys.Control | Keys.N;
+                newFileFileViewToolStripMenuItem.DropDownItems.Add(newFileItem);
+            }
+
             foreach(var item in UserConfig.Inst.NewFileNames)
             {
                 var newFileItem = new ToolStripMenuItem(item.DisplayName);
-                newFileItem.Click += (s, e) => CreateNewFile(item.FileName);
+                newFileItem.Click += (s, e) =>
+                {
+                    CreateNewFile(item);
+                    _lastNewFileCreated = item;
+                };
                 newFileFileViewToolStripMenuItem.DropDownItems.Add(newFileItem);
             }
         }
@@ -449,29 +474,41 @@ namespace RegexRenamer
                     dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
                 }
             }
-            if (e.KeyCode == Keys.F2)
-            {
-                dgvFiles.BeginEdit(false);
-            }
-            else if (e.KeyCode == Keys.C && (e.Modifiers & Keys.Control) == Keys.Control)
-            {
-                var selectedFiles = GetSelectedFileItems();
-                selectedFiles.CopyFilesToClipboad();
-            }
-            else if (e.KeyCode == Keys.X && (e.Modifiers & Keys.Control) == Keys.Control)
-            {
-                var selectedFiles = GetSelectedFileItems();
-                selectedFiles.CopyFilesToClipboad(true);
-            }
-            else if (e.KeyCode == Keys.V && (e.Modifiers & Keys.Control) == Keys.Control)
-            {
-                _activePath.ClipboardPasteFiles();
-                RefreshFileListView(UpdateStage.FileList);
-            }
-            else if (e.KeyCode == Keys.Delete)
-            {
-                DeleteFilesSelection();
-            }
+            //if (e.KeyCode == Keys.F2)
+            //{
+            //    dgvFiles.BeginEdit(false);
+            //}
+            //else if (e.KeyCode == Keys.C && (e.Modifiers & Keys.Control) == Keys.Control)
+            //{
+            //    var selectedFiles = GetSelectedFileItems();
+            //    selectedFiles.CopyFilesToClipboad();
+            //}
+            //else if (e.KeyCode == Keys.X && (e.Modifiers & Keys.Control) == Keys.Control)
+            //{
+            //    var selectedFiles = GetSelectedFileItems();
+            //    selectedFiles.CopyFilesToClipboad(true);
+            //}
+            //else if (e.KeyCode == Keys.V && (e.Modifiers & Keys.Control) == Keys.Control)
+            //{
+            //    _activePath.ClipboardPasteFiles();
+            //    RefreshFileListView(UpdateStage.FileList);
+            //}
+            //else if (e.KeyCode == Keys.Delete)
+            //{
+            //    DeleteFilesSelection();
+            //}
+            //else if (e.KeyCode == Keys.E && (e.Modifiers & Keys.Control) == Keys.Control)
+            //{
+            //    LaunchEditor(GetFirstSelectedFileItem(), "Notepad++");
+            //}
+            //else if(e.KeyCode == Keys.N && (e.Modifiers & Keys.Control) == Keys.Control)
+            //{
+            //    CreateNewFile(_lastNewFileCreated ?? UserConfig.Inst.NewFileNames.FirstOrDefault());
+            //    if (_lastNewFileCreated == null)
+            //    {
+            //        _lastNewFileCreated = UserConfig.Inst.NewFileNames.FirstOrDefault();
+            //    }
+            //}
         }
 
         private (List<RenameItemInfo> selectedFiles, int minIndex) GetSelectedRenameFileRows()
@@ -936,9 +973,9 @@ namespace RegexRenamer
             }
         }
 
-        private void CreateNewFile(string filename)
+        private void CreateNewFile(NewFileInfo item)
         {
-            if (string.IsNullOrWhiteSpace(filename)) return;
+            if (item == null) return;
 
             var targetFileName = "";
             var fileNames = ClipboardExtensions.GetNamesFromClipboard();
@@ -947,11 +984,11 @@ namespace RegexRenamer
                 targetFileName = Path.GetFileName(fileNames[0]);
                 targetFileName = Path.GetFileNameWithoutExtension(targetFileName);
                 targetFileName = targetFileName.ToMarkdownSafeFileName();
-                targetFileName = filename.Replace("{filename}", targetFileName);
+                targetFileName = item.FileName.Replace("{filename}", targetFileName);
             }
             else
             {
-                targetFileName = filename.ToMarkdownSafeFileName();
+                targetFileName = item.FileName.ToMarkdownSafeFileName();
             }
 
             string newFilePath = Path.Combine(_activePath, targetFileName);
@@ -964,10 +1001,26 @@ namespace RegexRenamer
             {
                 File.Create(newFilePath).Dispose(); // Create and close the file
                 RefreshFileListView(UpdateStage.FileList);
+                SelectFileByName(new List<string> { targetFileName });
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to create file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void SelectFileByName(List<string> filenames)
+        {
+            if (filenames == null || filenames.Count == 0) return;
+            for (int ifdx = 0; ifdx < _fileViewRows.Count; ifdx++)
+            {
+                if (filenames.Contains(_fileViewRows[ifdx].FileInfo.Name, StringComparer.OrdinalIgnoreCase))
+                {
+                    dgvFiles.ClearSelection();
+                    dgvFiles.Rows[ifdx].Selected = true;
+                    dgvFiles.FirstDisplayedScrollingRowIndex = ifdx;
+                    break;
+                }
             }
         }
 
