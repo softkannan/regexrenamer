@@ -32,6 +32,15 @@ namespace RegexRenamer
         private DataGridIconCache _fileViewIconCache = new DataGridIconCache();
         private NewFileInfo _lastNewFileCreated = null;
 
+        // Multi-column sorting support
+        private struct SortColumnInfo
+        {
+            public DataGridViewColumn Column { get; set; }
+            public ListSortDirection Direction { get; set; }
+        }
+
+        private readonly List<SortColumnInfo> _sortColumns = new();
+
         // Initialize file list view and context menu, and wire up event handlers for virtual mode, context menu, selection, sorting, and shortcuts.
         #region Context Menu Builder and Initializer
         private void InitializeFileListView()
@@ -303,6 +312,15 @@ namespace RegexRenamer
             _userResizedColumns = false;
             DistributeColumnWidths();
         }
+
+        /// <summary>Clears all sort columns and resets visual indicators.</summary>
+        private void ClearSort()
+        {
+            _sortColumns.Clear();
+            _currentSortColumn = null;
+            _currentSortOrder = SortOrder.Ascending;
+            UpdateSortIndicators();
+        }
         #endregion
 
         // Sorting handlers
@@ -311,9 +329,34 @@ namespace RegexRenamer
         private void UpdateDataGridColumnTextAlignment(DataGridViewContentAlignment alignment)
         {
             if (_activePath == null) return;
-            
+
             colFilename.DefaultCellStyle.Alignment = alignment;
            // colPreview.DefaultCellStyle.Alignment = alignment;
+        }
+
+        /// <summary>Updates column header text to display sort order indicators for multi-column sort.</summary>
+        private void UpdateSortIndicators()
+        {
+            // Reset all column headers to their base names
+            foreach (DataGridViewColumn col in dgvFiles.Columns)
+            {
+                // Remove existing sort indicators (look for numbers in parentheses)
+                string baseName = col.HeaderText;
+                int parenIndex = baseName.LastIndexOf(" (");
+                if (parenIndex > 0)
+                {
+                    baseName = baseName[..parenIndex];
+                }
+                col.HeaderText = baseName;
+            }
+
+            // Add indicators for sorted columns
+            for (int i = 0; i < _sortColumns.Count; i++)
+            {
+                var sortInfo = _sortColumns[i];
+                string direction = sortInfo.Direction == ListSortDirection.Ascending ? "▲" : "▼";
+                sortInfo.Column.HeaderText = $"{sortInfo.Column.HeaderText} ({i + 1}{direction})";
+            }
         }
 
 
@@ -356,15 +399,40 @@ namespace RegexRenamer
         }
         // called when user clicks column header. We sort the backing list of FileViewRowData objects and refresh the grid (instead of using built-in sorting)
         // to maintain correct indexing to the active files list and allow for custom sort text conversion.
+        // Single click: sort by this column only (resets multi-column sort)
+        // Shift+click: add/toggle this column to the multi-column sort
         private void dgvFiles_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             DataGridViewColumn clickedColumn = dgvFiles.Columns[e.ColumnIndex];
-            ListSortDirection direction = ListSortDirection.Ascending;
 
-            if (_currentSortColumn == clickedColumn && _currentSortOrder == SortOrder.Ascending)
-                direction = ListSortDirection.Descending;
+            if (ModifierKeys == Keys.Shift)
+            {
+                // Shift+Click: Add or toggle column in multi-column sort
+                var existingSort = _sortColumns.FirstOrDefault(s => s.Column == clickedColumn);
 
-            SortFileViewRows(clickedColumn, direction);
+                if (existingSort.Column != null)
+                {
+                    // Toggle direction if already in sort list
+                    var index = _sortColumns.FindIndex(s => s.Column == clickedColumn);
+                    var newDirection = existingSort.Direction == ListSortDirection.Ascending 
+                        ? ListSortDirection.Descending 
+                        : ListSortDirection.Ascending;
+                    _sortColumns[index] = new SortColumnInfo { Column = clickedColumn, Direction = newDirection };
+                }
+                else
+                {
+                    // Add to sort list
+                    _sortColumns.Add(new SortColumnInfo { Column = clickedColumn, Direction = ListSortDirection.Ascending });
+                }
+            }
+            else
+            {
+                // Single click: reset and sort by this column only
+                _sortColumns.Clear();
+                _sortColumns.Add(new SortColumnInfo { Column = clickedColumn, Direction = ListSortDirection.Ascending });
+            }
+
+            SortFileViewRows();
         }
 
         #endregion
@@ -408,47 +476,85 @@ namespace RegexRenamer
         private SortOrder _currentSortOrder = SortOrder.Ascending;
         // Track the current sort column to allow toggling sort order and applying visual indicators in the UI (e.g. sort glyphs in the column header).
         private DataGridViewColumn _currentSortColumn;
-        // helper to sort the backing list and refresh the grid
-        private void SortFileViewRows(DataGridViewColumn column, ListSortDirection direction)
+
+        // helper to sort the backing list and refresh the grid with multi-column sort support
+        private void SortFileViewRows()
         {
-            if (column == null || _fileViewRows.Count == 0) return;
+            if (_sortColumns.Count == 0 || _fileViewRows.Count == 0) return;
 
-            _currentSortColumn = column;
-            _currentSortOrder = direction == ListSortDirection.Descending ? SortOrder.Descending : SortOrder.Ascending;
+            // Cache sort column info to avoid repeated lookups
+            var sortInfos = _sortColumns.Select(sc => new
+            {
+                sc.Column,
+                sc.Direction,
+                ColumnIndex = sc.Column.Index,
+                Sign = sc.Direction == ListSortDirection.Ascending ? 1 : -1,
+                IsFileSizeColumn = sc.Column == colFileSize,
+                IsModifiedColumn = sc.Column == colModified,
+                IsFilenameColumn = sc.Column == colFilename
+            }).ToList();
 
-            int colIndex = column.Index;
-            int sign = direction == ListSortDirection.Ascending ? 1 : -1;
-
-            // Hoist invariant checks outside the per-comparison lambda
             bool useCustomSort = !string.IsNullOrWhiteSpace(_activeSortHintName) && _activeSortStringProvider != null;
-            bool isFileSizeColumn = column == colFileSize;
-            bool isModifiedColumn = column == colModified;
             var sortStringConverter = _activeSortStringProvider;
 
             _fileViewRows.Sort((a, b) =>
             {
-                object val1 = GetCellValue(a, colIndex, false);
-                object val2 = GetCellValue(b, colIndex, false);
-
-                if (useCustomSort)
+                // Compare by each sort column in order
+                foreach (var sortInfo in sortInfos)
                 {
-                    string s1 = (val1?.ToString() ?? "").ConvertToSortText(sortStringConverter);
-                    string s2 = (val2?.ToString() ?? "").ConvertToSortText(sortStringConverter);
-                    return sign * string.Compare(s1, s2);
+                    object val1 = GetCellValue(a, sortInfo.ColumnIndex, false);
+                    object val2 = GetCellValue(b, sortInfo.ColumnIndex, false);
+
+                    int result = 0;
+
+                    if (sortInfo.IsFilenameColumn && useCustomSort)
+                    {
+                        string s1 = (val1?.ToString() ?? "").ConvertToSortText(sortStringConverter);
+                        string s2 = (val2?.ToString() ?? "").ConvertToSortText(sortStringConverter);
+                        result = string.Compare(s1, s2);
+                    }
+                    else if (sortInfo.IsFileSizeColumn && val1 is FileSizeInfo fs1 && val2 is FileSizeInfo fs2)
+                    {
+                        result = fs1.CompareTo(fs2);
+                    }
+                    else if (sortInfo.IsModifiedColumn && val1 is FileModificationInfo fm1 && val2 is FileModificationInfo fm2)
+                    {
+                        result = fm1.CompareTo(fm2);
+                    }
+                    else
+                    {
+                        string str1 = val1?.ToString() ?? "";
+                        string str2 = val2?.ToString() ?? "";
+                        result = string.Compare(str1, str2, StringComparison.CurrentCulture);
+                    }
+
+                    // If values differ, apply sort direction and return
+                    if (result != 0)
+                    {
+                        return sortInfo.Sign * result;
+                    }
+                    // If values are equal, continue to next sort column
                 }
 
-                if (isFileSizeColumn && val1 is FileSizeInfo fs1 && val2 is FileSizeInfo fs2)
-                    return sign * fs1.CompareTo(fs2);
-
-                if (isModifiedColumn && val1 is FileModificationInfo fm1 && val2 is FileModificationInfo fm2)
-                    return sign * fm1.CompareTo(fm2);
-
-                string str1 = val1?.ToString() ?? "";
-                string str2 = val2?.ToString() ?? "";
-                return sign * string.Compare(str1, str2, StringComparison.CurrentCulture);
+                return 0; // All sort columns are equal
             });
 
+            // Update tracking for backward compatibility with visual indicators
+            _currentSortColumn = _sortColumns.Count > 0 ? _sortColumns[0].Column : null;
+            _currentSortOrder = _sortColumns.Count > 0 && _sortColumns[0].Direction == ListSortDirection.Descending
+                ? SortOrder.Descending
+                : SortOrder.Ascending;
+
+            UpdateSortIndicators();
             dgvFiles.Invalidate();
+        }
+
+        // Legacy method for backward compatibility (if called from elsewhere)
+        private void SortFileViewRows(DataGridViewColumn column, ListSortDirection direction)
+        {
+            _sortColumns.Clear();
+            _sortColumns.Add(new SortColumnInfo { Column = column, Direction = direction });
+            SortFileViewRows();
         }
 
         #endregion
@@ -920,7 +1026,28 @@ namespace RegexRenamer
 
         private void pasteFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _activePath.ClipboardPasteFiles();
+            var (filesList, isMove) = ClipboardExtensions.GetFilesFromClipboard();
+            foreach (var item in filesList)
+            {
+                var targetPath = Path.Combine(_activePath, Path.GetFileName(item));
+                if(File.Exists(targetPath))
+                {
+                   var result = MessageBoxForm.ShowMessage($"File '{Path.GetFileName(item)}' already exists in the target directory.",
+                       //+ "\n\nWhat would you like to do?"
+                       //+ "\n\nYou can choose to overwrite the existing file, skip this file, rename the new file, or cancel the entire operation."
+                       //+ "\n\nIf you choose to rename, the new file will be renamed to avoid conflicts."
+                       //+ "\n\nYou can also choose to apply the same action to all remaining files in the operation."
+                       //+ "\n\nPlease make your selection below."
+                       "Warning", new List<Tuple<string, string>> {
+                           new Tuple<string, string>("check", "Do this for remaining files"),
+                           new Tuple<string, string>("bttn", "Skip"),
+                           new Tuple<string, string>("bttn", "Overwrite"),
+                           new Tuple<string, string>("bttn", "Rename"),
+                           new Tuple<string, string>("bttn", "Cancel")  
+                       }, MessageBoxIcon.Warning);
+                }
+            }
+
             RefreshFileListView(UpdateStage.FileList);
         }
 
@@ -1001,6 +1128,7 @@ namespace RegexRenamer
             {
                 File.Create(newFilePath).Dispose(); // Create and close the file
                 RefreshFileListView(UpdateStage.FileList);
+                Application.DoEvents(); // Ensure the UI updates before selecting the new file
                 SelectFileByName(new List<string> { targetFileName });
             }
             catch (Exception ex)
@@ -1019,7 +1147,6 @@ namespace RegexRenamer
                     dgvFiles.ClearSelection();
                     dgvFiles.Rows[ifdx].Selected = true;
                     dgvFiles.FirstDisplayedScrollingRowIndex = ifdx;
-                    break;
                 }
             }
         }

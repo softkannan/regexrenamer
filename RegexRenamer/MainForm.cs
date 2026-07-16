@@ -294,6 +294,8 @@ namespace RegexRenamer
             // popluate folder tree and file list
             RefreshFolderTree();
             UpdateUserInputValues();
+            SetShowInfoColumnVisibility(chkShowInfo.Checked);
+            ResetColumnDistribution();
 
             RefreshFileListView(UpdateStage.FullRefresh);
             dgvFiles.ClearSelection();

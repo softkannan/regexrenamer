@@ -119,6 +119,39 @@ namespace RegexRenamer.Native
             PInvoke.FileOperationAPI.MoveFiles(files, pastePath,isMove);
         }
 
+        public static Tuple<List<string>, bool> GetFilesFromClipboard()
+        {
+            var data = Clipboard.GetDataObject() as DataObject;
+            if (data == null) return new Tuple<List<string>, bool>(new List<string>(), false);
+            bool isMove = false;
+            if (data.TryGetData<MemoryStream>(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, out var dropEffectStream) && dropEffectStream != null)
+            {
+                int dropEffect = dropEffectStream.ReadByte();
+                // Checks if the 'Copy' flag (1) is present within the value 5
+                if ((dropEffect & 1) != 0)
+                {
+                    // Handle Copy
+                    isMove = false;
+                }
+                if ((dropEffect & 2) != 0)
+                {
+                    // Handle Move
+                    isMove = true;
+                }
+                // Checks if the 'Link' flag (4) is present within the value 5
+                if ((dropEffect & 4) != 0)
+                {
+                    // Handle Link
+                }
+            }
+            List<string> files = new List<string>();
+            foreach (var item in data.GetFileDropList())
+            {
+                files.Add(item!.ToString());
+            }
+            return new Tuple<List<string>, bool>(files, isMove);
+        }
+
         public static void PutFilesOnClipboard(this IEnumerable<FileSystemInfo> filesAndFolders, bool moveFilesOnPaste = false)
         {
             var dropEffect = moveFilesOnPaste ? DragDropEffects.Move : DragDropEffects.Copy;

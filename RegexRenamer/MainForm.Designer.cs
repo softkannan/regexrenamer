@@ -112,6 +112,19 @@ namespace RegexRenamer
             fbdMoveCopy = new System.Windows.Forms.FolderBrowserDialog();
             lblPath = new System.Windows.Forms.Label();
             dgvFiles = new System.Windows.Forms.DataGridView();
+            colIcon = new System.Windows.Forms.DataGridViewImageColumn();
+            colSNO = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colPreview = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colExt = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colFileSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colTitle = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSeries = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colVolume = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colChapter = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            colSpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
             tsOptions = new System.Windows.Forms.ToolStrip();
             mnuOptions = new System.Windows.Forms.ToolStripDropDownButton();
             itmOptionsShowHidden = new System.Windows.Forms.ToolStripMenuItem();
@@ -138,19 +151,6 @@ namespace RegexRenamer
             lblFilter = new System.Windows.Forms.Label();
             groupBoxFolderTree = new System.Windows.Forms.GroupBox();
             groupBoxFileView = new System.Windows.Forms.GroupBox();
-            colIcon = new System.Windows.Forms.DataGridViewImageColumn();
-            colSNO = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colPreview = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colExt = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colFileSize = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colTitle = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSeries = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colVolume = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colChapter = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            colSpecial = new System.Windows.Forms.DataGridViewTextBoxColumn();
             cmsRename.SuspendLayout();
             pnlStats.SuspendLayout();
             tsMenu.SuspendLayout();
@@ -458,6 +458,8 @@ namespace RegexRenamer
             // chkShowInfo
             // 
             chkShowInfo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            chkShowInfo.Checked = true;
+            chkShowInfo.CheckState = System.Windows.Forms.CheckState.Checked;
             chkShowInfo.Location = new System.Drawing.Point(808, 12);
             chkShowInfo.Margin = new System.Windows.Forms.Padding(4);
             chkShowInfo.Name = "chkShowInfo";
@@ -763,249 +765,6 @@ namespace RegexRenamer
             dgvFiles.StandardTab = true;
             dgvFiles.TabIndex = 6;
             // 
-            // tsOptions
-            // 
-            tsOptions.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            tsOptions.CanOverflow = false;
-            tsOptions.Dock = System.Windows.Forms.DockStyle.None;
-            tsOptions.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            tsOptions.ImageScalingSize = new System.Drawing.Size(20, 20);
-            tsOptions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { mnuOptions, mnuHelp });
-            tsOptions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            tsOptions.Location = new System.Drawing.Point(6, 700);
-            tsOptions.Name = "tsOptions";
-            tsOptions.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            tsOptions.Size = new System.Drawing.Size(118, 20);
-            tsOptions.TabIndex = 2;
-            tsOptions.TabStop = true;
-            // 
-            // mnuOptions
-            // 
-            mnuOptions.AutoToolTip = false;
-            mnuOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            mnuOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmOptionsShowHidden, itmOptionsPreserveExt, itmOptionsRealtimePreview, itmOptionsAllowRenSub, itmOptionsRememberWinPos, itmOptionsAddContextMenu, itmOptionsEditConfig });
-            mnuOptions.Margin = new System.Windows.Forms.Padding(0, 1, 10, 0);
-            mnuOptions.Name = "mnuOptions";
-            mnuOptions.Size = new System.Drawing.Size(62, 19);
-            mnuOptions.Text = "Options";
-            mnuOptions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // itmOptionsShowHidden
-            // 
-            itmOptionsShowHidden.CheckOnClick = true;
-            itmOptionsShowHidden.Name = "itmOptionsShowHidden";
-            itmOptionsShowHidden.Size = new System.Drawing.Size(223, 22);
-            itmOptionsShowHidden.Text = "Show hidden files";
-            // 
-            // itmOptionsPreserveExt
-            // 
-            itmOptionsPreserveExt.CheckOnClick = true;
-            itmOptionsPreserveExt.Name = "itmOptionsPreserveExt";
-            itmOptionsPreserveExt.Size = new System.Drawing.Size(223, 22);
-            itmOptionsPreserveExt.Text = "Preserve file extension";
-            // 
-            // itmOptionsRealtimePreview
-            // 
-            itmOptionsRealtimePreview.Checked = true;
-            itmOptionsRealtimePreview.CheckOnClick = true;
-            itmOptionsRealtimePreview.CheckState = System.Windows.Forms.CheckState.Checked;
-            itmOptionsRealtimePreview.Name = "itmOptionsRealtimePreview";
-            itmOptionsRealtimePreview.Size = new System.Drawing.Size(223, 22);
-            itmOptionsRealtimePreview.Text = "Enable realtime preview";
-            itmOptionsRealtimePreview.ToolTipText = "When unchecked, press ENTER in the regex fields to update the preview";
-            // 
-            // itmOptionsAllowRenSub
-            // 
-            itmOptionsAllowRenSub.CheckOnClick = true;
-            itmOptionsAllowRenSub.Name = "itmOptionsAllowRenSub";
-            itmOptionsAllowRenSub.Size = new System.Drawing.Size(223, 22);
-            itmOptionsAllowRenSub.Text = "Allow rename to subfolders";
-            // 
-            // itmOptionsRememberWinPos
-            // 
-            itmOptionsRememberWinPos.Checked = true;
-            itmOptionsRememberWinPos.CheckOnClick = true;
-            itmOptionsRememberWinPos.CheckState = System.Windows.Forms.CheckState.Checked;
-            itmOptionsRememberWinPos.Name = "itmOptionsRememberWinPos";
-            itmOptionsRememberWinPos.Size = new System.Drawing.Size(223, 22);
-            itmOptionsRememberWinPos.Text = "Remember window position";
-            // 
-            // itmOptionsAddContextMenu
-            // 
-            itmOptionsAddContextMenu.Name = "itmOptionsAddContextMenu";
-            itmOptionsAddContextMenu.Size = new System.Drawing.Size(223, 22);
-            itmOptionsAddContextMenu.Text = "Add explorer context menu";
-            // 
-            // itmOptionsEditConfig
-            // 
-            itmOptionsEditConfig.Name = "itmOptionsEditConfig";
-            itmOptionsEditConfig.Size = new System.Drawing.Size(223, 22);
-            itmOptionsEditConfig.Text = "Edit Config";
-            // 
-            // mnuHelp
-            // 
-            mnuHelp.AutoToolTip = false;
-            mnuHelp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            mnuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmHelpContents, itmHelpRegexReference, itmHelpSep1, itmHelpEmailAuthor, itmHelpReportBug, itmHelpHomepage, itmHelpSep2, itmHelpAbout });
-            mnuHelp.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
-            mnuHelp.Name = "mnuHelp";
-            mnuHelp.Size = new System.Drawing.Size(45, 19);
-            mnuHelp.Text = "Help";
-            mnuHelp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // itmHelpContents
-            // 
-            itmHelpContents.Name = "itmHelpContents";
-            itmHelpContents.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            itmHelpContents.Size = new System.Drawing.Size(211, 22);
-            itmHelpContents.Text = "Contents";
-            // 
-            // itmHelpRegexReference
-            // 
-            itmHelpRegexReference.Name = "itmHelpRegexReference";
-            itmHelpRegexReference.ShortcutKeys = System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F1;
-            itmHelpRegexReference.Size = new System.Drawing.Size(211, 22);
-            itmHelpRegexReference.Text = "Regex Reference";
-            // 
-            // itmHelpSep1
-            // 
-            itmHelpSep1.Name = "itmHelpSep1";
-            itmHelpSep1.Size = new System.Drawing.Size(208, 6);
-            // 
-            // itmHelpEmailAuthor
-            // 
-            itmHelpEmailAuthor.Name = "itmHelpEmailAuthor";
-            itmHelpEmailAuthor.Size = new System.Drawing.Size(211, 22);
-            itmHelpEmailAuthor.Text = "Email the author";
-            // 
-            // itmHelpReportBug
-            // 
-            itmHelpReportBug.Name = "itmHelpReportBug";
-            itmHelpReportBug.Size = new System.Drawing.Size(211, 22);
-            itmHelpReportBug.Text = "Report a bug";
-            // 
-            // itmHelpHomepage
-            // 
-            itmHelpHomepage.Name = "itmHelpHomepage";
-            itmHelpHomepage.Size = new System.Drawing.Size(211, 22);
-            itmHelpHomepage.Text = "Homepage";
-            // 
-            // itmHelpSep2
-            // 
-            itmHelpSep2.Name = "itmHelpSep2";
-            itmHelpSep2.Size = new System.Drawing.Size(208, 6);
-            // 
-            // itmHelpAbout
-            // 
-            itmHelpAbout.Name = "itmHelpAbout";
-            itmHelpAbout.Size = new System.Drawing.Size(211, 22);
-            itmHelpAbout.Text = "About RegexRenamer";
-            // 
-            // progressBar
-            // 
-            progressBar.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            progressBar.Location = new System.Drawing.Point(163, 698);
-            progressBar.Margin = new System.Windows.Forms.Padding(4);
-            progressBar.Name = "progressBar";
-            progressBar.Size = new System.Drawing.Size(619, 26);
-            progressBar.TabIndex = 0;
-            // 
-            // btnCancel
-            // 
-            btnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            btnCancel.Enabled = false;
-            btnCancel.Location = new System.Drawing.Point(892, 692);
-            btnCancel.Margin = new System.Windows.Forms.Padding(4);
-            btnCancel.Name = "btnCancel";
-            btnCancel.Size = new System.Drawing.Size(148, 34);
-            btnCancel.TabIndex = 3;
-            btnCancel.Text = "&Cancel";
-            btnCancel.Visible = false;
-            // 
-            // bgwRename
-            // 
-            bgwRename.WorkerReportsProgress = true;
-            bgwRename.WorkerSupportsCancellation = true;
-            // 
-            // groupBoxTop
-            // 
-            groupBoxTop.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            groupBoxTop.Controls.Add(lblInfoFileSize);
-            groupBoxTop.Controls.Add(cmbSortHint);
-            groupBoxTop.Controls.Add(chkIncludeSubfolder);
-            groupBoxTop.Controls.Add(cmbFilter);
-            groupBoxTop.Controls.Add(rbFilterRegex);
-            groupBoxTop.Controls.Add(rbFilterGlob);
-            groupBoxTop.Controls.Add(chkRenameSelectionOnly);
-            groupBoxTop.Controls.Add(cbFilterExclude);
-            groupBoxTop.Controls.Add(chkShowInfo);
-            groupBoxTop.Controls.Add(lblMatch);
-            groupBoxTop.Controls.Add(cmbReplace);
-            groupBoxTop.Controls.Add(cmbMatch);
-            groupBoxTop.Controls.Add(cbModifierI);
-            groupBoxTop.Controls.Add(cbModifierG);
-            groupBoxTop.Controls.Add(cbModifierX);
-            groupBoxTop.Controls.Add(lblReplace);
-            groupBoxTop.Controls.Add(tsMenu);
-            groupBoxTop.Controls.Add(lblStats);
-            groupBoxTop.Controls.Add(pnlStats);
-            groupBoxTop.Controls.Add(lblSort);
-            groupBoxTop.Controls.Add(lblFilter);
-            groupBoxTop.Location = new System.Drawing.Point(10, 2);
-            groupBoxTop.Name = "groupBoxTop";
-            groupBoxTop.Size = new System.Drawing.Size(1487, 98);
-            groupBoxTop.TabIndex = 7;
-            groupBoxTop.TabStop = false;
-            // 
-            // lblSort
-            // 
-            lblSort.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lblSort.Location = new System.Drawing.Point(1176, 71);
-            lblSort.Name = "lblSort";
-            lblSort.Size = new System.Drawing.Size(46, 14);
-            lblSort.TabIndex = 11;
-            lblSort.Text = "Sort:";
-            lblSort.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // lblFilter
-            // 
-            lblFilter.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            lblFilter.Location = new System.Drawing.Point(1176, 17);
-            lblFilter.Name = "lblFilter";
-            lblFilter.Size = new System.Drawing.Size(46, 14);
-            lblFilter.TabIndex = 3;
-            lblFilter.Text = "Filter:";
-            lblFilter.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // groupBoxFolderTree
-            // 
-            groupBoxFolderTree.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            groupBoxFolderTree.Controls.Add(txtPath);
-            groupBoxFolderTree.Controls.Add(lblPath);
-            groupBoxFolderTree.Controls.Add(tvwFolders);
-            groupBoxFolderTree.Controls.Add(btnNetwork);
-            groupBoxFolderTree.Location = new System.Drawing.Point(10, 106);
-            groupBoxFolderTree.Name = "groupBoxFolderTree";
-            groupBoxFolderTree.Size = new System.Drawing.Size(441, 733);
-            groupBoxFolderTree.TabIndex = 8;
-            groupBoxFolderTree.TabStop = false;
-            // 
-            // groupBoxFileView
-            // 
-            groupBoxFileView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            groupBoxFileView.Controls.Add(dgvFiles);
-            groupBoxFileView.Controls.Add(progressBar);
-            groupBoxFileView.Controls.Add(tsOptions);
-            groupBoxFileView.Controls.Add(btnRename);
-            groupBoxFileView.Controls.Add(btnCancel);
-            groupBoxFileView.Controls.Add(lblNumConflict);
-            groupBoxFileView.Controls.Add(lblNumMatched);
-            groupBoxFileView.Location = new System.Drawing.Point(457, 106);
-            groupBoxFileView.Name = "groupBoxFileView";
-            groupBoxFileView.Size = new System.Drawing.Size(1048, 732);
-            groupBoxFileView.TabIndex = 9;
-            groupBoxFileView.TabStop = false;
-            // 
             // colIcon
             // 
             colIcon.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
@@ -1126,6 +885,249 @@ namespace RegexRenamer
             colSpecial.ReadOnly = true;
             colSpecial.Visible = false;
             colSpecial.Width = 60;
+            // 
+            // tsOptions
+            // 
+            tsOptions.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            tsOptions.CanOverflow = false;
+            tsOptions.Dock = System.Windows.Forms.DockStyle.None;
+            tsOptions.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            tsOptions.ImageScalingSize = new System.Drawing.Size(20, 20);
+            tsOptions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { mnuOptions, mnuHelp });
+            tsOptions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
+            tsOptions.Location = new System.Drawing.Point(6, 700);
+            tsOptions.Name = "tsOptions";
+            tsOptions.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            tsOptions.Size = new System.Drawing.Size(118, 20);
+            tsOptions.TabIndex = 2;
+            tsOptions.TabStop = true;
+            // 
+            // mnuOptions
+            // 
+            mnuOptions.AutoToolTip = false;
+            mnuOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            mnuOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmOptionsShowHidden, itmOptionsPreserveExt, itmOptionsRealtimePreview, itmOptionsAllowRenSub, itmOptionsRememberWinPos, itmOptionsAddContextMenu, itmOptionsEditConfig });
+            mnuOptions.Margin = new System.Windows.Forms.Padding(0, 1, 10, 0);
+            mnuOptions.Name = "mnuOptions";
+            mnuOptions.Size = new System.Drawing.Size(62, 19);
+            mnuOptions.Text = "Options";
+            mnuOptions.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // itmOptionsShowHidden
+            // 
+            itmOptionsShowHidden.CheckOnClick = true;
+            itmOptionsShowHidden.Name = "itmOptionsShowHidden";
+            itmOptionsShowHidden.Size = new System.Drawing.Size(223, 22);
+            itmOptionsShowHidden.Text = "Show hidden files";
+            // 
+            // itmOptionsPreserveExt
+            // 
+            itmOptionsPreserveExt.CheckOnClick = true;
+            itmOptionsPreserveExt.Name = "itmOptionsPreserveExt";
+            itmOptionsPreserveExt.Size = new System.Drawing.Size(223, 22);
+            itmOptionsPreserveExt.Text = "Preserve file extension";
+            // 
+            // itmOptionsRealtimePreview
+            // 
+            itmOptionsRealtimePreview.Checked = true;
+            itmOptionsRealtimePreview.CheckOnClick = true;
+            itmOptionsRealtimePreview.CheckState = System.Windows.Forms.CheckState.Checked;
+            itmOptionsRealtimePreview.Name = "itmOptionsRealtimePreview";
+            itmOptionsRealtimePreview.Size = new System.Drawing.Size(223, 22);
+            itmOptionsRealtimePreview.Text = "Enable realtime preview";
+            itmOptionsRealtimePreview.ToolTipText = "When unchecked, press ENTER in the regex fields to update the preview";
+            // 
+            // itmOptionsAllowRenSub
+            // 
+            itmOptionsAllowRenSub.CheckOnClick = true;
+            itmOptionsAllowRenSub.Name = "itmOptionsAllowRenSub";
+            itmOptionsAllowRenSub.Size = new System.Drawing.Size(223, 22);
+            itmOptionsAllowRenSub.Text = "Allow rename to subfolders";
+            // 
+            // itmOptionsRememberWinPos
+            // 
+            itmOptionsRememberWinPos.Checked = true;
+            itmOptionsRememberWinPos.CheckOnClick = true;
+            itmOptionsRememberWinPos.CheckState = System.Windows.Forms.CheckState.Checked;
+            itmOptionsRememberWinPos.Name = "itmOptionsRememberWinPos";
+            itmOptionsRememberWinPos.Size = new System.Drawing.Size(223, 22);
+            itmOptionsRememberWinPos.Text = "Remember window position";
+            // 
+            // itmOptionsAddContextMenu
+            // 
+            itmOptionsAddContextMenu.Name = "itmOptionsAddContextMenu";
+            itmOptionsAddContextMenu.Size = new System.Drawing.Size(223, 22);
+            itmOptionsAddContextMenu.Text = "Add explorer context menu";
+            // 
+            // itmOptionsEditConfig
+            // 
+            itmOptionsEditConfig.Name = "itmOptionsEditConfig";
+            itmOptionsEditConfig.Size = new System.Drawing.Size(223, 22);
+            itmOptionsEditConfig.Text = "Edit Config";
+            // 
+            // mnuHelp
+            // 
+            mnuHelp.AutoToolTip = false;
+            mnuHelp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            mnuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { itmHelpContents, itmHelpRegexReference, itmHelpSep1, itmHelpEmailAuthor, itmHelpReportBug, itmHelpHomepage, itmHelpSep2, itmHelpAbout });
+            mnuHelp.Margin = new System.Windows.Forms.Padding(0, 1, 0, 0);
+            mnuHelp.Name = "mnuHelp";
+            mnuHelp.Size = new System.Drawing.Size(45, 19);
+            mnuHelp.Text = "Help";
+            mnuHelp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // itmHelpContents
+            // 
+            itmHelpContents.Name = "itmHelpContents";
+            itmHelpContents.ShortcutKeys = System.Windows.Forms.Keys.F1;
+            itmHelpContents.Size = new System.Drawing.Size(212, 22);
+            itmHelpContents.Text = "Contents";
+            // 
+            // itmHelpRegexReference
+            // 
+            itmHelpRegexReference.Name = "itmHelpRegexReference";
+            itmHelpRegexReference.ShortcutKeys = System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F1;
+            itmHelpRegexReference.Size = new System.Drawing.Size(212, 22);
+            itmHelpRegexReference.Text = "Regex Reference";
+            // 
+            // itmHelpSep1
+            // 
+            itmHelpSep1.Name = "itmHelpSep1";
+            itmHelpSep1.Size = new System.Drawing.Size(209, 6);
+            // 
+            // itmHelpEmailAuthor
+            // 
+            itmHelpEmailAuthor.Name = "itmHelpEmailAuthor";
+            itmHelpEmailAuthor.Size = new System.Drawing.Size(212, 22);
+            itmHelpEmailAuthor.Text = "Email the author";
+            // 
+            // itmHelpReportBug
+            // 
+            itmHelpReportBug.Name = "itmHelpReportBug";
+            itmHelpReportBug.Size = new System.Drawing.Size(212, 22);
+            itmHelpReportBug.Text = "Report a bug";
+            // 
+            // itmHelpHomepage
+            // 
+            itmHelpHomepage.Name = "itmHelpHomepage";
+            itmHelpHomepage.Size = new System.Drawing.Size(212, 22);
+            itmHelpHomepage.Text = "Homepage";
+            // 
+            // itmHelpSep2
+            // 
+            itmHelpSep2.Name = "itmHelpSep2";
+            itmHelpSep2.Size = new System.Drawing.Size(209, 6);
+            // 
+            // itmHelpAbout
+            // 
+            itmHelpAbout.Name = "itmHelpAbout";
+            itmHelpAbout.Size = new System.Drawing.Size(212, 22);
+            itmHelpAbout.Text = "About RegexRenamer";
+            // 
+            // progressBar
+            // 
+            progressBar.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            progressBar.Location = new System.Drawing.Point(163, 698);
+            progressBar.Margin = new System.Windows.Forms.Padding(4);
+            progressBar.Name = "progressBar";
+            progressBar.Size = new System.Drawing.Size(619, 26);
+            progressBar.TabIndex = 0;
+            // 
+            // btnCancel
+            // 
+            btnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            btnCancel.Enabled = false;
+            btnCancel.Location = new System.Drawing.Point(892, 692);
+            btnCancel.Margin = new System.Windows.Forms.Padding(4);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new System.Drawing.Size(148, 34);
+            btnCancel.TabIndex = 3;
+            btnCancel.Text = "&Cancel";
+            btnCancel.Visible = false;
+            // 
+            // bgwRename
+            // 
+            bgwRename.WorkerReportsProgress = true;
+            bgwRename.WorkerSupportsCancellation = true;
+            // 
+            // groupBoxTop
+            // 
+            groupBoxTop.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxTop.Controls.Add(lblInfoFileSize);
+            groupBoxTop.Controls.Add(cmbSortHint);
+            groupBoxTop.Controls.Add(chkIncludeSubfolder);
+            groupBoxTop.Controls.Add(cmbFilter);
+            groupBoxTop.Controls.Add(rbFilterRegex);
+            groupBoxTop.Controls.Add(rbFilterGlob);
+            groupBoxTop.Controls.Add(chkRenameSelectionOnly);
+            groupBoxTop.Controls.Add(cbFilterExclude);
+            groupBoxTop.Controls.Add(chkShowInfo);
+            groupBoxTop.Controls.Add(lblMatch);
+            groupBoxTop.Controls.Add(cmbReplace);
+            groupBoxTop.Controls.Add(cmbMatch);
+            groupBoxTop.Controls.Add(cbModifierI);
+            groupBoxTop.Controls.Add(cbModifierG);
+            groupBoxTop.Controls.Add(cbModifierX);
+            groupBoxTop.Controls.Add(lblReplace);
+            groupBoxTop.Controls.Add(tsMenu);
+            groupBoxTop.Controls.Add(lblStats);
+            groupBoxTop.Controls.Add(pnlStats);
+            groupBoxTop.Controls.Add(lblSort);
+            groupBoxTop.Controls.Add(lblFilter);
+            groupBoxTop.Location = new System.Drawing.Point(10, 2);
+            groupBoxTop.Name = "groupBoxTop";
+            groupBoxTop.Size = new System.Drawing.Size(1487, 98);
+            groupBoxTop.TabIndex = 7;
+            groupBoxTop.TabStop = false;
+            // 
+            // lblSort
+            // 
+            lblSort.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            lblSort.Location = new System.Drawing.Point(1176, 71);
+            lblSort.Name = "lblSort";
+            lblSort.Size = new System.Drawing.Size(46, 14);
+            lblSort.TabIndex = 11;
+            lblSort.Text = "Sort:";
+            lblSort.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // lblFilter
+            // 
+            lblFilter.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            lblFilter.Location = new System.Drawing.Point(1176, 17);
+            lblFilter.Name = "lblFilter";
+            lblFilter.Size = new System.Drawing.Size(46, 14);
+            lblFilter.TabIndex = 3;
+            lblFilter.Text = "Filter:";
+            lblFilter.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // groupBoxFolderTree
+            // 
+            groupBoxFolderTree.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            groupBoxFolderTree.Controls.Add(txtPath);
+            groupBoxFolderTree.Controls.Add(lblPath);
+            groupBoxFolderTree.Controls.Add(tvwFolders);
+            groupBoxFolderTree.Controls.Add(btnNetwork);
+            groupBoxFolderTree.Location = new System.Drawing.Point(10, 106);
+            groupBoxFolderTree.Name = "groupBoxFolderTree";
+            groupBoxFolderTree.Size = new System.Drawing.Size(441, 733);
+            groupBoxFolderTree.TabIndex = 8;
+            groupBoxFolderTree.TabStop = false;
+            // 
+            // groupBoxFileView
+            // 
+            groupBoxFileView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBoxFileView.Controls.Add(dgvFiles);
+            groupBoxFileView.Controls.Add(progressBar);
+            groupBoxFileView.Controls.Add(tsOptions);
+            groupBoxFileView.Controls.Add(btnRename);
+            groupBoxFileView.Controls.Add(btnCancel);
+            groupBoxFileView.Controls.Add(lblNumConflict);
+            groupBoxFileView.Controls.Add(lblNumMatched);
+            groupBoxFileView.Location = new System.Drawing.Point(457, 106);
+            groupBoxFileView.Name = "groupBoxFileView";
+            groupBoxFileView.Size = new System.Drawing.Size(1048, 732);
+            groupBoxFileView.TabIndex = 9;
+            groupBoxFileView.TabStop = false;
             // 
             // MainForm
             // 
