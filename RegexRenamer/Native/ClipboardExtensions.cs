@@ -82,17 +82,21 @@ namespace RegexRenamer.Native
             var data = new DataObject();
             data.SetFileDropList(droplist);
             data.SetData(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, new MemoryStream(BitConverter.GetBytes((int)dropEffect)));
-            data.SetText(fileText, TextDataFormat.UnicodeText);
-            Clipboard.SetDataObject(data);
+            //data.SetText(fileText, TextDataFormat.UnicodeText);
+            Clipboard.SetDataObject(data, true);
         }
         public static void ClipboardPasteFiles(this string pastePath)
         {
             var data = Clipboard.GetDataObject() as DataObject;
             if(data == null) return;
             bool isMove = false;
-            if (data.TryGetData<MemoryStream>(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, out var dropEffectStream) && dropEffectStream != null)
+            if (data.GetDataPresent(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT) &&
+                data.TryGetData<MemoryStream>(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, out var dropEffectStream) &&
+                dropEffectStream != null)
             {
-                int dropEffect = dropEffectStream.ReadByte();
+                byte[] buffer = new byte[4];
+                dropEffectStream.Read(buffer, 0, 4);
+                int dropEffect = BitConverter.ToInt32(buffer, 0);
                 // Checks if the 'Copy' flag (1) is present within the value 5
                 if ((dropEffect & 1) != 0)
                 {
@@ -124,9 +128,13 @@ namespace RegexRenamer.Native
             var data = Clipboard.GetDataObject() as DataObject;
             if (data == null) return new Tuple<List<string>, bool>(new List<string>(), false);
             bool isMove = false;
-            if (data.TryGetData<MemoryStream>(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, out var dropEffectStream) && dropEffectStream != null)
+            if (data.GetDataPresent(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT) &&
+                data.TryGetData<MemoryStream>(ClipboardAPI.ShellClipboardFormat.CFSTR_PREFERREDDROPEFFECT, out var dropEffectStream) && 
+                dropEffectStream != null)
             {
-                int dropEffect = dropEffectStream.ReadByte();
+                byte[] buffer = new byte[4];
+                dropEffectStream.Read(buffer, 0, 4);
+                int dropEffect = BitConverter.ToInt32(buffer, 0);
                 // Checks if the 'Copy' flag (1) is present within the value 5
                 if ((dropEffect & 1) != 0)
                 {

@@ -5,12 +5,16 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Media.Animation;
 using Windows.Devices.AllJoyn;
 
+using MessageBoxResult  = (string, System.Collections.Generic.Dictionary<string, bool>);
 namespace RegexRenamer.Forms
 {
     public partial class MessageBoxForm : Form
     {
+        
+
         public MessageBoxForm()
         {
             InitializeComponent();
@@ -19,7 +23,7 @@ namespace RegexRenamer.Forms
         private string _bttnClicked = null;
         private Dictionary<string, bool> _chkStates = new Dictionary<string, bool>();
 
-        public static Tuple<string, Dictionary<string, bool>> ShowMessage(string message, string title = "Message", List<Tuple<string, string>> buttons = null,  MessageBoxIcon icon = MessageBoxIcon.Information)
+        public static MessageBoxResult ShowMessage(string message, string title = "Message", List<Tuple<string, string>> buttons = null,  MessageBoxIcon icon = MessageBoxIcon.Information)
         {
             using (var form = new MessageBoxForm())
             {
@@ -47,7 +51,7 @@ namespace RegexRenamer.Forms
                 form.AddButtons(buttons ?? new List<Tuple<string, string>> { new Tuple<string, string>("default", "Ok") });
                 form.ResizeFormToFitContent(gap);
                 var result = form.ShowDialog();
-                return Tuple.Create(form._bttnClicked, form._chkStates);
+                return (form._bttnClicked, form._chkStates);
             }
         }
 

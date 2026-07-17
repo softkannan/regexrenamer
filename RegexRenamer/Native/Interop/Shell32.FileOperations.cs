@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-
-using HWND = System.IntPtr;
 using HANDLE = System.IntPtr;
+using HWND = System.IntPtr;
 
 namespace PInvoke;
 
@@ -121,7 +121,7 @@ public class FileOperationAPI
         }
     }
 
-    internal static void MoveFiles(IList<string> srcPaths, string destFolder, bool isMove = false)
+    internal static void MoveFilesOld(IList<string> srcPaths, string destFolder, bool isMove = false)
     {
         try
         {
@@ -140,8 +140,56 @@ public class FileOperationAPI
             MessageBox.Show($"MoveFiles Error {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
-    internal static void MoveFiles(string srcFile, string destFolder, bool isMove = false)
+    internal static void MoveFilesOld(string srcFile, string destFolder, bool isMove = false)
     {
         MoveFiles(new string[] { srcFile }, destFolder, isMove);
+    }
+
+    internal static void SendToRecycleBin(string filePath)
+    {
+        // Deletes a file with the Explorer progress UI, sending it to the Recycle Bin
+        FileSystem.DeleteFile(filePath,
+            UIOption.AllDialogs,
+            RecycleOption.SendToRecycleBin);
+    }
+    internal static void MoveFiles(IList<string> srcPaths, string destFolder, bool isMove = false)
+    {
+        if (isMove)
+        {
+            foreach (var srcPath in srcPaths)
+            {
+                // Moves a file with the standard Windows prompt and progress animations
+                FileSystem.MoveFile(srcPath, destFolder,
+                    UIOption.AllDialogs,
+                    UICancelOption.ThrowException);
+            }
+        }
+        else
+        {
+            foreach (var srcPath in srcPaths)
+            {
+                // Copies a file with the standard Windows prompt and progress animations
+                FileSystem.CopyFile(srcPath, destFolder,
+                    UIOption.AllDialogs,
+                    UICancelOption.ThrowException);
+            }
+        }
+    }
+    internal static void MoveFiles(string srcFile, string destFile, bool isMove = false)
+    {
+        if (isMove)
+        {
+
+            // Moves a file with the standard Windows prompt and progress animations
+            FileSystem.MoveFile(srcFile, destFile,
+                UIOption.AllDialogs,
+                UICancelOption.ThrowException);
+        }
+        else
+        {
+            FileSystem.CopyFile(srcFile, destFile,
+                UIOption.AllDialogs,
+                UICancelOption.ThrowException);
+        }
     }
 }

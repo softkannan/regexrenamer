@@ -1,6 +1,5 @@
 using Config;
 using RegexRenamer.Controls.FolderTreeViewCtrl;
-using RegexRenamer.Controls.FolderTreeViewCtrl.Native;
 using RegexRenamer.Forms;
 using RegexRenamer.Models;
 using RegexRenamer.Native;
@@ -10,19 +9,14 @@ using RegexRenamer.Tools.Translate;
 using RegexRenamer.Utility;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Windows.Storage;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+using MessageBoxResult = (string, System.Collections.Generic.Dictionary<string, bool>);
 
 namespace RegexRenamer
 {
@@ -1027,12 +1021,22 @@ namespace RegexRenamer
         private void pasteFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var (filesList, isMove) = ClipboardExtensions.GetFilesFromClipboard();
+            MessageBoxResult result = (string.Empty, null);
             foreach (var item in filesList)
             {
                 var targetPath = Path.Combine(_activePath, Path.GetFileName(item));
-                if(File.Exists(targetPath))
+                if (File.Exists(targetPath))
                 {
-                   var result = MessageBoxForm.ShowMessage($"File '{Path.GetFileName(item)}' already exists in the target directory.",
+                    bool doLastAction = false;
+
+                    if (result.Item1 != string.Empty && result.Item2 != null && result.Item2.ContainsKey("Do this for remaining files") && result.Item2["Do this for remaining files"])
+                    {
+                        doLastAction = true;
+                    }
+
+                    if (doLastAction == false)
+                    {
+                        result = MessageBoxForm.ShowMessage($"File '{Path.GetFileName(item)}' already exists in the target directory.",
                        //+ "\n\nWhat would you like to do?"
                        //+ "\n\nYou can choose to overwrite the existing file, skip this file, rename the new file, or cancel the entire operation."
                        //+ "\n\nIf you choose to rename, the new file will be renamed to avoid conflicts."
@@ -1043,8 +1047,39 @@ namespace RegexRenamer
                            new Tuple<string, string>("bttn", "Skip"),
                            new Tuple<string, string>("bttn", "Overwrite"),
                            new Tuple<string, string>("bttn", "Rename"),
-                           new Tuple<string, string>("bttn", "Cancel")  
+                           new Tuple<string, string>("bttn", "Cancel")
                        }, MessageBoxIcon.Warning);
+                    }
+
+                    switch (result.Item1)
+                    {
+                        case "Skip":
+                            continue;
+                        case "Overwrite":
+                            {
+                                var tempFilePath = targetPath + ".tmp";
+                                PInvoke.FileOperationAPI.MoveFiles(item, tempFilePath, isMove);
+                                try
+                                {
+                                    File.Delete(targetPath);
+                                }
+                                catch { }
+                                PInvoke.FileOperationAPI.MoveFiles(tempFilePath, targetPath, true);
+                            }
+                            break;
+                        case "Rename":
+                            {
+                                var newFilePath = item.GetNextAvailableFilePath(_activePath);
+                                PInvoke.FileOperationAPI.MoveFiles(item, newFilePath, isMove);
+                            }
+                            break;
+                        case "Cancel":
+                            return;
+                    }
+                }
+                else
+                {
+                    PInvoke.FileOperationAPI.MoveFiles(item, targetPath, isMove);
                 }
             }
 
