@@ -421,9 +421,16 @@ namespace RegexRenamer
             }
             else
             {
-                // Single click: reset and sort by this column only
+                // Single click: sort by this column only; toggle direction when clicking the same active column
+                var existingSingleSort = _sortColumns.Count == 1 ? _sortColumns[0] : default;
+                var direction = existingSingleSort.Column == clickedColumn && existingSingleSort.Column != null
+                    ? (existingSingleSort.Direction == ListSortDirection.Ascending
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending)
+                    : ListSortDirection.Ascending;
+
                 _sortColumns.Clear();
-                _sortColumns.Add(new SortColumnInfo { Column = clickedColumn, Direction = ListSortDirection.Ascending });
+                _sortColumns.Add(new SortColumnInfo { Column = clickedColumn, Direction = direction });
             }
 
             SortFileViewRows();
