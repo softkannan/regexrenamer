@@ -180,42 +180,12 @@ public static class EBookHelper
     }
     
     /// <summary>
-    /// Launches the specified ebook file in the default reader.
-    /// Supports a wide range of ebook file types.
-    /// </summary>
-    /// <param name="filePath">Path to the ebook file.</param>
-    /// <returns>True if operation succeeded, false if file type is unsupported.</returns>
-    public static async Task<bool> LaunchEBookAsync(string filePath)
-    {
-        var fileExt = Path.GetExtension(filePath).TrimStart('.');
-        // check file is with ebook extension
-        if (!supportedEPubReadFileFormats.Contains(fileExt, StringComparer.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-        var cmdName = "default";
-        if (Parser.IsPdf(filePath))
-        {
-            cmdName = "LaunchPDF";
-        }
-        else if (Parser.IsEpub(filePath))
-        {
-            cmdName = "LaunchEbook";
-        }
-        await cmdName.ExecNamedCmdAsync(Path.GetDirectoryName(filePath), new List<Tuple<string, string>>()
-                    {
-                        new Tuple<string, string>("{filepath}", filePath)
-                    });
-        return true;
-    }
-
-    /// <summary>
     /// Opens the specified ebook file in an editor.
     /// Only supported for certain file types (e.g., EPUB, AZW, KEPUB).
     /// </summary>
     /// <param name="filePath">Path to the ebook file.</param>
     /// <returns>True if operation succeeded, false if file type is unsupported.</returns>
-    public static async Task<bool> EditEBookAsync(string filePath)
+    public static async Task<bool> OpenEBookAsync(string filePath)
     {
         var fileExt = Path.GetExtension(filePath).TrimStart('.');
         // check file is with ebook extension
@@ -223,14 +193,18 @@ public static class EBookHelper
         {
             return false;
         }
-        var cmdName = "LaunchEditor";
+        var cmdName = "OpenPDF";
         if (Parser.IsPdf(filePath))
         {
-            cmdName = "EditPDF";
+            cmdName = "OpenPDF";
         }
         else if (Parser.IsEpub(filePath))
         {
-            cmdName = "EditEbook";
+            cmdName = "OpenEbook";
+        }
+        else
+        {
+            return false;
         }
         await cmdName.ExecNamedCmdAsync(Path.GetDirectoryName(filePath), new List<Tuple<string, string>>()
                     {

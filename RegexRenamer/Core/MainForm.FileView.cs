@@ -81,10 +81,10 @@ namespace RegexRenamer
         private void CreateFileViewContextMenu()
         {
             cmFileView = new System.Windows.Forms.ContextMenuStrip(components);
-            var editFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            var launchEditorFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            var launchNotepadFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            var explorerFileViewContextMenuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var renameFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var openFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var openInTextEditorFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var showExplorerCtxMenuFileViewContextMenuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var copyFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var copyPathFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var cutFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -93,65 +93,66 @@ namespace RegexRenamer
             var editMetadataFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var eBookOperationsFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var translateFileNameFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            var translateFileNameGUIFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            var showTranslateGUIFileNameFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             var newFileFileViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 
             // 
             // cmFileView
             // 
             cmFileView.ImageScalingSize = new System.Drawing.Size(20, 20);
-            cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { editFileViewToolStripMenuItem, 
-                launchEditorFileViewToolStripMenuItem, launchNotepadFileViewToolStripMenuItem, translateFileNameFileViewToolStripMenuItem, translateFileNameGUIFileViewToolStripMenuItem,
-                explorerFileViewContextMenuToolStripMenuItem, copyFileViewToolStripMenuItem, copyPathFileViewToolStripMenuItem,
+            cmFileView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { renameFileViewToolStripMenuItem, 
+                openFileViewToolStripMenuItem, openInTextEditorFileViewToolStripMenuItem, showExplorerCtxMenuFileViewContextMenuToolStripMenuItem,
+                translateFileNameFileViewToolStripMenuItem, showTranslateGUIFileNameFileViewToolStripMenuItem,
+                copyFileViewToolStripMenuItem, copyPathFileViewToolStripMenuItem,
                 cutFileViewToolStripMenuItem, pasteFileViewToolStripMenuItem, deleteFileViewToolStripMenuItem, 
                 editMetadataFileViewToolStripMenuItem, eBookOperationsFileViewToolStripMenuItem, newFileFileViewToolStripMenuItem });
             cmFileView.Name = "contextMenuStripFileView";
             cmFileView.Size = new System.Drawing.Size(195, 224);
             // 
-            // editFileViewToolStripMenuItem
+            // renameFileViewToolStripMenuItem
             // 
-            editFileViewToolStripMenuItem.Name = "editFileViewToolStripMenuItem";
-            editFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            editFileViewToolStripMenuItem.Text = "Edit";
-            editFileViewToolStripMenuItem.ShortcutKeys = Keys.F2;
-            editFileViewToolStripMenuItem.Click += editFileViewToolStripMenuItem_Click;
+            renameFileViewToolStripMenuItem.Name = "renameFileViewToolStripMenuItem";
+            renameFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            renameFileViewToolStripMenuItem.Text = "Rename";
+            renameFileViewToolStripMenuItem.ShortcutKeys = Keys.F2;
+            renameFileViewToolStripMenuItem.Click += renameFileViewToolStripMenuItem_Click;
             // 
-            // launchEditorFileViewToolStripMenuItem
+            // openFileViewToolStripMenuItem
             // 
-            launchEditorFileViewToolStripMenuItem.Name = "launchEditorFileViewToolStripMenuItem";
-            launchEditorFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            launchEditorFileViewToolStripMenuItem.Text = "Launch Editor";
-            launchEditorFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
-            launchEditorFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "");
+            openFileViewToolStripMenuItem.Name = "openFileViewToolStripMenuItem";
+            openFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            openFileViewToolStripMenuItem.Text = "Open";
+            openFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
+            openFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "Open");
             // 
-            // launchNotepadFileViewToolStripMenuItem
+            // openInTextEditorFileViewToolStripMenuItem
             // 
-            launchNotepadFileViewToolStripMenuItem.Name = "launchNotepadFileViewToolStripMenuItem";
-            launchNotepadFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            launchNotepadFileViewToolStripMenuItem.Text = "Launch Notepad";
-            launchNotepadFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.E;
-            launchNotepadFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "Notepad++");
+            openInTextEditorFileViewToolStripMenuItem.Name = "openInTextEditorFileViewToolStripMenuItem";
+            openInTextEditorFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            openInTextEditorFileViewToolStripMenuItem.Text = "Open in text editor";
+            openInTextEditorFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.E;
+            openInTextEditorFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "TextEditor");
+            // 
+            // showExplorerCtxMenuFileViewContextMenuToolStripMenuItem
+            // 
+            showExplorerCtxMenuFileViewContextMenuToolStripMenuItem.Name = "showExplorerCtxMenuFileViewContextMenuToolStripMenuItem";
+            showExplorerCtxMenuFileViewContextMenuToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            showExplorerCtxMenuFileViewContextMenuToolStripMenuItem.Text = "Show Explorer Context Menu";
+            showExplorerCtxMenuFileViewContextMenuToolStripMenuItem.Click += explorerFileViewContextMenuToolStripMenuItem_Click;
             // 
             // translateFileNameFileViewToolStripMenuItem
             // 
             translateFileNameFileViewToolStripMenuItem.Name = "translateFileNameFileViewToolStripMenuItem";
             translateFileNameFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             translateFileNameFileViewToolStripMenuItem.Text = "Translate";
-            translateFileNameFileViewToolStripMenuItem.Click += TranslateFileNameFileViewToolStripMenuItem_Click;
+            translateFileNameFileViewToolStripMenuItem.Click += translateFileNameFileViewToolStripMenuItem_Click;
             // 
-            // translateFileNameFileViewToolStripMenuItemGui
+            // showTranslateGUIFileNameFileViewToolStripMenuItem
             // 
-            translateFileNameGUIFileViewToolStripMenuItem.Name = "translateFileNameFileViewToolStripMenuItemGui";
-            translateFileNameGUIFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            translateFileNameGUIFileViewToolStripMenuItem.Text = "Translate GUI";
-            translateFileNameGUIFileViewToolStripMenuItem.Click += TranslateFileNameFileViewToolStripMenuItemGui_Click;
-            // 
-            // explorerFileViewContextMenuToolStripMenuItem1
-            // 
-            explorerFileViewContextMenuToolStripMenuItem.Name = "explorerFileViewContextMenuToolStripMenuItem1";
-            explorerFileViewContextMenuToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            explorerFileViewContextMenuToolStripMenuItem.Text = "Explorer Context Menu";
-            explorerFileViewContextMenuToolStripMenuItem.Click += explorerFileViewContextMenuToolStripMenuItem_Click;
+            showTranslateGUIFileNameFileViewToolStripMenuItem.Name = "showTranslateGUIFileViewToolStripMenuItem";
+            showTranslateGUIFileNameFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            showTranslateGUIFileNameFileViewToolStripMenuItem.Text = "Translate GUI";
+            showTranslateGUIFileNameFileViewToolStripMenuItem.Click += showTranslateGUIFileViewToolStripMenuItem_Click;
             // 
             // copyFileViewToolStripMenuItem
             // 
@@ -824,7 +825,7 @@ namespace RegexRenamer
             {
                 var rowData = _fileViewRows[e.RowIndex];
                 var filePath = rowData.FileInfo.Fullpath;
-                var result = await EBookHelper.LaunchEBookAsync(filePath);
+                var result = await EBookHelper.OpenEBookAsync(filePath);
                 if(!result)
                 {
                     ProcessStartInfo startInfo = new ProcessStartInfo(filePath);
@@ -884,7 +885,7 @@ namespace RegexRenamer
 
         // file operations from context menu
         #region File View context menu handlers
-        private async void TranslateFileNameFileViewToolStripMenuItemGui_Click(object sender, EventArgs e)
+        private async void showTranslateGUIFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
@@ -932,7 +933,7 @@ namespace RegexRenamer
             }
         }
 
-        private async void TranslateFileNameFileViewToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void translateFileNameFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
@@ -981,10 +982,10 @@ namespace RegexRenamer
         {
             try
             {
-                if (string.IsNullOrEmpty(editorName))
+                if (string.IsNullOrEmpty(editorName) || editorName.Equals("Open", StringComparison.OrdinalIgnoreCase))
                 {
                     var filePath = selectedFile?.Fullpath;
-                    var result = await EBookHelper.EditEBookAsync(filePath);
+                    var result = await EBookHelper.OpenEBookAsync(filePath);
                     if (!result)
                     {
                         ProcessStartInfo startInfo = new ProcessStartInfo(filePath);
@@ -1111,7 +1112,7 @@ namespace RegexRenamer
             selectedFiles.CopyFilesPathToClipboad();
         }
 
-        private void editFileViewToolStripMenuItem_Click(object sender, EventArgs e)
+        private void renameFileViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             dgvFiles.BeginEdit(false);
         }

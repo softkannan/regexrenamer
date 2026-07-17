@@ -211,15 +211,7 @@ Auto Environment variables
       ]
     },
     {
-      "Name": "EditEbook",
-      "ToolName": "EbookEditor",
-      "Args": [
-        // Supports {filepath} variables
-        "\"{filepath}\""
-      ]
-    },
-    {
-      "Name": "EditPDF",
+      "Name": "OpenPDF",
       "ToolName": "PDFEditor",
       "Args": [
         // Supports {filepath} variables
@@ -227,7 +219,7 @@ Auto Environment variables
       ]
     },
     {
-      "Name": "LaunchEbook",
+      "Name": "OpenEbook",
       "ToolName": "EbookViewer",
       "Args": [
         // Supports {filepath} variables
@@ -235,15 +227,7 @@ Auto Environment variables
       ]
     },
     {
-      "Name": "LaunchPDF",
-      "ToolName": "PDFViewer",
-      "Args": [
-        // Supports {filepath} variables
-        "\"{filepath}\""
-      ]
-    },
-    {
-      "Name": "LaunchEditor",
+      "Name": "TextEditor",
       "ToolName": "Notepad++",
       "Args": [
         // Supports {options} {filepath} variables
