@@ -7,6 +7,7 @@ using RegexRenamer.Rename;
 using RegexRenamer.Tools.EBookPDFTools;
 using RegexRenamer.Tools.Translate;
 using RegexRenamer.Utility;
+using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -995,22 +996,13 @@ namespace RegexRenamer
                 }
                 else
                 {
-                    var tool = UserConfig.Inst.AvailableTools.FirstOrDefault(t => t.Editor.Equals(editorName, StringComparison.OrdinalIgnoreCase));
-                    if (tool != null)
+                    var cmdName = editorName;
+                    var filePath = selectedFile?.Fullpath;
+                    await cmdName.ExecNamedCmdAsync(Path.GetDirectoryName(filePath), new List<Tuple<string, string>>()
                     {
-                        var filePath = selectedFile?.Fullpath;
-                        var processStartInfo = new ProcessStartInfo
-                        {
-                            FileName = tool.Path,
-                            Arguments = $"\"{filePath}\"",
-                            UseShellExecute = true
-                        };
-                        Process.Start(processStartInfo);
-                    }
-                    else
-                    {
-                        MessageBox.Show($"Editor '{editorName}' not found in available tools.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                        new Tuple<string,string>("{options}",""),
+                        new Tuple<string, string>("{filepath}", filePath)
+                    });
                 }
             }
             catch (Exception ex)

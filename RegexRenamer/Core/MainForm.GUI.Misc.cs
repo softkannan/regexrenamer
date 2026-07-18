@@ -63,7 +63,7 @@ namespace RegexRenamer
             string configPath = UserConfig.ConfigFile;
             // Launch notepad++ to edit config file
             // Supports {options} {filepath} variables
-            var cmdName = "LaunchEditor";
+            var cmdName = "TextEditor";
             await cmdName.ExecNamedCmdAsync(Path.GetDirectoryName(configPath), new List<Tuple<string, string>>() {
                    new Tuple<string, string>("{options}", "-ljson5"),
                    new Tuple<string, string>("{filepath}", configPath),

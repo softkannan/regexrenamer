@@ -141,12 +141,16 @@ public static class ConfigExtensions
     {
         if (string.IsNullOrEmpty(pThis) || templatePairs == null || templatePairs.Count == 0)
             return pThis;
+
         var result = pThis;
+
         foreach (var item in templatePairs)
         {
-            // Replace item1 with item2 and ignore case
-            result = result.Replace(item.Item1, item.Item2,StringComparison.OrdinalIgnoreCase);
+            // If value is not provided or empty, remove the template parameter entirely
+            var replacement = string.IsNullOrEmpty(item.Item2) ? string.Empty : item.Item2;
+            result = result.Replace(item.Item1, replacement, StringComparison.OrdinalIgnoreCase);
         }
+
         return result;
     }
 
