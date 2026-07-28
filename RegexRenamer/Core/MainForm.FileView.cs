@@ -191,7 +191,7 @@ namespace RegexRenamer
             deleteFileViewToolStripMenuItem.Name = "deleteFileViewToolStripMenuItem";
             deleteFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             deleteFileViewToolStripMenuItem.Text = "Delete";
-            deleteFileViewToolStripMenuItem.ShortcutKeys = Keys.Delete;
+            //deleteFileViewToolStripMenuItem.ShortcutKeys = Keys.Delete;
             deleteFileViewToolStripMenuItem.Click += deleteFileViewToolStripMenuItem_Click;
             // 
             // editMetadataFileViewToolStripMenuItem1
@@ -602,22 +602,22 @@ namespace RegexRenamer
             //    _activePath.ClipboardPasteFiles();
             //    RefreshFileListView(UpdateStage.FileList);
             //}
-            //else if (e.KeyCode == Keys.Delete)
-            //{
-            //    DeleteFilesSelection();
-            //}
-            //else if (e.KeyCode == Keys.E && (e.Modifiers & Keys.Control) == Keys.Control)
-            //{
-            //    LaunchEditor(GetFirstSelectedFileItem(), "Notepad++");
-            //}
-            //else if(e.KeyCode == Keys.N && (e.Modifiers & Keys.Control) == Keys.Control)
-            //{
-            //    CreateNewFile(_lastNewFileCreated ?? UserConfig.Inst.NewFileNames.FirstOrDefault());
-            //    if (_lastNewFileCreated == null)
-            //    {
-            //        _lastNewFileCreated = UserConfig.Inst.NewFileNames.FirstOrDefault();
-            //    }
-            //}
+            else if (e.KeyCode == Keys.Delete)
+            {
+                DeleteFilesSelection();
+            }
+            else if (e.KeyCode == Keys.E)
+            {
+                LaunchEditor(GetFirstSelectedFileItem(), "TextEditor");
+            }
+            else if (e.KeyCode == Keys.N)
+            {
+                CreateNewFile(_lastNewFileCreated ?? UserConfig.Inst.NewFileNames.FirstOrDefault());
+                if (_lastNewFileCreated == null)
+                {
+                    _lastNewFileCreated = UserConfig.Inst.NewFileNames.FirstOrDefault();
+                }
+            }
         }
 
         private (List<RenameItemInfo> selectedFiles, int minIndex) GetSelectedRenameFileRows()
