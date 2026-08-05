@@ -147,10 +147,19 @@ public class FileOperationAPI
 
     internal static void SendToRecycleBin(string filePath)
     {
-        // Deletes a file with the Explorer progress UI, sending it to the Recycle Bin
-        FileSystem.DeleteFile(filePath,
+        if (System.IO.Directory.Exists(filePath))
+        {
+            FileSystem.DeleteDirectory(filePath,
             UIOption.AllDialogs,
             RecycleOption.SendToRecycleBin);
+        }
+        else
+        {
+            // Deletes a file with the Explorer progress UI, sending it to the Recycle Bin
+            FileSystem.DeleteFile(filePath,
+                UIOption.AllDialogs,
+                RecycleOption.SendToRecycleBin);
+        }
     }
     internal static void MoveFiles(IList<string> srcPaths, string destFolder, bool isMove = false)
     {

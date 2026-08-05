@@ -111,7 +111,8 @@ namespace RegexRenamer.Rename
         private void BuildFoldersStoreFast()
         {
             var filter = _globInfo.CreateGlobFilter();
-            DirectoryInfo activeDir = new DirectoryInfo(_globInfo.RootPath);
+            string nextPath = GetNextExistedPath(_globInfo.RootPath);
+            DirectoryInfo activeDir = new DirectoryInfo(nextPath);
             var options = new EnumerationOptions
             {
                 IgnoreInaccessible = true,
@@ -210,10 +211,24 @@ namespace RegexRenamer.Rename
                 _files.Add(new RenameItemInfo(dir, hidden, _globInfo.PreserveExt));
             }
         }
+
+        private string GetNextExistedPath(string path)
+        {
+            string nextPath = path;
+            while (!Directory.Exists(nextPath) && !File.Exists(nextPath))
+            {
+                nextPath = Path.GetDirectoryName(nextPath);
+                if (string.IsNullOrEmpty(nextPath))
+                    break;
+            }
+            return nextPath;
+        }
+
         private void BuildFilesStoreFast()
         {
             var filter = _globInfo.CreateGlobFilter();
-            DirectoryInfo activeDir = new DirectoryInfo(_globInfo.RootPath);
+            string nextPath = GetNextExistedPath(_globInfo.RootPath);
+            DirectoryInfo activeDir = new DirectoryInfo(nextPath);
             var options = new EnumerationOptions { 
                 IgnoreInaccessible = true,
                 RecurseSubdirectories = _searchInFolders,

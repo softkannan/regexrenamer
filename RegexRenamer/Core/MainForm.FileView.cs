@@ -115,7 +115,7 @@ namespace RegexRenamer
             renameFileViewToolStripMenuItem.Name = "renameFileViewToolStripMenuItem";
             renameFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             renameFileViewToolStripMenuItem.Text = "Rename";
-            renameFileViewToolStripMenuItem.ShortcutKeys = Keys.F2;
+            //renameFileViewToolStripMenuItem.ShortcutKeys = Keys.F2;
             renameFileViewToolStripMenuItem.Click += renameFileViewToolStripMenuItem_Click;
             // 
             // openFileViewToolStripMenuItem
@@ -123,7 +123,7 @@ namespace RegexRenamer
             openFileViewToolStripMenuItem.Name = "openFileViewToolStripMenuItem";
             openFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             openFileViewToolStripMenuItem.Text = "Open";
-            openFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
+            //openFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
             openFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "Open");
             // 
             // openInTextEditorFileViewToolStripMenuItem
@@ -131,7 +131,7 @@ namespace RegexRenamer
             openInTextEditorFileViewToolStripMenuItem.Name = "openInTextEditorFileViewToolStripMenuItem";
             openInTextEditorFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             openInTextEditorFileViewToolStripMenuItem.Text = "Open in text editor";
-            openInTextEditorFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.E;
+            //openInTextEditorFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.E;
             openInTextEditorFileViewToolStripMenuItem.Click += (sender, e) => LaunchEditor(GetFirstSelectedFileItem(), "TextEditor");
             // 
             // showExplorerCtxMenuFileViewContextMenuToolStripMenuItem
@@ -160,7 +160,7 @@ namespace RegexRenamer
             copyFileViewToolStripMenuItem.Name = "copyFileViewToolStripMenuItem";
             copyFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             copyFileViewToolStripMenuItem.Text = "Copy";
-            copyFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
+            //copyFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.C;
             copyFileViewToolStripMenuItem.Click += copyFileViewToolStripMenuItem_Click;
             // 
             // copyPathFileViewToolStripMenuItem
@@ -175,7 +175,7 @@ namespace RegexRenamer
             cutFileViewToolStripMenuItem.Name = "cutFileViewToolStripMenuItem";
             cutFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             cutFileViewToolStripMenuItem.Text = "Cut";
-            cutFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
+            //cutFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.X;
             cutFileViewToolStripMenuItem.Click += cutFileViewToolStripMenuItem_Click;
             // 
             // pasteFileViewToolStripMenuItem
@@ -183,7 +183,7 @@ namespace RegexRenamer
             pasteFileViewToolStripMenuItem.Name = "pasteFileViewToolStripMenuItem";
             pasteFileViewToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             pasteFileViewToolStripMenuItem.Text = "Paste";
-            pasteFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
+            //pasteFileViewToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.V;
             pasteFileViewToolStripMenuItem.Click += pasteFileViewToolStripMenuItem_Click;
             // 
             // deleteFileViewToolStripMenuItem
@@ -224,7 +224,7 @@ namespace RegexRenamer
                         _lastNewFileCreated = UserConfig.Inst.NewFileNames.FirstOrDefault();
                     }
                 };
-                newFileItem.ShortcutKeys = Keys.Control | Keys.N;
+                //newFileItem.ShortcutKeys = Keys.Control | Keys.N;
                 newFileFileViewToolStripMenuItem.DropDownItems.Add(newFileItem);
             }
 
@@ -583,28 +583,32 @@ namespace RegexRenamer
                     dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
                 }
             }
-            //if (e.KeyCode == Keys.F2)
-            //{
-            //    dgvFiles.BeginEdit(false);
-            //}
-            //else if (e.KeyCode == Keys.C && (e.Modifiers & Keys.Control) == Keys.Control)
-            //{
-            //    var selectedFiles = GetSelectedFileItems();
-            //    selectedFiles.CopyFilesToClipboad();
-            //}
-            //else if (e.KeyCode == Keys.X && (e.Modifiers & Keys.Control) == Keys.Control)
-            //{
-            //    var selectedFiles = GetSelectedFileItems();
-            //    selectedFiles.CopyFilesToClipboad(true);
-            //}
-            //else if (e.KeyCode == Keys.V && (e.Modifiers & Keys.Control) == Keys.Control)
-            //{
-            //    _activePath.ClipboardPasteFiles();
-            //    RefreshFileListView(UpdateStage.FileList);
-            //}
+            if (e.KeyCode == Keys.F2)
+            {
+                dgvFiles.BeginEdit(false);
+            }
+            else if (e.KeyCode == Keys.C && (e.Modifiers & Keys.Control) == Keys.Control)
+            {
+                var selectedFiles = GetSelectedFileItems();
+                selectedFiles.CopyFilesToClipboad();
+            }
+            else if (e.KeyCode == Keys.X && (e.Modifiers & Keys.Control) == Keys.Control)
+            {
+                var selectedFiles = GetSelectedFileItems();
+                selectedFiles.CopyFilesToClipboad(true);
+            }
+            else if (e.KeyCode == Keys.V && (e.Modifiers & Keys.Control) == Keys.Control)
+            {
+                _activePath.ClipboardPasteFiles();
+                RefreshFileListView(UpdateStage.FileList);
+            }
             else if (e.KeyCode == Keys.Delete)
             {
                 DeleteFilesSelection();
+            }
+            else if(e.KeyCode == Keys.O)
+            {
+                LaunchEditor(GetFirstSelectedFileItem(), "Open");
             }
             else if (e.KeyCode == Keys.E)
             {
@@ -658,12 +662,15 @@ namespace RegexRenamer
             PInvoke.FileOperationAPI.SendToRecycleBin(filePaths);
             RefreshFileListView(UpdateStage.FileList);
             var selectedIndex = Math.Min(minIndex, dgvFiles.Rows.Count - 1);
-            dgvFiles.Rows[selectedIndex].Selected = true;
-            // if the selected row is now out of view after deletion, scroll into view
-            if (dgvFiles.Rows[selectedIndex]?.Displayed == false)
+            if (dgvFiles.Rows.Count > 0 && selectedIndex >= 0 && selectedIndex < dgvFiles.Rows.Count)
             {
-                //scroll into view
-                dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
+                dgvFiles.Rows[selectedIndex].Selected = true;
+                // if the selected row is now out of view after deletion, scroll into view
+                if (dgvFiles.Rows[selectedIndex]?.Displayed == false)
+                {
+                    //scroll into view
+                    dgvFiles.FirstDisplayedScrollingRowIndex = selectedIndex;
+                }
             }
         }
         #endregion

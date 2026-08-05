@@ -220,7 +220,10 @@ namespace RegexRenamer
 
             (TreeNode clickNode, Point location) = ((TreeNode, Point))cmFolderView.Tag;
             var destPath = clickNode.TreeNodeToPath();
-            PInvoke.FileOperationAPI.SendToRecycleBin(destPath);
+            if (Directory.Exists(destPath))
+            {
+                PInvoke.FileOperationAPI.SendToRecycleBin(destPath);
+            }
             // refresh folder tree
             RefreshFolderTree();
             cmFolderView.Tag = null;
@@ -298,7 +301,7 @@ namespace RegexRenamer
             if (e.Button == MouseButtons.Right )
             {
                 cmFolderView.Tag = (e.Node, e.Location);
-                cmFolderView.Show(e.Location);
+                cmFolderView.Show(tvwFolders, e.Location);
             }
         }
 
